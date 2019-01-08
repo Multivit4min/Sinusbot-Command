@@ -1,49 +1,86 @@
+/**
+ * @author Multivitamin <david.kartnaller@gmail.com>
+ * @license GPLv3
+ * @ignore
+ */
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage Commands",
-  autorun: true,
   version: "0.1",
-  author: "Multivitamin <david.kartnaller@gmail.com>"
+  author: "Multivitamin <david.kartnaller@gmail.com>",
+  backends: ["ts3"],
+  enableWeb: true,
+  vars: [{
+      name: "CMD_HELPUI_ENABLE",
+      title: "Enable the helpui command",
+      type: "select",
+      options: ["no","yes"],
+      default: "0"
+  }, {
+      name: "EXTERNAL_ACCESS",
+      title: "How is the Sinusbot Webinterface reachable?",
+      type: "string",
+      default: false,
+      indent: 2,
+      conditions: [{ field: "CMD_HELPUI_ENABLE", value: 1 }]
+  }, {
+    name: "DEBUGLEVEL",
+    title: "Debug Messages (default is INFO)",
+    type: "select",
+    options: ["ERROR", "WARNING", "INFO", "VERBOSE"],
+    default: "3"
+}]
 }, (_, config, meta) => {
 
   const engine = require("engine")
   const event = require("event")
+  const backend = require("backend")
+  const http = require("http")
+  const store = require("store")
   var commands = []
+
+  function DEBUG(level) {
+    return mode => (...args) => {
+      if (mode > level) return
+      engine.log(...args)
+    }
+  }
+  DEBUG.VERBOSE = 3
+  DEBUG.INFO = 2
+  DEBUG.WARNING = 1
+  DEBUG.ERROR = 0
+  const debug = DEBUG(parseInt(config.DEBUGLEVEL, 10))
 
   const GROUP_ARGS = {
     OR: "or",
     AND: "and"
   }
 
-  function getCommandPrefix() {
-    var prefix = engine.getCommandPrefix()
-    if (typeof prefix !== "string" || prefix.length === 0) return "!"
-    return prefix
-  }
+  debug(DEBUG.INFO)(`command prefix is "${getCommandPrefix()}"`)
 
-  engine.log(`command prefix is "${getCommandPrefix()}"`)
-
-  /** Class representing a Parse Error **/
+  /**
+   * Class representing a ParseError
+   * @private
+   * @extends Error
+   */
   class ParseError extends Error {
     constructor(err) {
       super(err)
     }
   }
 
-  /** Class represnting an Argument not found Error **/
-  class ArgumentNotFoundError extends Error {
-    constructor(err) {
-      super(err)
-    }
-  }
 
-
-  /** Class representing an Argument **/
+  /** 
+   * Class representing an Argument
+   * @name Argument
+   */
   class Argument {
-    constructor(parent) {
+    /**
+     * Create a new Argument
+     */
+    constructor() {
       this._optional = false
       this._name = "_"
-      this._parent = parent
     }
 
     /**
@@ -86,59 +123,96 @@ registerPlugin({
   }
 
 
-  /** Class representing a Grouped Argument */
+  /** 
+   * Class representing a GroupArgument
+   * @name GroupArgument
+   * @extends Argument
+   */
   class GroupArgument extends Argument {
-      constructor(type) {
-        super()
-        this._type = type
-        this._args = []
-      }
+    /**
+     * Create a Group Argument
+     * @param {string} type - the type of the Argument, should be "and" or "or"
+     */
+    constructor(type) {
+      super()
+      this._type = type
+      this._args = []
+    }
 
-      validate(args) {
-        switch (this._type) {
-          case GROUP_ARGS.OR: return this._validateOr(args)
-          case GROUP_ARGS.AND: return this._validateAnd(args)
-        }
+    /**
+     * Validates the given String to the GroupArgument
+     * @private
+     * @param {string} args - the remaining args
+     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     */
+    validate(args) {
+      switch (this._type) {
+        case GROUP_ARGS.OR: return this._validateOr(args)
+        case GROUP_ARGS.AND: return this._validateAnd(args)
       }
+    }
 
-      _validateOr(args) {
-        var errors = []
-        var resolved = {}
-        var valid = this._args.some(arg => {
-          var result = arg.validate(args)
-          if (result instanceof Error)
-            return (errors.push(result), false)
-          resolved[arg.getName()] = result[0]
-          return (args = result[1].trim(), true)
-        })
-        if (!valid) return Error(`No valid match found`)
-        return [resolved, args]
-      }
+    /**
+     * Validates the given string to the "or" of the GroupArgument
+     * @private
+     * @param {string} args - the remaining args
+     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     */
+    _validateOr(args) {
+      var errors = []
+      var resolved = {}
+      var valid = this._args.some(arg => {
+        var result = arg.validate(args)
+        if (result instanceof Error)
+          return (errors.push(result), false)
+        resolved[arg.getName()] = result[0]
+        return (args = result[1].trim(), true)
+      })
+      if (!valid) return Error(`No valid match found`)
+      return [resolved, args]
+    }
 
-      _validateAnd(args) {
-        var resolved = {}
-        var error = null
-        this._args.some(arg => {
-          var result = arg.validate(args)
-          if (result instanceof Error) return (error = result, true)
-          resolved[arg.getName()] = result[0]
-          return (args = result[1].trim(), false)
-        })
-        if (error !== null) return error
-        return [resolved, args]
-      }
+    /**
+     * Validates the given string to the "and" of the GroupArgument
+     * @private
+     * @param {string} args - the remaining args
+     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     */
+    _validateAnd(args) {
+      var resolved = {}
+      var error = null
+      this._args.some(arg => {
+        var result = arg.validate(args)
+        if (result instanceof Error) return (error = result, true)
+        resolved[arg.getName()] = result[0]
+        return (args = result[1].trim(), false)
+      })
+      if (error !== null) return error
+      return [resolved, args]
+    }
 
-      argument(...args) {
-        this._args.push(...args)
-        return this
-      }
+    /**
+     * Adds one or multiple argument to the validation chain
+     * @param {string} args - the remaining args
+     * @returns {this} returns this to make it chainable
+     */
+    argument(...args) {
+      this._args.push(...args)
+      return this
+    }
   }
 
 
 
-  /** Class representing a StringArgument */
+  /** 
+   * Class representing a StringArgument
+   * @name StringArgument
+   * @extends Argument
+   */
   class StringArgument extends Argument {
-
+    /**
+     * Create a String Argument
+     */
     constructor(ignoreWhitespace = false) {
       super()
       super._parent = this
@@ -152,8 +226,8 @@ registerPlugin({
     /**
      * Validates the given String to the StringArgument
      * @private
-     * @param {string} args - the remaining args
-     * @returns {Error|boolean} returns true when validation was successful otherwise returns an Error
+     * @param {string} args - the remaining args       
+     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
       var argArray = args.split(" ")
@@ -164,8 +238,8 @@ registerPlugin({
     /**
      * Validates the whole given String to the StringArgument params
      * @private
-     * @param {string} args - the remaining args
-     * @returns {Error|boolean} returns true when validation was successful otherwise returns an Error
+     * @param {string} args - the remaining args       
+     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validateRest(args) {
       return this._validate(args, "")
@@ -174,7 +248,8 @@ registerPlugin({
     /**
      * Validates the given string to the StringArgument params
      * @private
-     * @param {string} args - the remaining args
+     * @param {string} args - args which should get parsed
+     * @param {string} rest - the remaining args
      * @returns {Error|boolean} returns true when validation was successful otherwise returns an Error
      */
     _validate(str, ...rest) {
@@ -244,9 +319,15 @@ registerPlugin({
 
 
 
-  /** Class representing a ClientArgument */
+  /** 
+   * Class representing a ClientArgument
+   * @name ClientArgument
+   * @extends Argument
+   */
   class ClientArgument extends Argument {
-
+    /**
+     * Create a Client Argument
+     */
     constructor() {
       super()
       super._parent = this
@@ -254,9 +335,9 @@ registerPlugin({
 
     /**
      * Validates and tries to parse the Client from the given input string
-     * @param {any} str - the input from where the client gets extracted
-     * @param {boolean} tryConvert - convert the string if its another type (eg number)
-     * @returns {Error|boolean} returns true when validation was successful otherwise returns an Error
+     * @private
+     * @param {string} args - the input from where the client gets extracted
+     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
       var match = args.match(/^(\[URL=client:\/\/[1-90-9*]\/(?<url_uid>[\/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[\/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
@@ -267,13 +348,25 @@ registerPlugin({
 
 
 
-  /** Class representing a RestArgument */
+  /** 
+   * Class representing a RestArgument
+   * @name RestArgument
+   * @extends StringArgument
+   */
   class RestArgument extends StringArgument {
-
+    /**
+     * Create a Number Argument
+     */
     constructor() {
       super()
     }
 
+    /**
+     * Validates the given String to the RestArgument
+     * @private
+     * @param {string} args - the remaining args       
+     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     */
     validate(args) {
       return super.validateRest(args)
     }
@@ -282,9 +375,15 @@ registerPlugin({
 
 
 
-  /** Class representing a NumberArgument */
+  /** 
+   * Class representing a NumberArgument
+   * @name NumberArgument
+   * @extends Argument
+   */
   class NumberArgument extends Argument {
-
+    /**
+     * Create a Number Argument
+     */
     constructor() {
       super()
       super._parent = this
@@ -297,8 +396,9 @@ registerPlugin({
 
     /**
      * Validates the given Number to the Object
+     * @private
      * @param {string} args - the remaining args
-     * @returns {Error|number} returns true when validation was successful otherwise returns the number
+     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
       var argArray = args.split(" ")
@@ -376,7 +476,10 @@ registerPlugin({
 
 
 
-  /** Class representing a Command */
+  /** 
+   * Class representing a Command
+   * @name Command
+   */
   class Command {
     /**
      * Create a command
@@ -386,6 +489,8 @@ registerPlugin({
       this._validateCommand(cmd)
       this._cmd = cmd
       this._help = ""
+      this._manual = ""
+      this._enabled = true
       this._fncs = {}
       this._alias = []
       this._args = []
@@ -430,9 +535,51 @@ registerPlugin({
     }
 
     /**
+     * Retrieves the serialized data from a command
+     */
+    serialize() {
+      return JSON.stringify({
+        cmd: this._cmd,
+        alias: this._alias,
+        help: this._help,
+        manual: this._manual
+      })
+    }
+
+    /**
+     * Disabled the command
+     * @returns {Command} returns this to chain Functions
+     */
+    disable() {
+      debug(DEBUG.INFO)(`Command "${this.getCommand()}" has been disabled`)
+      this._enabled = false
+      return this
+    }
+
+    /**
+     * Enables the command
+     * @returns {Command} returns this to chain Functions
+     */
+    enable() {
+      debug(DEBUG.INFO)(`Command "${this.getCommand()}" has been enabled`)
+      this._enabled = true
+      return this
+    }
+
+    /**
+     * Enables the command
+     * @returns {Boolean} returns true when the command is enabled
+     */
+    isEnabled() {
+      return this._enabled
+    }
+
+    /**
      * Destroys and unloads a command completly
+     * @returns {null}
      */
     destroy() {
+      debug(DEBUG.INFO)(`Command "${this.getCommand()}" has been destroyed`)
       commands = commands.filter(cmd => cmd !== this)
       return null
     }
@@ -473,7 +620,7 @@ registerPlugin({
      * @param { string } text - the short help text
      * @returns {Command} returns this to chain Functions
      */
-    setHelp(text = "") {
+    help(text = "") {
       this._help = text
       return this
     }
@@ -499,7 +646,7 @@ registerPlugin({
      * @param { string } text - the manual text
      * @returns {Command} returns this to chain Functions
      */
-    setManual(text = "") {
+    manual(text = "") {
       this._manual = text
       return this
     }
@@ -577,8 +724,8 @@ registerPlugin({
        * @param {object} client - the caller which represents a TeamSpeak Client
        * @param {array} args - the args which have been resolved
        */
-      dispatchCommand(client, args) {
-        this._getFunction("exec")(client, args)
+      dispatchCommand(...args) {
+        return this._getFunction("exec")(...args)
       }
 
       /**
@@ -601,30 +748,38 @@ registerPlugin({
 
   /**
    * Creates a new Command Instance with the given Command Name
+   * @name createCommand
    * @param {string} cmd - the command which should be added
-   * @returns {Command} returns this to chain Functions
+   * @returns {Command} returns this to chain Functions     
+   * @example
+   * createCommad("ping")
+   *  .help("replies with Pong!")
+   *  .exec((client, args, reply) => reply("Pong!"))
    */
   function createCommand(cmd) {
-    engine.log(`registering command ${cmd}`)
+    debug(DEBUG.INFO)(`registering command ${cmd}`)
     commands.push(new Command(cmd))
     return commands[commands.length - 1]
   }
 
   /**
-   * Creates a new Command Instance with the given Command Name
-   * @param {string} cmd - the command which should be added
-   * @returns {Command} returns the created Command
-   */
-  function destroyCommand(cmd) {
-    if (!(cmd instanceof Command)) throw new Error("Parameter is not a instance of Command!")
-    commands = commands.filter(cmd => cmd !== this)
-    return null
-  }
-
-  /**
    * Creates a new Argument Instance
+   * allowed argument types are `"string", "number", "rest", "client"`
+   * @name createArgument
    * @param {string} type - the argument type which should be created
    * @returns {Argument} returns the created Argument
+   * @example
+   * createCommad("ping")
+   *  .help("replies n times with Pong!")
+   *  .manual("Usage: ${Command.getCommandPrefix()}ping [amount]")
+   *  .addArgument(createArgument("number").setName(amount).min(1).max(10).optional())
+   *  .exec((client, args, reply) => {
+   *    var amount = args.amount ? args.amount : 4 
+   *    while (amount > 0) {
+   *      reply("Pong!")
+   *      amount--
+   *    }
+   *  })
    */
   function createArgument(type) {
     if (typeof availableArguments[type.toLowerCase()] !== "function")
@@ -634,6 +789,7 @@ registerPlugin({
 
   /**
    * Creates a new Argument Instance
+   * @name createGroupedArgument
    * @param {string} type - the argument type which should be created either "or" or "and" allowed
    * @returns {GroupArgument} returns this to chain Functions
    */
@@ -641,40 +797,123 @@ registerPlugin({
     if (Object.values(GROUP_ARGS).indexOf(type) === -1) throw new Error(`Unexpected GroupArgument type, expected one of [${Object.values(GROUP_ARGS).join(", ")}] but got ${type}!`)
     return new GroupArgument(type)
   }
+ 
+  /**
+   * Creates a new Argument Instance
+   * @name getCommandByName
+   * @param {string} name - the name of the command which should be retrieved
+   * @returns {Command|undefined} returns the command if found otherwise undefined
+   */
+  function getCommandByName(name) {
+    return commands.filter(cmd => cmd.getCommand() === name)[0]
+  }
+
+  /**
+   * retrieves the current Command Prefix
+   * @name getCommandPrefix
+   * @returns {string} returns the command prefix
+   */
+  function getCommandPrefix() {
+    var prefix = engine.getCommandPrefix()
+    if (typeof prefix !== "string" || prefix.length === 0) return "!"
+    return prefix
+  }
+
+  /**
+   * gets all available commands
+   * @name getAvailableCommands
+   * @param {Client} client - the sinusbot client for which the commands should be retrieved
+   * @param {string|boolean} [cmd=false] - the command which should be searched for
+   * @returns {Command[]} returns an array of commands
+   */
+  function getAvailableCommands(client, cmd = false) {
+    return commands
+      .filter(c => c.getCommand() === cmd || cmd === false)
+      .filter(c => c.isEnabled())
+      .filter(c => c.isAllowed(client))
+  }
+
+  /**
+   * Creates a random string
+   * @name randomString
+   * @private
+   * @param {number} [len=8] - the length of the string
+   * @param {string} [chars=abcdefghijklmnopqrstuvwxyz0123456789] - the chars which get used
+   * @returns {string} returns the random string with the given length
+   */
+  function randomString(len = 8, chars = "abcdefghijklmnopqrstuvwxyz0123456789") {
+    return Array(len).fill().map(() => chars[Math.floor(Math.random() * chars.length)]).join("")
+  }
+
+  /**
+   * Returns the correct reply chat from where the client has sent the message
+   * @name getReplyOutput
+   * @private
+   * @params {number} mode - the mode from where the message came from [1=client, 2=channel, 3=server]
+   * @params {Client} client - the sinusbot client which sent the message
+   * @returns {function} returns a function where the chat message gets redirected to
+   */
+  function getReplyOutput(mode, client) {
+    switch (mode) {
+      case 1: return client.chat.bind(client)
+      case 2: return client.getChannels()[0].chat.bind(client.getChannels()[0])
+      case 3: return backend.chat.bind(backend)
+      default: return msg => debug(DEBUG.WARNING)(`WARN no reply channel set for mode ${ev.mode}, message "${msg}" not sent!`)
+    }
+  }
 
   //creates the help command
   createCommand("help")
-    .setHelp("Displays this text")
-    .setManual(`Displays a list of useable commands, you can search for a specific command by using [b]${getCommandPrefix()}help [i]keyword[/i][/b]`)
+    .help("Displays this text")
+    .manual(`Displays a list of useable commands, you can search for a specific command by using [b]${getCommandPrefix()}help [i]keyword[/i][/b]`)
     .addArgument(createArgument("string").setName("filter").min(1).optional())
-    .exec((client, {filter}) => {
-      var cmds = commands
+    .exec((client, {filter}, reply) => {
+      var cmds = getAvailableCommands(client)
         .filter(cmd => cmd.hasHelp())
         .filter(cmd => {
           return !filter ||
             cmd.getCommand().match(new RegExp(filter, "i")) ||
-            cmd.getAlias().some(alias => alias.match(new RegExp(filter, "i")))
+            cmd.getAlias().some(alias => alias.match(new RegExp(filter, "i"))) ||
+            cmd.getHelp().match(new RegExp(filter, "i"))
           })
-        .filter(cmd => cmd.isAllowed(client))
-      client.chat(`[b]${cmds.length}[/b] Commands found:`)
-      cmds.forEach(cmd => client.chat(`[b]${getCommandPrefix()}${cmd.getCommand()}[/b] - ${cmd.getHelp()}`))
+      reply(`[b]${cmds.length}[/b] Commands found:`)
+      cmds.forEach(cmd => reply(`[b]${getCommandPrefix()}${cmd.getCommand()}[/b] - ${cmd.getHelp()}`))
     })
 
   //creates the man command
   createCommand("man")
-    .setHelp("Displays detailed help about a command if available")
-    .setManual(`Displays usage help for a specific command,\nusage for manual is:\n[i]${getCommandPrefix()}man <command>[/i]`)
+    .help("Displays detailed help about a command if available")
+    .manual(`Displays usage help for a specific command,\nusage for manual is:\n[i]${getCommandPrefix()}man <command>[/i]`)
     .addArgument(createArgument("string").setName("command").min(1).optional())
-    .exec((client, {command}) => {
-      var cmds = commands
-        .filter(cmd => cmd.getCommand() === command)
-        .filter(cmd => cmd.isAllowed(client))
-      if (cmds.length === 0) return client.chat("No command with valid manual documentation found! Maybe did you misstype the command?")
+    .exec((client, {command}, reply) => {
+      var cmds = getAvailableCommands(client, command)
+      if (cmds.length === 0) return reply("No command with valid manual documentation found! Maybe did you misstype the command?")
       cmds.forEach(cmd => {
-        if (!cmd.hasManual()) client.chat(`[b]${cmd.getCommand()}[/b], no manual Text available!`)
-        client.chat(`\nManual for command: [b]${cmd.getCommand()}[/b]\n${cmd.getManual()}`)
+        if (!cmd.hasManual()) reply(`[b]${cmd.getCommand()}[/b], no manual Text available!`)
+        reply(`\nManual for command: [b]${cmd.getCommand()}[/b]\n${cmd.getManual()}`)
       })
     })
+
+
+
+  if (config.CMD_HELPUI_ENABLE === "1" && typeof config.EXTERNAL_ACCESS === "string") {
+    //creates the webviewer command
+    createCommand("helpui")
+      .help("opens a webui to view available commands")
+      .manual(`TODO`)
+      .exec((client, _, reply) => {
+        var random = randomString(12)
+        var url = `${config.EXTERNAL_ACCESS}/scripts/Command/#${engine.getBotID()}.${engine.getInstanceID()}.${random}`
+        store.set(`webui_${random}`, getAvailableCommands(client).map(cmd => cmd.serialize()))
+        client.chat(`[b][url=${url}]CLICK[/url][/b] to get a list of available commands!`)
+      })
+
+    debug(DEBUG.VERBOSE)("REGISTER PUBLIC#COMMANDLIST")
+    event.on("public:commandlist", data => {
+      debug(DEBUG.VERBOSE)("public#COMMANDLIST")
+      debug(DEBUG.VERBOSE)(data)
+    })
+  }
 
 
   event.on("chat", ev => {
@@ -686,14 +925,22 @@ registerPlugin({
     if (ev.text[0] !== engine.getCommandPrefix() && !match) return
     const { command } = match.groups
     //check if command exists
-    var cmds = commands.filter(cmd => cmd.getCommand() === command || cmd.getAlias().indexOf(command) >= 0)
-    if (cmds.length === 0) return ev.client.chat(`There is no command named "[b]${command}[/b], check [b]${getCommandPrefix()}help[/b] to get a list of available commands!"`)
+    var cmds = commands
+      .filter(cmd => cmd.getCommand() === command || cmd.getAlias().indexOf(command) >= 0)
+      .filter(cmd => cmd.isEnabled())
+    if (cmds.length === 0) return ev.client.chat(`There is no enabled command named "[b]${command}[/b], check [b]${getCommandPrefix()}help[/b] to get a list of available commands!"`)
     //check if permissions are okay
-    cmds = cmds.filter(cmd => cmd.isAllowed(ev.client))
+    cmds = cmds.filter(cmd => {
+      try {
+        return cmd.isAllowed(ev.client)
+      } catch(e) {
+        return false
+      }
+    })
     if (cmds.length === 0) return ev.client.chat(`You have no Permissions to use the Command [b]${command}[/b], check [b]${getCommandPrefix()}help[/b] to get a list of available commands!"`)
     //handle the arguments for all commands
     cmds
-      .forEach(cmd => {
+      .forEach(async cmd => {
         var { args } = match.groups
         var resolved = {}
         var error = null
@@ -709,7 +956,20 @@ registerPlugin({
         if (!cmd.shouldIgnoreTooManyArgs() && args.length > 0) {
           ev.client.chat("Too many Arguments passed!")
         } else {
-          if (error === null) return cmd.dispatchCommand(ev.client, resolved, ev.text)
+          if (error === null) {
+            var start = Date.now()
+            try {
+              await Promise.resolve(cmd.dispatchCommand(ev.client, resolved, getReplyOutput(ev.mode, ev.client), ev.text))
+              debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" finnished successfully after ${Date.now()-start}ms`)
+            } catch (e) {
+              debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" failed after ${Date.now()-start}ms`)
+              debug(DEBUG.ERROR)(`Error while handling command "${cmd.getCommand()}"!`)
+              debug(DEBUG.ERROR)(`This is probably a problem with a Script which is using Command.js!`)
+              debug(DEBUG.ERROR)(e.stack)
+              ev.client.chat("An error happened while processing the command :(")
+            }
+            return
+          }
           ev.client.chat(`Invalid Argument given! ${index}. validation Argument: ${error.message}`)
         }
         ev.client.chat(`Invalid Command usage! For Command usage see [b]${getCommandPrefix()}man ${cmd.getCommand()}[/b]`)
@@ -717,10 +977,14 @@ registerPlugin({
   })
 
 
-  module.exports = {
+
+  engine.export({
     createCommand,
     createArgument,
     createGroupedArgument,
-  }
+    getCommandPrefix,
+    getAvailableCommands,
+    getCommandByName
+  })
 
 })

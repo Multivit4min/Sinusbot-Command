@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "lts/*"
+script:
+  - npm install -g documentation
+  - documentation build Command.js --project-name "Command.js" -f html -o docs -c documentation.yml
+deploy:
+  provider: pages
+  github-token: $GITHUB_TOKEN
+  skip-cleanup: true
+  local-dir: docs
+  on:
+    branch: master
