@@ -14,22 +14,25 @@ toc:
   - name: Classes
     description: |
       Definition for Classes
-  - Command
+    children:
+      - Command
   - name: Argument Types
     description: |
       Available Argument Types which can be added to a Command
-  - Argument
-  - NumberArgument
-  - StringArgument
-  - ClientArgument
-  - RestArgument
-  - GroupArgument
+    children:
+    - Argument
+    - NumberArgument
+    - StringArgument
+    - ClientArgument
+    - RestArgument
+    - GroupArgument
   - name: Exports
     description: |
       These Functions gets exported as object when imported through `require("Command.js")`
-  - createCommand
-  - createArgument
-  - createGroupedArgument
-  - getCommandPrefix
-  - getCommandByName
-  - getAvailableCommands
+    children:
+    - createCommand
+    - createArgument
+    - createGroupedArgument
+    - getCommandPrefix
+    - getCommandByName
+    - getAvailableCommands
