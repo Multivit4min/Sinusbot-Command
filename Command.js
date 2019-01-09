@@ -9,21 +9,7 @@ registerPlugin({
   version: "0.1",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   backends: ["ts3"],
-  enableWeb: true,
   vars: [{
-      name: "CMD_HELPUI_ENABLE",
-      title: "Enable the helpui command",
-      type: "select",
-      options: ["no","yes"],
-      default: "0"
-  }, {
-      name: "EXTERNAL_ACCESS",
-      title: "How is the Sinusbot Webinterface reachable?",
-      type: "string",
-      default: false,
-      indent: 2,
-      conditions: [{ field: "CMD_HELPUI_ENABLE", value: 1 }]
-  }, {
     name: "DEBUGLEVEL",
     title: "Debug Messages (default is INFO)",
     type: "select",
@@ -75,9 +61,6 @@ registerPlugin({
    * @name Argument
    */
   class Argument {
-    /**
-     * Create a new Argument
-     */
     constructor() {
       this._optional = false
       this._name = "_"
@@ -127,12 +110,9 @@ registerPlugin({
    * Class representing a GroupArgument
    * @name GroupArgument
    * @extends Argument
+   * @param {string} type - the type of the Argument, should be "and" or "or"
    */
   class GroupArgument extends Argument {
-    /**
-     * Create a Group Argument
-     * @param {string} type - the type of the Argument, should be "and" or "or"
-     */
     constructor(type) {
       super()
       this._type = type
@@ -210,9 +190,6 @@ registerPlugin({
    * @extends Argument
    */
   class StringArgument extends Argument {
-    /**
-     * Create a String Argument
-     */
     constructor(ignoreWhitespace = false) {
       super()
       super._parent = this
@@ -325,9 +302,6 @@ registerPlugin({
    * @extends Argument
    */
   class ClientArgument extends Argument {
-    /**
-     * Create a Client Argument
-     */
     constructor() {
       super()
       super._parent = this
@@ -354,9 +328,6 @@ registerPlugin({
    * @extends StringArgument
    */
   class RestArgument extends StringArgument {
-    /**
-     * Create a Number Argument
-     */
     constructor() {
       super()
     }
@@ -381,9 +352,6 @@ registerPlugin({
    * @extends Argument
    */
   class NumberArgument extends Argument {
-    /**
-     * Create a Number Argument
-     */
     constructor() {
       super()
       super._parent = this
@@ -479,12 +447,9 @@ registerPlugin({
   /** 
    * Class representing a Command
    * @name Command
-   */
+    * @param {string} cmd - The Command which should be used
+    */
   class Command {
-    /**
-     * Create a command
-     * @param {string} cmd - The Command which should be used
-     */
     constructor(cmd) {
       this._validateCommand(cmd)
       this._cmd = cmd
@@ -750,11 +715,7 @@ registerPlugin({
    * Creates a new Command Instance with the given Command Name
    * @name createCommand
    * @param {string} cmd - the command which should be added
-   * @returns {Command} returns this to chain Functions     
-   * @example
-   * createCommad("ping")
-   *  .help("replies with Pong!")
-   *  .exec((client, args, reply) => reply("Pong!"))
+   * @returns {Command} returns this to chain Functions
    */
   function createCommand(cmd) {
     debug(DEBUG.INFO)(`registering command ${cmd}`)
@@ -764,22 +725,9 @@ registerPlugin({
 
   /**
    * Creates a new Argument Instance
-   * allowed argument types are `"string", "number", "rest", "client"`
    * @name createArgument
    * @param {string} type - the argument type which should be created
    * @returns {Argument} returns the created Argument
-   * @example
-   * createCommad("ping")
-   *  .help("replies n times with Pong!")
-   *  .manual("Usage: ${Command.getCommandPrefix()}ping [amount]")
-   *  .addArgument(createArgument("number").setName(amount).min(1).max(10).optional())
-   *  .exec((client, args, reply) => {
-   *    var amount = args.amount ? args.amount : 4 
-   *    while (amount > 0) {
-   *      reply("Pong!")
-   *      amount--
-   *    }
-   *  })
    */
   function createArgument(type) {
     if (typeof availableArguments[type.toLowerCase()] !== "function")
@@ -893,27 +841,6 @@ registerPlugin({
         reply(`\nManual for command: [b]${cmd.getCommand()}[/b]\n${cmd.getManual()}`)
       })
     })
-
-
-
-  if (config.CMD_HELPUI_ENABLE === "1" && typeof config.EXTERNAL_ACCESS === "string") {
-    //creates the webviewer command
-    createCommand("helpui")
-      .help("opens a webui to view available commands")
-      .manual(`TODO`)
-      .exec((client, _, reply) => {
-        var random = randomString(12)
-        var url = `${config.EXTERNAL_ACCESS}/scripts/Command/#${engine.getBotID()}.${engine.getInstanceID()}.${random}`
-        store.set(`webui_${random}`, getAvailableCommands(client).map(cmd => cmd.serialize()))
-        client.chat(`[b][url=${url}]CLICK[/url][/b] to get a list of available commands!`)
-      })
-
-    debug(DEBUG.VERBOSE)("REGISTER PUBLIC#COMMANDLIST")
-    event.on("public:commandlist", data => {
-      debug(DEBUG.VERBOSE)("public#COMMANDLIST")
-      debug(DEBUG.VERBOSE)(data)
-    })
-  }
 
 
   event.on("chat", ev => {

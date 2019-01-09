@@ -1,7 +1,19 @@
 toc:
-  - name: class
+  - name: Examples
+    children:
+      - name: How to load the library
+        file: examples/REQUIRE.md
+      - name: Command come
+        file: examples/COME.md
+      - name: Command ping [amount]
+        file: examples/PING.md
+      - name: Command mass [chat|poke] [message]
+        file: examples/MASS.md
+      - name: Command greet [client]
+        file: examples/GREET.md
+  - name: Classes
     description: |
-      Definition for generic Classes
+      Definition for Classes
   - Command
   - name: Argument Types
     description: |
@@ -12,9 +24,9 @@ toc:
   - ClientArgument
   - RestArgument
   - GroupArgument
-  - name: exports
+  - name: Exports
     description: |
-      These Functions gets exported and can be imported with `require("Command.js")`
+      These Functions gets exported as object when imported through `require("Command.js")`
   - createCommand
   - createArgument
   - createGroupedArgument
