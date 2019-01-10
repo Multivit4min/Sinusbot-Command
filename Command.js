@@ -813,18 +813,6 @@ registerPlugin({
   }
 
   /**
-   * Creates a random string
-   * @name randomString
-   * @private
-   * @param {number} [len=8] - the length of the string
-   * @param {string} [chars=abcdefghijklmnopqrstuvwxyz0123456789] - the chars which get used
-   * @returns {string} returns the random string with the given length
-   */
-  function randomString(len = 8, chars = "abcdefghijklmnopqrstuvwxyz0123456789") {
-    return Array(len).fill().map(() => chars[Math.floor(Math.random() * chars.length)]).join("")
-  }
-
-  /**
    * Returns the correct reply chat from where the client has sent the message
    * @name getReplyOutput
    * @private
