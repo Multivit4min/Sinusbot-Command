@@ -11,6 +11,8 @@ toc:
         file: examples/MASS.md
       - name: Command greet [client]
         file: examples/GREET.md
+      - name: Async example
+        file: examples/ASYNC.md
   - name: Classes
     description: |
       Definition for Classes
