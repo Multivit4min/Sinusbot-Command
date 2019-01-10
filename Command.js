@@ -913,10 +913,10 @@ registerPlugin({
         var { args } = match.groups
         var resolved = {}
         var error = null
-        var index = 0
+        var lastArg = null
         //validate each available command
         cmd.getArguments().some(arg => {
-          index++
+          lastArg = arg
           var result = arg.validate(args)
           if (result instanceof Error && !arg.isOptional()) return (error = result, true)
           if (result instanceof Error && arg.isOptional()) return false
@@ -944,7 +944,8 @@ registerPlugin({
             return
           }
           //handle an error
-          ev.client.chat(`Invalid Argument given! ${index}. validation Argument: ${error.message}`)
+          ev.client.chat(`Argument parsed with an error [b]${lastArg.getManual()}[/b]`)
+          ev.client.chat(`Returned with [b]${error.message}[/b]`)
         }
         ev.client.chat(`Invalid Command usage! For Command usage see [b]${getCommandPrefix()}man ${cmd.getCommand()}[/b]`)
       })
