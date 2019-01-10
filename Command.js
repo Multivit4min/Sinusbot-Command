@@ -10,12 +10,18 @@ registerPlugin({
   author: "Multivitamin <david.kartnaller@gmail.com>",
   backends: ["ts3"],
   vars: [{
+    name: "NOT_FOUND_MESSAGE",
+    title: "Send a message if no command has been found?",
+    type: "select",
+    options: ["YES", "NO"],
+    default: "0"
+  }, {
     name: "DEBUGLEVEL",
     title: "Debug Messages (default is INFO)",
     type: "select",
     options: ["ERROR", "WARNING", "INFO", "VERBOSE"],
-    default: "3"
-}]
+    default: "2"
+  }]
 }, (_, config, meta) => {
 
   const engine = require("engine")
@@ -73,6 +79,18 @@ registerPlugin({
     optional() {
       this._optional = true
       return this
+    }
+
+    /**
+     * Gets the manual of a command
+     * @returns {string} will return a formated name
+     */
+    getManual() {
+      if (this.isOptional()) {
+        return `[${this._name}]`
+      } else {
+        return `<${this._name}>`
+      }
     }
 
     /**
@@ -633,6 +651,14 @@ registerPlugin({
     }
 
     /**
+     * Retrieves the usage of the command with its parameterized names
+     * @returns {string} retrieves the complete usage of the command with its argument names
+     */
+    getUsage() {
+      return `${getCommandPrefix()}${this.getCommand()} ${this.getArguments().map(arg => arg.getManual()).join(" ")}`
+    }
+
+    /**
      * Checks if the client has permissions to execute this command
      * takes a function as argument which will be called on every permission test
      * the function will receive the sinusbot client object as first parameter
@@ -714,6 +740,7 @@ registerPlugin({
   /**
    * Creates a new Command Instance with the given Command Name
    * @name createCommand
+   * @module export/createCommand
    * @param {string} cmd - the command which should be added
    * @returns {Command} returns this to chain Functions
    */
@@ -726,6 +753,7 @@ registerPlugin({
   /**
    * Creates a new Argument Instance
    * @name createArgument
+   * @module export/createArgument
    * @param {string} type - the argument type which should be created
    * @returns {Argument} returns the created Argument
    */
@@ -738,6 +766,7 @@ registerPlugin({
   /**
    * Creates a new Argument Instance
    * @name createGroupedArgument
+   * @module export/createGroupedArgument
    * @param {string} type - the argument type which should be created either "or" or "and" allowed
    * @returns {GroupArgument} returns this to chain Functions
    */
@@ -749,6 +778,7 @@ registerPlugin({
   /**
    * Creates a new Argument Instance
    * @name getCommandByName
+   * @module export/getCommandByName
    * @param {string} name - the name of the command which should be retrieved
    * @returns {Command|undefined} returns the command if found otherwise undefined
    */
@@ -759,6 +789,7 @@ registerPlugin({
   /**
    * retrieves the current Command Prefix
    * @name getCommandPrefix
+   * @module export/getCommandPrefix
    * @returns {string} returns the command prefix
    */
   function getCommandPrefix() {
@@ -770,6 +801,7 @@ registerPlugin({
   /**
    * gets all available commands
    * @name getAvailableCommands
+   * @module export/getAvailableCommands
    * @param {Client} client - the sinusbot client for which the commands should be retrieved
    * @param {string|boolean} [cmd=false] - the command which should be searched for
    * @returns {Command[]} returns an array of commands
@@ -831,14 +863,20 @@ registerPlugin({
   //creates the man command
   createCommand("man")
     .help("Displays detailed help about a command if available")
-    .manual(`Displays usage help for a specific command,\nusage for manual is:\n[i]${getCommandPrefix()}man <command>[/i]`)
-    .addArgument(createArgument("string").setName("command").min(1).optional())
+    .manual(`Displays detailed usage help for a specific command`)
+    .addArgument(createArgument("string").setName("command").min(1))
     .exec((client, {command}, reply) => {
       var cmds = getAvailableCommands(client, command)
       if (cmds.length === 0) return reply("No command with valid manual documentation found! Maybe did you misstype the command?")
       cmds.forEach(cmd => {
-        if (!cmd.hasManual()) reply(`[b]${cmd.getCommand()}[/b], no manual Text available!`)
-        reply(`\nManual for command: [b]${cmd.getCommand()}[/b]\n${cmd.getManual()}`)
+        var manual = "No manual for this command available!"
+        if (cmd.hasManual()) {
+          manual = cmd.getManual()
+        } else if (cmd.hasHelp()) {
+          manual = cmd.getHelp()
+        }
+        reply(`\nManual for command: [b]${cmd.getCommand()}[/b]\n[b]Usage:[/b] ${cmd.getUsage()}\n\n${manual}`)
+
       })
     })
 
@@ -855,7 +893,12 @@ registerPlugin({
     var cmds = commands
       .filter(cmd => cmd.getCommand() === command || cmd.getAlias().indexOf(command) >= 0)
       .filter(cmd => cmd.isEnabled())
-    if (cmds.length === 0) return ev.client.chat(`There is no enabled command named "[b]${command}[/b], check [b]${getCommandPrefix()}help[/b] to get a list of available commands!"`)
+    if (cmds.length === 0) {
+      //depending on the config setting return without error
+      if (config.NOT_FOUND_MESSAGE !== "0") return
+      //send the not found message
+      return ev.client.chat(`There is no enabled command named "[b]${getCommandPrefix()}${command}[/b], check [b]${getCommandPrefix()}help[/b] to get a list of available commands!`)
+    }
     //check if permissions are okay
     cmds = cmds.filter(cmd => {
       try {
@@ -864,6 +907,7 @@ registerPlugin({
         return false
       }
     })
+    //send message because the client has no permissions to use this command
     if (cmds.length === 0) return ev.client.chat(`You have no Permissions to use the Command [b]${command}[/b], check [b]${getCommandPrefix()}help[/b] to get a list of available commands!"`)
     //handle the arguments for all commands
     cmds
@@ -872,6 +916,7 @@ registerPlugin({
         var resolved = {}
         var error = null
         var index = 0
+        //validate each available command
         cmd.getArguments().some(arg => {
           index++
           var result = arg.validate(args)
@@ -880,15 +925,18 @@ registerPlugin({
           resolved[arg.getName()] = result[0]
           return (args = result[1].trim(), false)
         })
+        //check if too many arguments have been parsed and no error occured
         if (!cmd.shouldIgnoreTooManyArgs() && args.length > 0 && !(error instanceof Error)) {
           ev.client.chat("Too many Arguments passed!")
         } else {
           if (error === null) {
+            //start the command execution
             var start = Date.now()
             try {
               await Promise.resolve(cmd.dispatchCommand(ev.client, resolved, getReplyOutput(ev.mode, ev.client), ev))
               debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" finnished successfully after ${Date.now()-start}ms`)
             } catch (e) {
+              //caught an error during processing
               debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" failed after ${Date.now()-start}ms`)
               debug(DEBUG.ERROR)(`Error while handling command "${cmd.getCommand()}"!`)
               debug(DEBUG.ERROR)(`This is probably a problem with a Script which is using Command.js!`)
@@ -897,6 +945,7 @@ registerPlugin({
             }
             return
           }
+          //handle an error
           ev.client.chat(`Invalid Argument given! ${index}. validation Argument: ${error.message}`)
         }
         ev.client.chat(`Invalid Command usage! For Command usage see [b]${getCommandPrefix()}man ${cmd.getCommand()}[/b]`)
