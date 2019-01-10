@@ -373,12 +373,12 @@ registerPlugin({
       var num = argArray.shift()
       if (isNaN(num)) return new ParseError(`Searched for number but found "${num}"`)
       num = parseFloat(num)
-      if (isNaN(num)) return new Error(`Given input is not typeof Number (typeof ${typeof num})`)
+      if (isNaN(num)) return new ParseError(`Given input is not typeof Number (typeof ${typeof num})`)
       if (this._min !== null && this._min > num) return new ParseError(`Number not greater or equal! Expected at least ${this._min}, but got ${num}`)
       if (this._max !== null && this._max < num) return new ParseError(`Number not less or equal! Expected at least ${this._max}, but got ${num}`)
       if (this._integer && num % 1 !== 0) return new ParseError(`Given Number is not an Integer! (${num})`)
-      if (this._forcePositive && num > 0) return new ParseError(`Given Number is not Positive! (${num})`)
-      if (this._forceNegative && num < 0) return new ParseError(`Given Number is not Negative! (${num})`)
+      if (this._forcePositive && num <= 0) return new ParseError(`Given Number is not Positive! (${num})`)
+      if (this._forceNegative && num >= 0) return new ParseError(`Given Number is not Negative! (${num})`)
       return [num, argArray.join(" ")]
     }
 
@@ -714,6 +714,7 @@ registerPlugin({
   /**
    * Creates a new Command Instance with the given Command Name
    * @name createCommand
+   * @module export/createCommand
    * @param {string} cmd - the command which should be added
    * @returns {Command} returns this to chain Functions
    */
@@ -726,6 +727,7 @@ registerPlugin({
   /**
    * Creates a new Argument Instance
    * @name createArgument
+   * @module export/createArgument
    * @param {string} type - the argument type which should be created
    * @returns {Argument} returns the created Argument
    */
@@ -738,6 +740,7 @@ registerPlugin({
   /**
    * Creates a new Argument Instance
    * @name createGroupedArgument
+   * @module export/createGroupedArgument
    * @param {string} type - the argument type which should be created either "or" or "and" allowed
    * @returns {GroupArgument} returns this to chain Functions
    */
@@ -749,6 +752,7 @@ registerPlugin({
   /**
    * Creates a new Argument Instance
    * @name getCommandByName
+   * @module export/getCommandByName
    * @param {string} name - the name of the command which should be retrieved
    * @returns {Command|undefined} returns the command if found otherwise undefined
    */
@@ -759,6 +763,7 @@ registerPlugin({
   /**
    * retrieves the current Command Prefix
    * @name getCommandPrefix
+   * @module export/getCommandPrefix
    * @returns {string} returns the command prefix
    */
   function getCommandPrefix() {
@@ -770,6 +775,7 @@ registerPlugin({
   /**
    * gets all available commands
    * @name getAvailableCommands
+   * @module export/getAvailableCommands
    * @param {Client} client - the sinusbot client for which the commands should be retrieved
    * @param {string|boolean} [cmd=false] - the command which should be searched for
    * @returns {Command[]} returns an array of commands
@@ -880,13 +886,13 @@ registerPlugin({
           resolved[arg.getName()] = result[0]
           return (args = result[1].trim(), false)
         })
-        if (!cmd.shouldIgnoreTooManyArgs() && args.length > 0) {
+        if (!cmd.shouldIgnoreTooManyArgs() && args.length > 0 && !(error instanceof Error)) {
           ev.client.chat("Too many Arguments passed!")
         } else {
           if (error === null) {
             var start = Date.now()
             try {
-              await Promise.resolve(cmd.dispatchCommand(ev.client, resolved, getReplyOutput(ev.mode, ev.client), ev.text))
+              await Promise.resolve(cmd.dispatchCommand(ev.client, resolved, getReplyOutput(ev.mode, ev.client), ev))
               debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" finnished successfully after ${Date.now()-start}ms`)
             } catch (e) {
               debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" failed after ${Date.now()-start}ms`)
