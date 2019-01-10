@@ -714,7 +714,6 @@ registerPlugin({
   /**
    * Creates a new Command Instance with the given Command Name
    * @name createCommand
-   * @module export/createCommand
    * @param {string} cmd - the command which should be added
    * @returns {Command} returns this to chain Functions
    */
@@ -727,7 +726,6 @@ registerPlugin({
   /**
    * Creates a new Argument Instance
    * @name createArgument
-   * @module export/createArgument
    * @param {string} type - the argument type which should be created
    * @returns {Argument} returns the created Argument
    */
@@ -740,7 +738,6 @@ registerPlugin({
   /**
    * Creates a new Argument Instance
    * @name createGroupedArgument
-   * @module export/createGroupedArgument
    * @param {string} type - the argument type which should be created either "or" or "and" allowed
    * @returns {GroupArgument} returns this to chain Functions
    */
@@ -752,7 +749,6 @@ registerPlugin({
   /**
    * Creates a new Argument Instance
    * @name getCommandByName
-   * @module export/getCommandByName
    * @param {string} name - the name of the command which should be retrieved
    * @returns {Command|undefined} returns the command if found otherwise undefined
    */
@@ -763,7 +759,6 @@ registerPlugin({
   /**
    * retrieves the current Command Prefix
    * @name getCommandPrefix
-   * @module export/getCommandPrefix
    * @returns {string} returns the command prefix
    */
   function getCommandPrefix() {
@@ -775,7 +770,6 @@ registerPlugin({
   /**
    * gets all available commands
    * @name getAvailableCommands
-   * @module export/getAvailableCommands
    * @param {Client} client - the sinusbot client for which the commands should be retrieved
    * @param {string|boolean} [cmd=false] - the command which should be searched for
    * @returns {Command[]} returns an array of commands
