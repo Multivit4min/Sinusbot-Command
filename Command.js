@@ -70,6 +70,7 @@ registerPlugin({
     constructor() {
       this._optional = false
       this._name = "_"
+      this._display = "_"
     }
 
     /**
@@ -87,9 +88,9 @@ registerPlugin({
      */
     getManual() {
       if (this.isOptional()) {
-        return `[${this._name}]`
+        return `[${this._display}]`
       } else {
-        return `<${this._name}>`
+        return `<${this._display}>`
       }
     }
 
@@ -104,15 +105,18 @@ registerPlugin({
     /**
      * Sets a name for the argument to identify it later when the Command gets dispatched
      * @params {string} name - sets the name of the argument
+     * @params {string} [display] - sets a beautified display name which will be used when the getManual command gets executed, if none given it will use the first parameter as display value
      * @returns {Argument} returns this to make functions chainable
      */
-     setName(name) {
-       if (typeof name !== "string") throw new Error("Argument of setName needs to be a string")
-       if (name.length < 1) throw new Error("Argument of setName needs to be at least 1 char long")
-       if (!name.match(/^[a-z0-9_]+$/i)) throw new Error("Argument of setName should contain only chars A-z, 0-9 and _")
-       this._name = name
-       return this
-     }
+    setName(name, display = false) {
+      this._display = display
+      if (this._display === false) this._display = name
+      if (typeof name !== "string") throw new Error("Argument of setName needs to be a string")
+      if (name.length < 1) throw new Error("Argument of setName needs to be at least 1 char long")
+      if (!name.match(/^[a-z0-9_]+$/i)) throw new Error("Argument of setName should contain only chars A-z, 0-9 and _")
+      this._name = name
+      return this
+    }
 
      /**
       * Retrieves the name of the Argument
@@ -472,7 +476,7 @@ registerPlugin({
       this._validateCommand(cmd)
       this._cmd = cmd
       this._help = ""
-      this._manual = ""
+      this._manual = []
       this._enabled = true
       this._fncs = {}
       this._alias = []
@@ -626,11 +630,12 @@ registerPlugin({
 
     /**
      * Sets a detailed manual command on how to use the command
-     * @param { string } text - the manual text
+     * the manual command can be called multiple times, for every call it will add it as a new line
+     * @param {string} text - the manual text
      * @returns {Command} returns this to chain Functions
      */
     manual(text = "") {
-      this._manual = text
+      this._manual.push(text)
       return this
     }
 
@@ -639,7 +644,7 @@ registerPlugin({
      * @returns {boolean} returns true if the command has a manual text
      */
     hasManual() {
-      return typeof this._manual === "string" && this._manual.length > 0
+      return this._manual.length > 0
     }
 
     /**
@@ -647,7 +652,7 @@ registerPlugin({
      * @returns {string} returns the manual Command
      */
     getManual() {
-      return this._manual
+      return this._manual.join("\r\n")
     }
 
     /**
@@ -870,7 +875,6 @@ registerPlugin({
           manual = cmd.getHelp()
         }
         reply(`\nManual for command: [b]${cmd.getCommand()}[/b]\n[b]Usage:[/b] ${cmd.getUsage()}\n\n${manual}`)
-
       })
     })
 
@@ -878,7 +882,7 @@ registerPlugin({
   event.on("chat", ev => {
     //do not do anything when the bot sends a message
     if (ev.client.isSelf()) return
-    //get the basic commanmd with arguments and command
+    //get the basic command with arguments and command splitted
     var match = ev.text.match(new RegExp("^"+engine.getCommandPrefix().split("").map(char => char.match(/[0-9\w]/) ? char : "\\"+char).join("")+"(?<command>\\w*) *(?<args>.*) *$", "i"))
     //return if no valid command has been found
     if (ev.text[0] !== engine.getCommandPrefix() && !match) return
