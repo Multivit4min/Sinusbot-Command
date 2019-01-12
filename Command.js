@@ -71,15 +71,34 @@ registerPlugin({
       this._optional = false
       this._name = "_"
       this._display = "_"
+      this._default = undefined
     }
 
     /**
      * Sets an Argument as optional
+     * @param {any} [fallback] - the default value which should be set if this parameter has not been found
      * @returns {Argument} returns this to chain functions
      */
-    optional() {
+    optional(fallback) {
+      this._default = fallback
       this._optional = true
       return this
+    }
+
+    /**
+     * Retrieves the default value if it had been set
+     * @returns {any} the default value of this argument
+     */
+    getDefault() {
+      return this._default
+    }
+
+    /**
+     * Checks if the Argument has a default value
+     * @returns {boolean} returns true when a default value is present
+     */
+    hasDefault() {
+      return this._default !== undefined
     }
 
     /**
@@ -88,7 +107,7 @@ registerPlugin({
      */
     getManual() {
       if (this.isOptional()) {
-        return `[${this._display}]`
+        return `[${this._display}${this.hasDefault() ? `=${this.getDefault()}`: ""}]`
       } else {
         return `<${this._display}>`
       }
@@ -104,8 +123,8 @@ registerPlugin({
 
     /**
      * Sets a name for the argument to identify it later when the Command gets dispatched
-     * @params {string} name - sets the name of the argument
-     * @params {string} [display] - sets a beautified display name which will be used when the getManual command gets executed, if none given it will use the first parameter as display value
+     * @param {string} name - sets the name of the argument
+     * @param {string} [display] - sets a beautified display name which will be used when the getManual command gets executed, if none given it will use the first parameter as display value
      * @returns {Argument} returns this to make functions chainable
      */
     setName(name, display = false) {
@@ -748,8 +767,18 @@ registerPlugin({
    * @param {string} cmd - the command which should be added
    * @returns {Command} returns this to chain Functions
    */
-  function createCommand(cmd) {
-    debug(DEBUG.INFO)(`registering command ${cmd}`)
+  function createCommand(cmd, OVERRIDES) {
+    if (typeof cmd !== "string") throw new Error("Expected a string as command name!")
+    if (cmd.length === 0) throw new Error("Command should have a minimum length of 2!")
+    if (
+      cmd.length === 1 && 
+      OVERRIDES !== "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE"
+    ) throw new Error("Command should have a minimum length of 2!")
+    debug(DEBUG.INFO)(`registering command '${cmd}'`)
+    if (getCommandByName(cmd)) {
+      debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
+      debug(DEBUG.WARNING)(`Command.js may work not as expected!`)
+    }
     commands.push(new Command(cmd))
     return commands[commands.length - 1]
   }
@@ -828,8 +857,8 @@ registerPlugin({
    * Returns the correct reply chat from where the client has sent the message
    * @name getReplyOutput
    * @private
-   * @params {number} mode - the mode from where the message came from [1=client, 2=channel, 3=server]
-   * @params {Client} client - the sinusbot client which sent the message
+   * @param {number} mode - the mode from where the message came from [1=client, 2=channel, 3=server]
+   * @param {Client} client - the sinusbot client which sent the message
    * @returns {function} returns a function where the chat message gets redirected to
    */
   function getReplyOutput(mode, client) {
@@ -913,19 +942,33 @@ registerPlugin({
         var { args } = match.groups
         var resolved = {}
         var error = null
+        var possibleErrors = []
         var lastArg = null
         //validate each available command
         cmd.getArguments().some(arg => {
           lastArg = arg
           var result = arg.validate(args)
-          if (result instanceof Error && !arg.isOptional()) return (error = result, true)
-          if (result instanceof Error && arg.isOptional()) return false
+          if (result instanceof Error) { 
+            if (!arg.isOptional()) return (error = result, true)
+            resolved[arg.getName()] = arg.getDefault()
+            possibleErrors.push([arg, result])
+            return false
+          }
           resolved[arg.getName()] = result[0]
           return (args = result[1].trim(), false)
         })
         //check if too many arguments have been parsed and no error occured
-        if (!cmd.shouldIgnoreTooManyArgs() && args.length > 0 && !(error instanceof Error)) {
-          ev.client.chat("Too many Arguments passed!")
+        if ((!cmd.shouldIgnoreTooManyArgs() || possibleErrors.length > 0) && args.length > 0 && !(error instanceof Error)) {
+          debug(DEBUG.VERBOSE)(`Argument parsing failed for cmd ${cmd.getCommand()}`)
+          debug(DEBUG.VERBOSE)(`Should ignore to many args? ${cmd.shouldIgnoreTooManyArgs()}`)
+          debug(DEBUG.VERBOSE)(`How many possible Errors? ${possibleErrors.length}`)
+          debug(DEBUG.VERBOSE)(`Total Arguments given? ${args.length }`)
+          if (possibleErrors.length > 0) {
+            var [arg, err] = possibleErrors[0]
+            ev.client.chat(`Possible Error during parsing Argument ${arg.getManual()}: [b]${err.message}[/b]`)
+          } else {
+            ev.client.chat("Too many Arguments passed!")
+          }
         } else {
           if (error === null) {
             //start the command execution
