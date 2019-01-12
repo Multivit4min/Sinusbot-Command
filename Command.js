@@ -1,6 +1,6 @@
 /**
  * @author Multivitamin <david.kartnaller@gmail.com>
- * @license GPLv3
+ * @license MIT
  * @ignore
  */
 registerPlugin({
@@ -336,7 +336,7 @@ registerPlugin({
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
-      var match = args.match(/^(\[URL=client:\/\/[1-90-9*]\/(?<url_uid>[\/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[\/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
+      var match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[\/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[\/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
       if (!match) return new ParseError("Client not found!")
       return [match.groups.url_uid||match.groups.uid, match.groups.rest]
     }
@@ -810,6 +810,18 @@ registerPlugin({
       .filter(c => c.getCommand() === cmd || cmd === false)
       .filter(c => c.isEnabled())
       .filter(c => c.isAllowed(client))
+  }
+
+  /**
+   * Creates a random string
+   * @name randomString
+   * @private
+   * @param {number} [len=8] - the length of the string
+   * @param {string} [chars=abcdefghijklmnopqrstuvwxyz0123456789] - the chars which get used
+   * @returns {string} returns the random string with the given length
+   */
+  function randomString(len = 8, chars = "abcdefghijklmnopqrstuvwxyz0123456789") {
+    return Array(len).fill().map(() => chars[Math.floor(Math.random() * chars.length)]).join("")
   }
 
   /**
