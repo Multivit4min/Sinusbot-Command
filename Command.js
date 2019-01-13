@@ -234,6 +234,7 @@ registerPlugin({
     constructor(ignoreWhitespace = false) {
       super()
       super._parent = this
+      this._regex = null
       this._maxlen = null
       this._minlen = null
       this._whitelist = null
@@ -254,16 +255,6 @@ registerPlugin({
     }
 
     /**
-     * Validates the whole given String to the StringArgument params
-     * @private
-     * @param {string} args - the remaining args       
-     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
-     */
-    validateRest(args) {
-      return this._validate(args, "")
-    }
-
-    /**
      * Validates the given string to the StringArgument params
      * @private
      * @param {string} args - args which should get parsed
@@ -271,14 +262,24 @@ registerPlugin({
      * @returns {Error|boolean} returns true when validation was successful otherwise returns an Error
      */
     _validate(str, ...rest) {
-      if (typeof str !== "string" && !tryConvert) return new ParseError(`Given input is not typeof string (typeof ${typeof str})`)
-      if (typeof str !== "string") str = String(str)
+      if (typeof str !== "string") return new ParseError(`Given input is not typeof string (typeof ${typeof str})`)
       if (this._uppercase) str = str.toUpperCase()
       if (this._lowercase) str = str.toLowerCase()
       if (this._minlen !== null && this._minlen > str.length) return new ParseError(`String length not greater or equal! Expected at least ${this._minlen}, but got ${str.length}`)
       if (this._maxlen !== null && this._maxlen < str.length) return new ParseError(`String length not less or equal! Maximum ${this._maxlen} chars allowed, but got ${str.length}`)
       if (this._whitelist !== null && this._whitelist.indexOf(str) === -1) return new ParseError(`Invalid Input for ${str}. Allowed words: ${this._whitelist.join(", ")}`)
+      if (this._regex !== null && !this._regex.test(str)) return new ParseError(`Regex missmatch, the input '${str}' did not match the expression ${this._regex.toString()}`)
       return [str, ...rest]
+    }
+
+    /**
+     * Matches a regular expression pattern
+     * @param {RegExp} the regex which should be validated
+     * @returns {StringArgument} returns this to chain Functions
+     */
+    match(regex) {
+      this._regex = regex
+      return this
     }
 
     /**
@@ -380,7 +381,7 @@ registerPlugin({
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
-      return super.validateRest(args)
+      return super._validate(args, "")
     }
   }
 
