@@ -874,7 +874,7 @@ registerPlugin({
   createCommand("help")
     .help("Displays this text")
     .manual(`Displays a list of useable commands`)
-    .manual(`you can search for a specific command by using:`)
+    .manual(`you can search/filter for a specific commands by adding a keyword`)
     .addArgument(createArgument("string").setName("filter").min(1).optional())
     .exec((client, {filter}, reply) => {
       var cmds = getAvailableCommands(client)
