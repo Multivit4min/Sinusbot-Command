@@ -274,7 +274,7 @@ registerPlugin({
 
     /**
      * Matches a regular expression pattern
-     * @param {RegExp} the regex which should be validated
+     * @param {RegExp} regex the regex which should be validated
      * @returns {StringArgument} returns this to chain Functions
      */
     match(regex) {
