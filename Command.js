@@ -6,9 +6,10 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage Commands",
-  version: "0.1",
+  version: "1.0",
   author: "Multivitamin <david.kartnaller@gmail.com>",
-  backends: ["ts3"],
+  autorun: true,
+  backends: ["ts3", "discord"],
   vars: [{
     name: "NOT_FOUND_MESSAGE",
     title: "Send a message if no command has been found?",
@@ -22,13 +23,12 @@ registerPlugin({
     options: ["ERROR", "WARNING", "INFO", "VERBOSE"],
     default: "2"
   }]
-}, (_, config, meta) => {
+}, (_, config) => {
 
   const engine = require("engine")
   const event = require("event")
   const backend = require("backend")
-  const http = require("http")
-  const store = require("store")
+  const format = require("format")
   var commands = []
 
   function DEBUG(level) {
@@ -873,7 +873,8 @@ registerPlugin({
   //creates the help command
   createCommand("help")
     .help("Displays this text")
-    .manual(`Displays a list of useable commands, you can search for a specific command by using [b]${getCommandPrefix()}help [i]keyword[/i][/b]`)
+    .manual(`Displays a list of useable commands`)
+    .manual(`you can search for a specific command by using:`)
     .addArgument(createArgument("string").setName("filter").min(1).optional())
     .exec((client, {filter}, reply) => {
       var cmds = getAvailableCommands(client)
@@ -884,8 +885,8 @@ registerPlugin({
             cmd.getAlias().some(alias => alias.match(new RegExp(filter, "i"))) ||
             cmd.getHelp().match(new RegExp(filter, "i"))
           })
-      reply(`[b]${cmds.length}[/b] Commands found:`)
-      cmds.forEach(cmd => reply(`[b]${getCommandPrefix()}${cmd.getCommand()}[/b] - ${cmd.getHelp()}`))
+      reply(`${format.bold(cmds.length)} Commands found:`)
+      cmds.forEach(cmd => reply(`${format.bold(`${getCommandPrefix()}${cmd.getCommand()}`)} - ${cmd.getHelp()}`))
     })
 
   //creates the man command
@@ -895,7 +896,8 @@ registerPlugin({
     .addArgument(createArgument("string").setName("command").min(1))
     .exec((client, {command}, reply) => {
       var cmds = getAvailableCommands(client, command)
-      if (cmds.length === 0) return reply("No command with valid manual documentation found! Maybe did you misstype the command?")
+      if (cmds.length === 0) 
+        return reply("No command with valid manual documentation found! Maybe did you misstype the command?")
       cmds.forEach(cmd => {
         var manual = "No manual for this command available!"
         if (cmd.hasManual()) {
@@ -903,7 +905,7 @@ registerPlugin({
         } else if (cmd.hasHelp()) {
           manual = cmd.getHelp()
         }
-        reply(`\nManual for command: [b]${cmd.getCommand()}[/b]\n[b]Usage:[/b] ${cmd.getUsage()}\n\n${manual}`)
+        reply(`\nManual for command: ${format.bold(cmd.getCommand())}\n${format.bold("Usage:")} ${cmd.getUsage()}\n\n${manual}`)
       })
     })
 
@@ -924,18 +926,20 @@ registerPlugin({
       //depending on the config setting return without error
       if (config.NOT_FOUND_MESSAGE !== "0") return
       //send the not found message
-      return ev.client.chat(`There is no enabled command named "[b]${getCommandPrefix()}${command}[/b], check [b]${getCommandPrefix()}help[/b] to get a list of available commands!`)
+      return ev.client.chat(`There is no enabled command named "${format.bold(`${getCommandPrefix()}${command}`)}", check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
     }
     //check if permissions are okay
     cmds = cmds.filter(cmd => {
       try {
         return cmd.isAllowed(ev.client)
       } catch(e) {
+        debug(DEBUG.ERROR)("An error happened during permission handling")
+        debug(DEBUG.ERROR)(e.stack)
         return false
       }
     })
     //send message because the client has no permissions to use this command
-    if (cmds.length === 0) return ev.client.chat(`You have no Permissions to use the Command [b]${command}[/b], check [b]${getCommandPrefix()}help[/b] to get a list of available commands!"`)
+    if (cmds.length === 0) return ev.client.chat(`You have no Permissions to use the Command ${format.bold(command)}, check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!"`)
     //handle the arguments for all commands
     cmds
       .forEach(async cmd => {
@@ -965,7 +969,7 @@ registerPlugin({
           debug(DEBUG.VERBOSE)(`Total Arguments given? ${args.length }`)
           if (possibleErrors.length > 0) {
             var [arg, err] = possibleErrors[0]
-            ev.client.chat(`Possible Error during parsing Argument ${arg.getManual()}: [b]${err.message}[/b]`)
+            ev.client.chat(`Possible Error during parsing Argument ${arg.getManual()}: ${format.bold(err.message)}`)
           } else {
             ev.client.chat("Too many Arguments passed!")
           }
@@ -987,10 +991,10 @@ registerPlugin({
             return
           }
           //handle an error
-          ev.client.chat(`Argument parsed with an error [b]${lastArg.getManual()}[/b]`)
-          ev.client.chat(`Returned with [b]${error.message}[/b]`)
+          ev.client.chat(`Argument parsed with an error ${format.bold(lastArg.getManual())}`)
+          ev.client.chat(`Returned with ${format.bold(error.message)}`)
         }
-        ev.client.chat(`Invalid Command usage! For Command usage see [b]${getCommandPrefix()}man ${cmd.getCommand()}[/b]`)
+        ev.client.chat(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
       })
   })
 
