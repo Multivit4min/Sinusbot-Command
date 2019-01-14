@@ -13,6 +13,12 @@ Command.createCommad("mass")
   .addArgument(Command.createArgument("string").setName("action").whitelist(["chat", "poke"]).toLowerCase())
   //parsed the rest of the string, it should have a minimum length of 3
   .addArgument(Command.createArgument("rest").setName("message").min(3))
+  //this function gets executed when a command has been parsed successfully
+  //the arguments which this function receives are following:
+  //1) the client which has executed the command
+  //2) the arguments which had been parsed
+  //3) reply, depending on where the client has sent the message it will automatically reply to the client, channel or server chat
+  //4) the raw text of the message
   .exec((client, args, reply, raw) => {
     var sent = 0
     var ignoreUids = [client.uid(), backend.getBotClient().uid()]

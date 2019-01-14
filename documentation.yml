@@ -13,6 +13,8 @@ toc:
         file: examples/GREET.md
       - name: Async example
         file: examples/ASYNC.md
+      - name: parse args by yourself
+        file: examples/ARGS.md
   - name: Classes
     description: |
       Definition for Classes

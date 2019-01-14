@@ -9,6 +9,12 @@ Command.createCommad("greet")
   .manual("Usage: ${Command.getCommandPrefix()}greet [client|uid]")
   //this expects a client or a uid
   .addArgument(Command.createArgument("client").setName("uid"))
+  //this function gets executed when a command has been parsed successfully
+  //the arguments which this function receives are following:
+  //1) the client which has executed the command
+  //2) the arguments which had been parsed
+  //3) reply, depending on where the client has sent the message it will automatically reply to the client, channel or server chat
+  //4) the raw text of the message
   .exec((client, args, reply, raw) => {
     //args.uid holds the detected client uid
     var receiver = backend.getClientByUID(args.uid) 

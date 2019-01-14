@@ -76,6 +76,7 @@ registerPlugin({
 
     /**
      * Sets an Argument as optional
+     * if the argument has not been parsed successful it will use the first argument which has been given inside this method
      * @param {any} [fallback] - the default value which should be set if this parameter has not been found
      * @returns {Argument} returns this to chain functions
      */
@@ -123,6 +124,7 @@ registerPlugin({
 
     /**
      * Sets a name for the argument to identify it later when the Command gets dispatched
+     * This name will be used when passing the parsed argument to the exec function
      * @param {string} name - sets the name of the argument
      * @param {string} [display] - sets a beautified display name which will be used when the getManual command gets executed, if none given it will use the first parameter as display value
      * @returns {Argument} returns this to make functions chainable
@@ -326,7 +328,7 @@ registerPlugin({
 
     /**
      * Creates a list of available whitelisted words
-     * @param {array} words - array of whitelisted words
+     * @param {Array} words - array of whitelisted words
      * @returns {StringArgument} returns this to chain Functions
      */
     whitelist(words) {
@@ -340,6 +342,8 @@ registerPlugin({
 
   /** 
    * Class representing a ClientArgument
+   * this Argument is capable to parse a Client UID or a simple UID
+   * inside the exec function it will resolve the found uid
    * @name ClientArgument
    * @extends Argument
    */
@@ -366,6 +370,8 @@ registerPlugin({
 
   /** 
    * Class representing a RestArgument
+   * this will parse everything remaining
+   * you can use all methods from the StringArgument here
    * @name RestArgument
    * @extends StringArgument
    */
@@ -390,6 +396,7 @@ registerPlugin({
 
   /** 
    * Class representing a NumberArgument
+   * this will try to parse a number
    * @name NumberArgument
    * @extends Argument
    */
@@ -543,6 +550,7 @@ registerPlugin({
 
     /**
      * Retrieves the serialized data from a command
+     * this function is not final yet
      */
     serialize() {
       return JSON.stringify({
@@ -554,7 +562,8 @@ registerPlugin({
     }
 
     /**
-     * Disabled the command
+     * Disables the command
+     * it can be enabled again with the method #enable()
      * @returns {Command} returns this to chain Functions
      */
     disable() {
@@ -574,7 +583,7 @@ registerPlugin({
     }
 
     /**
-     * Enables the command
+     * checks if the command is currently enabled
      * @returns {Boolean} returns true when the command is enabled
      */
     isEnabled() {
@@ -624,7 +633,8 @@ registerPlugin({
 
     /**
      * Sets a short help text for the help command (used inside the !help command)
-     * @param { string } text - the short help text
+     * This should be a very brief description of what the command does
+     * @param {string} text - the short help text
      * @returns {Command} returns this to chain Functions
      */
     help(text = "") {
@@ -651,6 +661,7 @@ registerPlugin({
     /**
      * Sets a detailed manual command on how to use the command
      * the manual command can be called multiple times, for every call it will add it as a new line
+     * use this to create a detailed documentation for your command
      * @param {string} text - the manual text
      * @returns {Command} returns this to chain Functions
      */
@@ -843,29 +854,19 @@ registerPlugin({
   }
 
   /**
-   * Creates a random string
-   * @name randomString
-   * @private
-   * @param {number} [len=8] - the length of the string
-   * @param {string} [chars=abcdefghijklmnopqrstuvwxyz0123456789] - the chars which get used
-   * @returns {string} returns the random string with the given length
-   */
-  function randomString(len = 8, chars = "abcdefghijklmnopqrstuvwxyz0123456789") {
-    return Array(len).fill().map(() => chars[Math.floor(Math.random() * chars.length)]).join("")
-  }
-
-  /**
    * Returns the correct reply chat from where the client has sent the message
    * @name getReplyOutput
    * @private
-   * @param {number} mode - the mode from where the message came from [1=client, 2=channel, 3=server]
-   * @param {Client} client - the sinusbot client which sent the message
+   * @param {object} ev the sinusbot chat event
+   * @param {number} ev.mode the mode from where the message came from [1=client, 2=channel, 3=server]
+   * @param {Client} ev.client the sinusbot client which sent the message
+   * @param {Channel} ev.channel the channel from where the command has been received
    * @returns {function} returns a function where the chat message gets redirected to
    */
-  function getReplyOutput(mode, client) {
-    switch (mode) {
-      case 1: return client.chat.bind(client)
-      case 2: return client.getChannels()[0].chat.bind(client.getChannels()[0])
+  function getReplyOutput(ev) {
+    switch (ev.mode) {
+      case 1: return ev.client.chat.bind(ev.client)
+      case 2: return ev.channel.chat.bind(ev.channel)
       case 3: return backend.chat.bind(backend)
       default: return msg => debug(DEBUG.WARNING)(`WARN no reply channel set for mode ${ev.mode}, message "${msg}" not sent!`)
     }
@@ -979,7 +980,7 @@ registerPlugin({
             //start the command execution
             var start = Date.now()
             try {
-              await Promise.resolve(cmd.dispatchCommand(ev.client, resolved, getReplyOutput(ev.mode, ev.client), ev))
+              await Promise.resolve(cmd.dispatchCommand(ev.client, resolved, getReplyOutput(ev), ev))
               debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" finnished successfully after ${Date.now()-start}ms`)
             } catch (e) {
               //caught an error during processing
