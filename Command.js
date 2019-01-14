@@ -6,7 +6,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage Commands",
-  version: "1.0",
+  version: "1.0.1",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -916,9 +916,9 @@ registerPlugin({
     //do not do anything when the bot sends a message
     if (ev.client.isSelf()) return
     //get the basic command with arguments and command splitted
-    var match = ev.text.match(new RegExp("^"+engine.getCommandPrefix().split("").map(char => char.match(/[0-9\w]/) ? char : "\\"+char).join("")+"(?<command>\\w*) *(?<args>.*) *$", "i"))
+    var match = ev.text.match(new RegExp(`^${getCommandPrefix().split("").map(char => char.match(/[0-9\w]/) ? char : "\\"+char).join("")}(?<command>\\w*)[ \r\n]*(?<args>.*) *$`, "si"))
     //return if no valid command has been found
-    if (ev.text[0] !== engine.getCommandPrefix() && !match) return
+    if (ev.text[0] !== getCommandPrefix() && !match) return
     const { command } = match.groups
     //check if command exists
     var cmds = commands
