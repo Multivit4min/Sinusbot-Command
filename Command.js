@@ -51,11 +51,50 @@ registerPlugin({
   debug(DEBUG.INFO)(`command prefix is "${getCommandPrefix()}"`)
 
   /**
+   * Class representing a CommandDisabledError
+   * @extends Error
+   */
+  class CommandDisabledError extends Error {
+    constructor(err) {
+      super(err)
+    }
+  }
+
+  /**
+   * Class representing a TooManyArgumentsError
+   * @extends Error
+   */
+  class TooManyArgumentsError extends Error {
+    constructor(err) {
+      super(err)
+    }
+  }
+
+  /**
    * Class representing a ParseError
-   * @private
    * @extends Error
    */
   class ParseError extends Error {
+    constructor(err) {
+      super(err)
+    }
+  }
+
+  /**
+   * Class representing a CommandNotFoundError
+   * @extends Error
+   */
+  class CommandNotFoundError extends Error {
+    constructor(err) {
+      super(err)
+    }
+  }
+
+  /**
+   * Class representing a PermissionError
+   * @extends Error
+   */
+  class PermissionError extends Error {
     constructor(err) {
       super(err)
     }
@@ -178,6 +217,7 @@ registerPlugin({
     /**
      * Validates the given string to the "or" of the GroupArgument
      * @private
+     * @throws {ParseError}
      * @param {string} args - the remaining args
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
@@ -191,7 +231,7 @@ registerPlugin({
         resolved[arg.getName()] = result[0]
         return (args = result[1].trim(), true)
       })
-      if (!valid) return Error(`No valid match found`)
+      if (!valid) throw new ParseError(`No valid match found`)
       return [resolved, args]
     }
 
@@ -259,18 +299,19 @@ registerPlugin({
     /**
      * Validates the given string to the StringArgument params
      * @private
+     * @throws {ParseError}
      * @param {string} args - args which should get parsed
      * @param {string} rest - the remaining args
      * @returns {Error|boolean} returns true when validation was successful otherwise returns an Error
      */
     _validate(str, ...rest) {
-      if (typeof str !== "string") return new ParseError(`Given input is not typeof string (typeof ${typeof str})`)
+      if (typeof str !== "string") throw new ParseError(`Given input is not typeof string (typeof ${typeof str})`)
       if (this._uppercase) str = str.toUpperCase()
       if (this._lowercase) str = str.toLowerCase()
-      if (this._minlen !== null && this._minlen > str.length) return new ParseError(`String length not greater or equal! Expected at least ${this._minlen}, but got ${str.length}`)
-      if (this._maxlen !== null && this._maxlen < str.length) return new ParseError(`String length not less or equal! Maximum ${this._maxlen} chars allowed, but got ${str.length}`)
-      if (this._whitelist !== null && this._whitelist.indexOf(str) === -1) return new ParseError(`Invalid Input for ${str}. Allowed words: ${this._whitelist.join(", ")}`)
-      if (this._regex !== null && !this._regex.test(str)) return new ParseError(`Regex missmatch, the input '${str}' did not match the expression ${this._regex.toString()}`)
+      if (this._minlen !== null && this._minlen > str.length) throw new ParseError(`String length not greater or equal! Expected at least ${this._minlen}, but got ${str.length}`)
+      if (this._maxlen !== null && this._maxlen < str.length) throw new ParseError(`String length not less or equal! Maximum ${this._maxlen} chars allowed, but got ${str.length}`)
+      if (this._whitelist !== null && this._whitelist.indexOf(str) === -1) throw new ParseError(`Invalid Input for ${str}. Allowed words: ${this._whitelist.join(", ")}`)
+      if (this._regex !== null && !this._regex.test(str)) throw new ParseError(`Regex missmatch, the input '${str}' did not match the expression ${this._regex.toString()}`)
       return [str, ...rest]
     }
 
@@ -356,12 +397,13 @@ registerPlugin({
     /**
      * Validates and tries to parse the Client from the given input string
      * @private
+     * @throws {ParseError}
      * @param {string} args - the input from where the client gets extracted
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
       var match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[\/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[\/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
-      if (!match) return new ParseError("Client not found!")
+      if (!match) throw new ParseError("Client not found!")
       return [match.groups.url_uid||match.groups.uid, match.groups.rest]
     }
   }
@@ -414,20 +456,21 @@ registerPlugin({
     /**
      * Validates the given Number to the Object
      * @private
+     * @throws {ParseError}
      * @param {string} args - the remaining args
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
       var argArray = args.split(" ")
       var num = argArray.shift()
-      if (isNaN(num)) return new ParseError(`Searched for number but found "${num}"`)
+      if (isNaN(num)) throw new ParseError(`Searched for number but found "${num}"`)
       num = parseFloat(num)
-      if (isNaN(num)) return new ParseError(`Given input is not typeof Number (typeof ${typeof num})`)
-      if (this._min !== null && this._min > num) return new ParseError(`Number not greater or equal! Expected at least ${this._min}, but got ${num}`)
-      if (this._max !== null && this._max < num) return new ParseError(`Number not less or equal! Expected at least ${this._max}, but got ${num}`)
-      if (this._integer && num % 1 !== 0) return new ParseError(`Given Number is not an Integer! (${num})`)
-      if (this._forcePositive && num <= 0) return new ParseError(`Given Number is not Positive! (${num})`)
-      if (this._forceNegative && num >= 0) return new ParseError(`Given Number is not Negative! (${num})`)
+      if (isNaN(num)) throw new ParseError(`Given input is not typeof Number (typeof ${typeof num})`)
+      if (this._min !== null && this._min > num) throw new ParseError(`Number not greater or equal! Expected at least ${this._min}, but got ${num}`)
+      if (this._max !== null && this._max < num) throw new ParseError(`Number not less or equal! Expected at least ${this._max}, but got ${num}`)
+      if (this._integer && num % 1 !== 0) throw new ParseError(`Given Number is not an Integer! (${num})`)
+      if (this._forcePositive && num <= 0) throw new ParseError(`Given Number is not Positive! (${num})`)
+      if (this._forceNegative && num >= 0) throw new ParseError(`Given Number is not Negative! (${num})`)
       return [num, argArray.join(" ")]
     }
 
@@ -483,7 +526,6 @@ registerPlugin({
   }
 
 
-
   const availableArguments = {
     string: () => new StringArgument(),
     number: () => new NumberArgument(),
@@ -492,143 +534,24 @@ registerPlugin({
   }
 
 
-
-  /** 
-   * Class representing a Command
-   * @name Command
-    * @param {string} cmd - The Command which should be used
-    */
-  class Command {
+  /**
+   * Class representing an Abstract
+   * @name Abstract
+   * @param {string} cmd - The Command which should be used
+   */
+  class Abstract {
     constructor(cmd) {
-      this._validateCommand(cmd)
       this._cmd = cmd
+      this._enabled = true
       this._help = ""
-      this._manual = []
-      this._enabled = true
-      this._fncs = {}
-      this._alias = []
-      this._args = []
-    }
-
-    /**
-     * Validates a Command and check if its okay to use
-     * @private
-     * @param {any} cmd - the command which should be tested for
-     * @param {boolean} [throwException = true] - wether it should throw an exception or not
-     * @returns {boolean} - the validation result
-     */
-    _validateCommand(cmd, throwException = true) {
-      if (typeof cmd === "string" && cmd.length > 0) return true
-      if (throwException) throw new Error("Command needs to be at least 1 char long!")
-      return false
-    }
-
-    /**
-     * Searches and returns the given function name
-     * @private
-     * @param {string} name - the function name which should be searched for
-     * @param {function} [fallback] - returns a fallback function if no function under the name has been found
-     * @returns {function} - the stored function
-     */
-    _getFunction(name, fallback = () => true) {
-      if (typeof this._fncs[name] === "function") return this._fncs[name]
-      return fallback
-    }
-
-    /**
-     * Stores a function with the given name, can be used to overwrite a function
-     * @private
-     * @param {string} name - the name for which the function should be stored
-     * @param {function} [fnc] - the function which should be stored
-     * @returns {Command} returns this to chain Functions
-     */
-    _storeFunction(name, fnc = () => true) {
-      if (typeof fnc !== "function") throw new Error("Parameter is no a function!")
-      this._fncs[name] = fnc
-      return this
-    }
-
-    /**
-     * Retrieves the serialized data from a command
-     * this function is not final yet
-     */
-    serialize() {
-      return JSON.stringify({
-        cmd: this._cmd,
-        alias: this._alias,
-        help: this._help,
-        manual: this._manual
-      })
-    }
-
-    /**
-     * Disables the command
-     * it can be enabled again with the method #enable()
-     * @returns {Command} returns this to chain Functions
-     */
-    disable() {
-      debug(DEBUG.INFO)(`Command "${this.getCommand()}" has been disabled`)
-      this._enabled = false
-      return this
-    }
-
-    /**
-     * Enables the command
-     * @returns {Command} returns this to chain Functions
-     */
-    enable() {
-      debug(DEBUG.INFO)(`Command "${this.getCommand()}" has been enabled`)
-      this._enabled = true
-      return this
-    }
-
-    /**
-     * checks if the command is currently enabled
-     * @returns {Boolean} returns true when the command is enabled
-     */
-    isEnabled() {
-      return this._enabled
-    }
-
-    /**
-     * Destroys and unloads a command completly
-     * @returns {null}
-     */
-    destroy() {
-      debug(DEBUG.INFO)(`Command "${this.getCommand()}" has been destroyed`)
-      commands = commands.filter(cmd => cmd !== this)
-      return null
     }
 
     /**
      * Retrieves the current command name
-     * @returns {string} returns the command
+     * @returns {string} returns the command by its name
      */
     getCommand() {
       return this._cmd
-    }
-
-    /**
-     * Adds one or more alias to the command
-     * @param {string} alias - one or more alias commands
-     * @returns {Command} returns this to chain Functions
-     */
-    addAlias(...alias) {
-      alias.forEach(cmd => {
-        this._validateCommand(cmd)
-        if (this._cmd === cmd) throw new Error("Alias is same as command already exists")
-        if (this._alias.indexOf(cmd) >= 0) throw new Error("Alias already exists")
-      })
-      this._alias.push(...alias)
-      return this
-    }
-
-    /**
-     * Retrieves all alias commands
-     * @returns {array} returns all available alias to the command
-     */
-    getAlias() {
-      return this._alias
     }
 
     /**
@@ -656,6 +579,139 @@ registerPlugin({
      */
     getHelp() {
       return this._help
+    }
+
+    /**
+     * Disables the command
+     * it can be enabled again with the method #enable()
+     * @returns {Command} returns this to chain Functions
+     */
+    disable() {
+      debug(DEBUG.VERBOSE)(`Command "${this.getCommand()}" has been disabled`)
+      this._enabled = false
+      return this
+    }
+
+    /**
+     * Enables the command
+     * @returns {Command} returns this to chain Functions
+     */
+    enable() {
+      debug(DEBUG.VERBOSE)(`Command "${this.getCommand()}" has been enabled`)
+      this._enabled = true
+      return this
+    }
+
+    /**
+     * checks if the command is currently enabled
+     * @returns {Boolean} returns true when the command is enabled
+     */
+    isEnabled() {
+      return this._enabled
+    }
+
+  }
+
+  /**
+   * Class representing a CommandGroup
+   * @name CommandGroup
+   * @extends Abstract
+   * @param {string} cmd - The Command which should be used
+   */
+  class CommandGroup extends Abstract {
+    constructor(cmd) {
+      super(cmd)
+      this._cmd
+      this._cmds = []
+    }
+
+    /**
+     * Adds a new sub Commmand to the group
+     * @param {string} name the sub command name which should be added
+     * @returns {Command} returns the new command
+     */
+    addCommand(name) {
+      validateCommandName(name)
+      var cmd = new Command(name)
+      this._cmds.push(cmd)
+      return cmd
+    }
+
+    /**
+     * Retrieves a subcommand by its command name
+     * @throws {CommandNotFoundError}
+     * @param {string} name the name which should be searched for
+     * @returns {Command} returns the Command instance if found
+     */
+    findSubCommandByName(name) {
+      var cmd = this._cmds.find(cmd => cmd.getCommand() === name)
+      if (!cmd) throw new CommandNotFoundError(`Sub command with name "${name}" has not been found!`)
+      return cmd
+    }
+
+    /**
+     * Checks if a Client is allowed to use one of the sub commands
+     * @param {object} client - the sinusbot client object to check against
+     * @returns {boolean} returns true if the client is allowed to use one of the subcommands
+     */
+    isAllowed(client) {
+      return this._cmds.some(cmd => cmd.isAllowed(client))
+    }
+
+    /**
+     * Runs a command
+     * @throws {CommandDisabledError}
+     * @throws {PermissionError}
+     * @param {string} args the raw argument string
+     * @param {object} ev the raw event
+     */
+    run(args, ev) {
+      if (!super.isEnabled()) throw new CommandDisabledError("Command not enabled!")
+      if (!this.isAllowed(ev.client)) throw new PermissionError("Missing Permissions")
+      var [sub, ...rest] = args.split(" ")
+      return this.findSubCommandByName(sub).run(rest.join(" "), ev)
+    }
+  }
+
+
+  /** 
+   * Class representing a Command
+   * @name Command
+   * @extends Abstract
+   * @param {string} cmd - The Command which should be used
+   */
+  class Command extends Abstract {
+    constructor(cmd) {
+      super(cmd)
+      this._help = ""
+      this._args = []
+      this._manual = []
+      this._fncs = {}
+    }
+
+    /**
+     * Searches and returns the given function name
+     * @private
+     * @param {string} name - the function name which should be searched for
+     * @param {function} [fallback] - returns a fallback function if no function under the name has been found
+     * @returns {function} - the stored function
+     */
+    _getFunction(name, fallback = () => true) {
+      if (typeof this._fncs[name] === "function") return this._fncs[name]
+      return fallback
+    }
+
+    /**
+     * Stores a function with the given name, can be used to overwrite a function
+     * @private
+     * @param {string} name - the name for which the function should be stored
+     * @param {function} [fnc] - the function which should be stored
+     * @returns {Command} returns this to chain Functions
+     */
+    _storeFunction(name, fnc = () => true) {
+      if (typeof fnc !== "function") throw new Error("Parameter is no a function!")
+      this._fncs[name] = fnc
+      return this
     }
 
     /**
@@ -717,81 +773,143 @@ registerPlugin({
     }
 
     /**
+     * Runs a command
+     * @throws {CommandDisabledError}
+     * @throws {PermissionError}
+     * @param {string} args the raw argument string
+     * @param {object} ev the raw event
+     */
+    run(args, ev) {
+      if (!super.isEnabled()) throw new CommandDisabledError("Command not enabled!")
+      if (!this.isAllowed(ev.client)) throw new PermissionError("Missing Permissions")
+      this.dispatchCommand(this.validate(args), ev)
+    }
+
+    /**
+     * Validates the command
+     * @throws {TooManyArgumentsError}
+     * @param {string} args the arguments from the command which should be validated
+     * @returns {object} returns the resolved arguments
+     */
+    validate(args) {
+      var [result, possibleErrors, remaining] = this.validateArgs(args)
+      if (remaining.length > 0) {
+        if (possibleErrors.length > 0) throw possibleErrors[0]
+        throw new TooManyArgumentsError(`Too many argument!`)
+      }
+      return result
+    }
+
+    /**
+     * Validates the given input string to all added arguments
+     * @param {string} args the string which should get validated
+     * @returns {array} returns the parsed arguments in index 1 and possible Errors on index 2 and the remaining arguments on index
+     */
+    validateArgs(args) {
+      args = args.trim()
+      var resolved = {}
+      var possibleErrors = []
+      this.getArguments().forEach(arg => {
+        try {
+          var [val, rest] = arg.validate(args)
+          resolved[arg.getName()] = val
+          args = rest.trim()
+        } catch (e) {
+          if (e instanceof ParseError && arg.isOptional()) {
+            resolved[arg.getName()] = arg.getDefault()
+            return possibleErrors.push(e)
+          }
+          throw e
+        }
+      })
+      return [resolved, possibleErrors, args]
+    }
+
+    /**
      * Adds an argument to the command
      * @param {Argument} - the argument to add
      * @returns {Command} returns this to chain the command
      */
-     addArgument(argument) {
-       this._args.push(argument)
-       return this
-     }
+    addArgument(argument) {
+      this._args.push(argument)
+      return this
+    }
 
-     /**
-      * Retrieves all available arguments
-      * @param {Argument} - the argument to add
-      * @returns {array} returns a list of defined Arguments
-      */
-      getArguments() {
-        return this._args
-      }
+    /**
+     * Retrieves all available arguments
+     * @param {Argument} - the argument to add
+     * @returns {array} returns a list of defined Arguments
+     */
+    getArguments() {
+      return this._args
+    }
 
-      /**
-       * Sets the function which gets executed
-       * @param {function} - the function which should be executed when the command has been validated successful
-       * @returns {Command} returns this to chain Functions
-       */
-      exec(fnc) {
-        this._storeFunction("exec", fnc)
-        return this
-      }
+    /**
+     * Sets the function which gets executed
+     * @param {function} - the function which should be executed when the command has been validated successful
+     * @returns {Command} returns this to chain Functions
+     */
+    exec(fnc) {
+      this._storeFunction("exec", fnc)
+      return this
+    }
 
-      /**
-       * Dispatches the command
-       * @private
-       * @param {object} client - the caller which represents a TeamSpeak Client
-       * @param {array} args - the args which have been resolved
-       */
-      dispatchCommand(...args) {
-        return this._getFunction("exec")(...args)
-      }
+    /**
+     * Dispatches a command
+     * @param {object} args - the parsed arguments
+     * @param {object} ev - the raw event
+     */
+    dispatchCommand(args, ev) {
+      return this._getFunction("exec")(ev.client, args, getReplyOutput(ev), ev)
+    }
+  }
 
-      /**
-       * Sets the Command to ignore additional passed Arguments
-       * @returns {Command} returns this to chain the command
-       */
-      ignoreTooManyArgs() {
-        this._shouldIgnoreTooManyArgs = true
-        return this
-      }
-
-      /**
-       * Retrieves wether there should be an error if too many arguments has been passed
-       * @returns {boolean}
-       */
-      shouldIgnoreTooManyArgs() {
-        return this._shouldIgnoreTooManyArgs
-      }
+  /**
+   * Checks if the command uses a valid command name
+   * @private
+   * @param {string} name the name which should be checked
+   * @param {boolean} allowSingleChar wether it should allow single char commands as name
+   * @returns {boolean} returns true when the command has a valid name
+   */
+  function validateCommandName(name, allowSingleChar = true) {
+    if (typeof name !== "string") throw new Error("Expected a string as command name!")
+    if (name.length === 0) throw new Error(`Command should have a minimum length of ${allowSingleChar ? "1" : "2"}!`)
+    if (name.length === 1 && !allowSingleChar) throw new Error("Command should have a minimum length of 2!")
+    if (!/^[a-z0-9_-]+$/i.test(name)) throw new Error("the command should match the following pattern '/^[a-z0-9_-]+$/i'")
+    return true
   }
 
   /**
    * Creates a new Command Instance with the given Command Name
    * @name createCommand
    * @param {string} cmd - the command which should be added
-   * @returns {Command} returns this to chain Functions
+   * @returns {Command} returns the created Command
    */
   function createCommand(cmd, OVERRIDES) {
-    if (typeof cmd !== "string") throw new Error("Expected a string as command name!")
-    if (cmd.length === 0) throw new Error("Command should have a minimum length of 2!")
-    if (
-      cmd.length === 1 && 
-      OVERRIDES !== "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE"
-    ) throw new Error("Command should have a minimum length of 2!")
+    validateCommandName(cmd, OVERRIDES === "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE")
     debug(DEBUG.INFO)(`registering command '${cmd}'`)
     if (getCommandByName(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
       debug(DEBUG.WARNING)(`Command.js may work not as expected!`)
     }
     commands.push(new Command(cmd))
+    return commands[commands.length - 1]
+  }
+
+  /**
+   * Creates a new CommandsCommand Instance with the given Command Name
+   * @name createCommandGroup
+   * @param {string} cmd - the command which should be added
+   * @returns {CommandGroup} returns the created CommandGroup instance
+   */
+  function createCommandGroup(cmd, OVERRIDES) {
+    validateCommandName(cmd, OVERRIDES === "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE")
+    debug(DEBUG.INFO)(`registering command '${cmd}'`)
+    if (getCommandByName(cmd)) {
+      debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
+      debug(DEBUG.WARNING)(`Command.js may work not as expected!`)
+    }
+    commands.push(new CommandGroup(cmd))
     return commands[commands.length - 1]
   }
 
@@ -811,7 +929,7 @@ registerPlugin({
    * Creates a new Argument Instance
    * @name createGroupedArgument
    * @param {string} type - the argument type which should be created either "or" or "and" allowed
-   * @returns {GroupArgument} returns this to chain Functions
+   * @returns {GroupArgument} returns the created Group Argument
    */
   function createGroupedArgument(type) {
     if (Object.values(GROUP_ARGS).indexOf(type) === -1) throw new Error(`Unexpected GroupArgument type, expected one of [${Object.values(GROUP_ARGS).join(", ")}] but got ${type}!`)
@@ -856,7 +974,6 @@ registerPlugin({
   /**
    * Returns the correct reply chat from where the client has sent the message
    * @name getReplyOutput
-   * @private
    * @param {object} ev the sinusbot chat event
    * @param {number} ev.mode the mode from where the message came from [1=client, 2=channel, 3=server]
    * @param {Client} ev.client the sinusbot client which sent the message
@@ -879,12 +996,15 @@ registerPlugin({
     .manual(`you can search/filter for a specific commands by adding a keyword`)
     .addArgument(createArgument("string").setName("filter").min(1).optional())
     .exec((client, {filter}, reply) => {
+      console.log(`Filter ${typeof filter} ${filter}`)
+      console.log(`length ${
+        getAvailableCommands(client).filter(cmd => cmd.hasHelp()).length
+      }`)
       var cmds = getAvailableCommands(client)
         .filter(cmd => cmd.hasHelp())
         .filter(cmd => {
           return !filter ||
             cmd.getCommand().match(new RegExp(filter, "i")) ||
-            cmd.getAlias().some(alias => alias.match(new RegExp(filter, "i"))) ||
             cmd.getHelp().match(new RegExp(filter, "i"))
           })
       reply(`${format.bold(cmds.length)} Commands found:`)
@@ -919,90 +1039,38 @@ registerPlugin({
     var match = ev.text.match(new RegExp(`^${getCommandPrefix().split("").map(char => char.match(/[0-9\w]/) ? char : "\\"+char).join("")}(?<command>\\w*)[ \r\n]*(?<args>.*) *$`, "si"))
     //return if no valid command has been found
     if (ev.text[0] !== getCommandPrefix() && !match) return
-    const { command } = match.groups
+    const { command, args } = match.groups
     //check if command exists
     var cmds = commands
-      .filter(cmd => cmd.getCommand() === command || cmd.getAlias().indexOf(command) >= 0)
+      .filter(cmd => cmd.getCommand() === command)
       .filter(cmd => cmd.isEnabled())
     if (cmds.length === 0) {
       //depending on the config setting return without error
       if (config.NOT_FOUND_MESSAGE !== "0") return
       //send the not found message
-      return ev.client.chat(`There is no enabled command named "${format.bold(`${getCommandPrefix()}${command}`)}", check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
+      return getReplyOutput(ev)(`There is no enabled command named "${format.bold(`${getCommandPrefix()}${command}`)}", check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
     }
-    //check if permissions are okay
-    cmds = cmds.filter(cmd => {
+    //handle every available command, should actually be only one command
+    cmds.forEach(cmd => {
       try {
-        return cmd.isAllowed(ev.client)
+        //run the cmd, this will
+        //check for permissions, 
+        //parse the arguments
+        //and finally dispatch the command
+        cmd.run(args, ev)
+      //catch errors, parsing errors / permission errors or anything else
       } catch(e) {
-        debug(DEBUG.ERROR)("An error happened during permission handling")
-        debug(DEBUG.ERROR)(e.stack)
-        return false
+        getReplyOutput(ev)("An unhandled exception occured, check the sinusbot logs for more informations")
+        console.log(`#### UNHANDLED EXCEPTION (${e.constructor.name}) ####`)
+        console.log(e)
       }
     })
-    //send message because the client has no permissions to use this command
-    if (cmds.length === 0) return ev.client.chat(`You have no Permissions to use the Command ${format.bold(command)}, check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!"`)
-    //handle the arguments for all commands
-    cmds
-      .forEach(async cmd => {
-        var { args } = match.groups
-        var resolved = {}
-        var error = null
-        var possibleErrors = []
-        var lastArg = null
-        //validate each available command
-        cmd.getArguments().some(arg => {
-          lastArg = arg
-          var result = arg.validate(args)
-          if (result instanceof Error) { 
-            if (!arg.isOptional()) return (error = result, true)
-            resolved[arg.getName()] = arg.getDefault()
-            possibleErrors.push([arg, result])
-            return false
-          }
-          resolved[arg.getName()] = result[0]
-          return (args = result[1].trim(), false)
-        })
-        //check if too many arguments have been parsed and no error occured
-        if ((!cmd.shouldIgnoreTooManyArgs() || possibleErrors.length > 0) && args.length > 0 && !(error instanceof Error)) {
-          debug(DEBUG.VERBOSE)(`Argument parsing failed for cmd ${cmd.getCommand()}`)
-          debug(DEBUG.VERBOSE)(`Should ignore to many args? ${cmd.shouldIgnoreTooManyArgs()}`)
-          debug(DEBUG.VERBOSE)(`How many possible Errors? ${possibleErrors.length}`)
-          debug(DEBUG.VERBOSE)(`Total Arguments given? ${args.length }`)
-          if (possibleErrors.length > 0) {
-            var [arg, err] = possibleErrors[0]
-            ev.client.chat(`Possible Error during parsing Argument ${arg.getManual()}: ${format.bold(err.message)}`)
-          } else {
-            ev.client.chat("Too many Arguments passed!")
-          }
-        } else {
-          if (error === null) {
-            //start the command execution
-            var start = Date.now()
-            try {
-              await Promise.resolve(cmd.dispatchCommand(ev.client, resolved, getReplyOutput(ev), ev))
-              debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" finnished successfully after ${Date.now()-start}ms`)
-            } catch (e) {
-              //caught an error during processing
-              debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" failed after ${Date.now()-start}ms`)
-              debug(DEBUG.ERROR)(`Error while handling command "${cmd.getCommand()}"!`)
-              debug(DEBUG.ERROR)(`This is probably a problem with a Script which is using Command.js!`)
-              debug(DEBUG.ERROR)(e.stack)
-              ev.client.chat("An error happened while processing the command :(")
-            }
-            return
-          }
-          //handle an error
-          ev.client.chat(`Argument parsed with an error ${format.bold(lastArg.getManual())}`)
-          ev.client.chat(`Returned with ${format.bold(error.message)}`)
-        }
-        ev.client.chat(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
-      })
   })
 
 
 
   engine.export({
+    createCommandGroup,
     createCommand,
     createArgument,
     createGroupedArgument,
