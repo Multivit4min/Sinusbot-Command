@@ -81,6 +81,16 @@ registerPlugin({
   }
 
   /**
+   * Class representing a SubCommandNotFoundError
+   * @extends Error
+   */
+  class SubCommandNotFoundError extends Error {
+    constructor(err) {
+      super(err)
+    }
+  }
+
+  /**
    * Class representing a CommandNotFoundError
    * @extends Error
    */
@@ -644,9 +654,25 @@ registerPlugin({
      * @returns {Command} returns the Command instance if found
      */
     findSubCommandByName(name) {
+      if (name.length === 0) throw new SubCommandNotFoundError(`No subcommand specified for Command ${this.getCommand()}`)
       var cmd = this._cmds.find(cmd => cmd.getCommand() === name)
-      if (!cmd) throw new CommandNotFoundError(`Sub command with name "${name}" has not been found!`)
+      if (!cmd) throw new SubCommandNotFoundError(`Sub command with name "${name}" has not been found for Command ${this.getCommand()}!`)
       return cmd
+    }
+    
+    /**
+     * retrievel all available subcommands
+     * @param {Client} [client] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
+     * @param {string|boolean} [cmd=false] - the command which should be searched for
+     * @return
+     */
+    getAvailableSubCommands(client = false, cmd = false) {
+      console.log("available sub", cmd, typeof cmd)
+      var cmds = this._cmds
+        .filter(c => c.getCommand() === cmd || cmd === false)
+        .filter(c => c.isEnabled())
+      if (!client) return cmds
+      return cmds.filter(c => c.isAllowed(client))
     }
 
     /**
@@ -683,7 +709,6 @@ registerPlugin({
   class Command extends Abstract {
     constructor(cmd) {
       super(cmd)
-      this._help = ""
       this._args = []
       this._manual = []
       this._fncs = {}
@@ -747,7 +772,7 @@ registerPlugin({
      * @returns {string} retrieves the complete usage of the command with its argument names
      */
     getUsage() {
-      return `${getCommandPrefix()}${this.getCommand()} ${this.getArguments().map(arg => arg.getManual()).join(" ")}`
+      return `${this.getCommand()} ${this.getArguments().map(arg => arg.getManual()).join(" ")}`
     }
 
     /**
@@ -803,7 +828,7 @@ registerPlugin({
     /**
      * Validates the given input string to all added arguments
      * @param {string} args the string which should get validated
-     * @returns {array} returns the parsed arguments in index 1 and possible Errors on index 2 and the remaining arguments on index
+     * @returns {array} returns the parsed arguments in index 1, possible Errors on index 2 and the remaining arguments on index
      */
     validateArgs(args) {
       args = args.trim()
@@ -957,10 +982,11 @@ registerPlugin({
     return prefix
   }
 
+
   /**
    * gets all available commands
    * @name getAvailableCommands
-   * @param {Client} client - the sinusbot client for which the commands should be retrieved
+   * @param {Client} [client] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
    * @param {string|boolean} [cmd=false] - the command which should be searched for
    * @returns {Command[]} returns an array of commands
    */
@@ -968,7 +994,8 @@ registerPlugin({
     return commands
       .filter(c => c.getCommand() === cmd || cmd === false)
       .filter(c => c.isEnabled())
-      .filter(c => c.isAllowed(client))
+      if (!client) return cmds
+      return cmds.filter(c => c.isAllowed(client))
   }
 
   /**
@@ -1016,18 +1043,25 @@ registerPlugin({
     .help("Displays detailed help about a command if available")
     .manual(`Displays detailed usage help for a specific command`)
     .addArgument(createArgument("string").setName("command").min(1))
-    .exec((client, {command}, reply) => {
+    .addArgument(createArgument("string").setName("subcommand").min(1).optional(false))
+    .exec((client, {command, subcommand}, reply) => {
+      var getManual = cmd => {
+        if (cmd.hasManual()) return cmd.getManual()
+        if (cmd.hasHelp()) return cmd.getHelp()
+        return "No manual available"
+      }
       var cmds = getAvailableCommands(client, command)
-      if (cmds.length === 0) 
-        return reply("No command with valid manual documentation found! Maybe did you misstype the command?")
+      if (cmds.length === 0) return reply(`No command with name ${format.bold(command)} found! Did you misstype the command?`)
       cmds.forEach(cmd => {
-        var manual = "No manual for this command available!"
-        if (cmd.hasManual()) {
-          manual = cmd.getManual()
-        } else if (cmd.hasHelp()) {
-          manual = cmd.getHelp()
+        if (cmd instanceof CommandGroup) {
+          console.log("CommandGroup")
+          cmd.getAvailableSubCommands(client, subcommand).forEach(sub => {
+            console.log(cmd.getCommand(), sub.getCommand())
+            reply(`\n${format.bold("Usage:")} ${getCommandPrefix()}${cmd.getCommand()} ${sub.getUsage()}\n${getManual(sub)}`)
+          })
+        } else {
+          reply(`\nManual for command: ${format.bold(`${getCommandPrefix()}${cmd.getCommand()}`)}\n${format.bold("Usage:")} ${cmd.getUsage()}\n${getManual(cmd)}`)
         }
-        reply(`\nManual for command: ${format.bold(cmd.getCommand())}\n${format.bold("Usage:")} ${cmd.getUsage()}\n\n${manual}`)
       })
     })
 
@@ -1051,22 +1085,27 @@ registerPlugin({
       return getReplyOutput(ev)(`There is no enabled command named "${format.bold(`${getCommandPrefix()}${command}`)}", check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
     }
     //handle every available command, should actually be only one command
-    cmds.forEach(cmd => {
+    cmds.forEach(async cmd => {
       try {
         //run the cmd, this will
-        //check for permissions, 
-        //parse the arguments
-        //and finally dispatch the command
-        cmd.run(args, ev)
+        // - check for permissions
+        // - parse the arguments
+        // - dispatch the command
+        await cmd.run(args, ev)
       //catch errors, parsing errors / permission errors or anything else
       } catch(e) {
-        getReplyOutput(ev)("An unhandled exception occured, check the sinusbot logs for more informations")
-        console.log(`#### UNHANDLED EXCEPTION (${e.constructor.name}) ####`)
-        console.log(e)
+        //Handle Command not found Exceptions for CommandGroups
+        if (e instanceof SubCommandNotFoundError) {
+          getReplyOutput(ev)(e.message)
+          getReplyOutput(ev)(`For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
+        } else {
+          getReplyOutput(ev)("An unhandled exception occured, check the sinusbot logs for more informations")
+          console.log(`#### UNHANDLED EXCEPTION (${e.constructor.name}) ####`)
+          console.log(e)
+        }
       }
     })
   })
-
 
 
   engine.export({
