@@ -61,10 +61,10 @@ registerPlugin({
   }
 
   /**
-   * Class representing a TooManyArgumentsError
+   * Class representing a TooManyArguments
    * @extends Error
    */
-  class TooManyArgumentsError extends Error {
+  class TooManyArguments extends Error {
     constructor(err) {
       super(err)
     }
@@ -81,20 +81,20 @@ registerPlugin({
   }
 
   /**
-   * Class representing a SubCommandNotFoundError
+   * Class representing a SubCommandNotFound
    * @extends Error
    */
-  class SubCommandNotFoundError extends Error {
+  class SubCommandNotFound extends Error {
     constructor(err) {
       super(err)
     }
   }
 
   /**
-   * Class representing a CommandNotFoundError
+   * Class representing a CommandNotFound
    * @extends Error
    */
-  class CommandNotFoundError extends Error {
+  class CommandNotFound extends Error {
     constructor(err) {
       super(err)
     }
@@ -649,14 +649,14 @@ registerPlugin({
 
     /**
      * Retrieves a subcommand by its command name
-     * @throws {CommandNotFoundError}
+     * @throws {CommandNotFound}
      * @param {string} name the name which should be searched for
      * @returns {Command} returns the Command instance if found
      */
     findSubCommandByName(name) {
-      if (name.length === 0) throw new SubCommandNotFoundError(`No subcommand specified for Command ${this.getCommand()}`)
+      if (name.length === 0) throw new SubCommandNotFound(`No subcommand specified for Command ${this.getCommand()}`)
       var cmd = this._cmds.find(cmd => cmd.getCommand() === name)
-      if (!cmd) throw new SubCommandNotFoundError(`Sub command with name "${name}" has not been found for Command ${this.getCommand()}!`)
+      if (!cmd) throw new SubCommandNotFound(`Sub command with name "${name}" has not been found for Command ${this.getCommand()}!`)
       return cmd
     }
     
@@ -812,7 +812,7 @@ registerPlugin({
 
     /**
      * Validates the command
-     * @throws {TooManyArgumentsError}
+     * @throws {TooManyArguments}
      * @param {string} args the arguments from the command which should be validated
      * @returns {object} returns the resolved arguments
      */
@@ -820,7 +820,7 @@ registerPlugin({
       var [result, possibleErrors, remaining] = this.validateArgs(args)
       if (remaining.length > 0) {
         if (possibleErrors.length > 0) throw possibleErrors[0]
-        throw new TooManyArgumentsError(`Too many argument!`)
+        throw new TooManyArguments(`Too many argument!`)
       }
       return result
     }
@@ -1095,7 +1095,7 @@ registerPlugin({
       //catch errors, parsing errors / permission errors or anything else
       } catch(e) {
         //Handle Command not found Exceptions for CommandGroups
-        if (e instanceof SubCommandNotFoundError) {
+        if (e instanceof SubCommandNotFound) {
           getReplyOutput(ev)(e.message)
           getReplyOutput(ev)(`For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
         } else {

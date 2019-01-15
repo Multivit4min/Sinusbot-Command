@@ -18,7 +18,9 @@ toc:
   - name: Classes
     description: |
       Definition for Classes
+  - Abstract
   - Command
+  - CommandGroup
   - name: Argument Types
     description: |
       Available Argument Types which can be added to a Command
@@ -32,8 +34,19 @@ toc:
     description: |
       These Functions gets exported as object when imported through `require("Command.js")`
   - createCommand
+  - createCommandGroup
   - createArgument
   - createGroupedArgument
   - getCommandPrefix
   - getCommandByName
   - getAvailableCommands
+  - name: Internal Errors
+    description: |
+      Internal Error Types
+  - CommandDisabledError
+  - TooManyArguments
+  - SubCommandNotFound
+  - CommandNotFound
+  - ParseError
+  - PermissionError
+  - name: Internal Functions
