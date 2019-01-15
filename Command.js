@@ -63,20 +63,27 @@ registerPlugin({
   /**
    * Class representing a TooManyArguments
    * @extends Error
+   * @param {string} err the error which will be handed over to the Error instance
+   * @param {ParseError} parseError a possible ParseError
    */
   class TooManyArguments extends Error {
-    constructor(err) {
+    constructor(err, parseError) {
       super(err)
+      this.parseError = parseError
     }
   }
 
   /**
    * Class representing a ParseError
+   * gets thrown when an Argument has not been parsed successful
    * @extends Error
+   * @param {string} err the error which will be handed over to the Error instance
+   * @param {Argument} argument the argument which failed 
    */
   class ParseError extends Error {
-    constructor(err) {
+    constructor(err, argument) {
       super(err)
+      this.argument = argument
     }
   }
 
@@ -241,7 +248,7 @@ registerPlugin({
         resolved[arg.getName()] = result[0]
         return (args = result[1].trim(), true)
       })
-      if (!valid) throw new ParseError(`No valid match found`)
+      if (!valid) throw new ParseError(`No valid match found`, this)
       return [resolved, args]
     }
 
@@ -315,13 +322,13 @@ registerPlugin({
      * @returns {Error|boolean} returns true when validation was successful otherwise returns an Error
      */
     _validate(str, ...rest) {
-      if (typeof str !== "string") throw new ParseError(`Given input is not typeof string (typeof ${typeof str})`)
+      if (typeof str !== "string") throw new ParseError(`Given input is not typeof string (typeof ${typeof str})`, this)
       if (this._uppercase) str = str.toUpperCase()
       if (this._lowercase) str = str.toLowerCase()
-      if (this._minlen !== null && this._minlen > str.length) throw new ParseError(`String length not greater or equal! Expected at least ${this._minlen}, but got ${str.length}`)
-      if (this._maxlen !== null && this._maxlen < str.length) throw new ParseError(`String length not less or equal! Maximum ${this._maxlen} chars allowed, but got ${str.length}`)
-      if (this._whitelist !== null && this._whitelist.indexOf(str) === -1) throw new ParseError(`Invalid Input for ${str}. Allowed words: ${this._whitelist.join(", ")}`)
-      if (this._regex !== null && !this._regex.test(str)) throw new ParseError(`Regex missmatch, the input '${str}' did not match the expression ${this._regex.toString()}`)
+      if (this._minlen !== null && this._minlen > str.length) throw new ParseError(`String length not greater or equal! Expected at least ${this._minlen}, but got ${str.length}`, this)
+      if (this._maxlen !== null && this._maxlen < str.length) throw new ParseError(`String length not less or equal! Maximum ${this._maxlen} chars allowed, but got ${str.length}`, this)
+      if (this._whitelist !== null && this._whitelist.indexOf(str) === -1) throw new ParseError(`Invalid Input for ${str}. Allowed words: ${this._whitelist.join(", ")}`, this)
+      if (this._regex !== null && !this._regex.test(str)) throw new ParseError(`Regex missmatch, the input '${str}' did not match the expression ${this._regex.toString()}`, this)
       return [str, ...rest]
     }
 
@@ -413,7 +420,7 @@ registerPlugin({
      */
     validate(args) {
       var match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[\/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[\/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
-      if (!match) throw new ParseError("Client not found!")
+      if (!match) throw new ParseError("Client not found!", this)
       return [match.groups.url_uid||match.groups.uid, match.groups.rest]
     }
   }
@@ -473,14 +480,14 @@ registerPlugin({
     validate(args) {
       var argArray = args.split(" ")
       var num = argArray.shift()
-      if (isNaN(num)) throw new ParseError(`Searched for number but found "${num}"`)
+      if (isNaN(num)) throw new ParseError(`Searched for number but found "${num}"`, this)
       num = parseFloat(num)
-      if (isNaN(num)) throw new ParseError(`Given input is not typeof Number (typeof ${typeof num})`)
-      if (this._min !== null && this._min > num) throw new ParseError(`Number not greater or equal! Expected at least ${this._min}, but got ${num}`)
-      if (this._max !== null && this._max < num) throw new ParseError(`Number not less or equal! Expected at least ${this._max}, but got ${num}`)
-      if (this._integer && num % 1 !== 0) throw new ParseError(`Given Number is not an Integer! (${num})`)
-      if (this._forcePositive && num <= 0) throw new ParseError(`Given Number is not Positive! (${num})`)
-      if (this._forceNegative && num >= 0) throw new ParseError(`Given Number is not Negative! (${num})`)
+      if (isNaN(num)) throw new ParseError(`Given input is not typeof Number (typeof ${typeof num})`, this)
+      if (this._min !== null && this._min > num) throw new ParseError(`Number not greater or equal! Expected at least ${this._min}, but got ${num}`, this)
+      if (this._max !== null && this._max < num) throw new ParseError(`Number not less or equal! Expected at least ${this._max}, but got ${num}`, this)
+      if (this._integer && num % 1 !== 0) throw new ParseError(`Given Number is not an Integer! (${num})`, this)
+      if (this._forcePositive && num <= 0) throw new ParseError(`Given Number is not Positive! (${num})`, this)
+      if (this._forceNegative && num >= 0) throw new ParseError(`Given Number is not Negative! (${num})`, this)
       return [num, argArray.join(" ")]
     }
 
@@ -667,7 +674,6 @@ registerPlugin({
      * @return
      */
     getAvailableSubCommands(client = false, cmd = false) {
-      console.log("available sub", cmd, typeof cmd)
       var cmds = this._cmds
         .filter(c => c.getCommand() === cmd || cmd === false)
         .filter(c => c.isEnabled())
@@ -818,10 +824,7 @@ registerPlugin({
      */
     validate(args) {
       var [result, possibleErrors, remaining] = this.validateArgs(args)
-      if (remaining.length > 0) {
-        if (possibleErrors.length > 0) throw possibleErrors[0]
-        throw new TooManyArguments(`Too many argument!`)
-      }
+      if (remaining.length > 0) throw new TooManyArguments(`Too many argument!`, possibleErrors.length > 0 ? possibleErrors[0] : null)
       return result
     }
 
@@ -1023,10 +1026,6 @@ registerPlugin({
     .manual(`you can search/filter for a specific commands by adding a keyword`)
     .addArgument(createArgument("string").setName("filter").min(1).optional())
     .exec((client, {filter}, reply) => {
-      console.log(`Filter ${typeof filter} ${filter}`)
-      console.log(`length ${
-        getAvailableCommands(client).filter(cmd => cmd.hasHelp()).length
-      }`)
       var cmds = getAvailableCommands(client)
         .filter(cmd => cmd.hasHelp())
         .filter(cmd => {
@@ -1087,22 +1086,41 @@ registerPlugin({
     //handle every available command, should actually be only one command
     cmds.forEach(async cmd => {
       try {
-        //run the cmd, this will
-        // - check for permissions
-        // - parse the arguments
-        // - dispatch the command
-        await cmd.run(args, ev)
-      //catch errors, parsing errors / permission errors or anything else
-      } catch(e) {
-        //Handle Command not found Exceptions for CommandGroups
-        if (e instanceof SubCommandNotFound) {
-          getReplyOutput(ev)(e.message)
-          getReplyOutput(ev)(`For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
-        } else {
-          getReplyOutput(ev)("An unhandled exception occured, check the sinusbot logs for more informations")
-          console.log(`#### UNHANDLED EXCEPTION (${e.constructor.name}) ####`)
-          console.log(e)
+        var start = Date.now()
+        try {
+          //run the cmd, this will
+          // - check for permissions
+          // - parse the arguments
+          // - dispatch the command
+          await cmd.run(args, ev)
+          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" finnished successfully after ${Date.now()-start}ms`)
+        //catch errors, parsing errors / permission errors or anything else
+        } catch(e) {
+          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" failed after ${Date.now()-start}ms`)
+          var reply = getReplyOutput(ev)
+          //Handle Command not found Exceptions for CommandGroups
+          if (e instanceof SubCommandNotFound) {
+            reply(e.message)
+            reply(`For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
+          } else if (e instanceof ParseError) {
+            reply(`Argument parsed with an error ${format.bold(e.argument.getManual())}`)
+            reply(`Returned with ${format.bold(e.message)}`)
+            reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
+          } else if (e instanceof TooManyArguments) {
+            reply(`Too many Arguments received for this Command!`)
+            if (e.parseError) {
+              reply(`Argument parsed with an error ${format.bold(e.parseError.argument.getManual())}`)
+              reply(`Returned with ${format.bold(e.parseError.message)}`)
+            }
+            reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
+          } else {
+            reply("An unhandled exception occured, check the sinusbot logs for more informations")
+            console.log(`#### UNHANDLED EXCEPTION (${e.constructor.name}) ####`)
+            console.log(e)
+          }
         }
+      } catch (e) {
+        console.log(e)
       }
     })
   })
