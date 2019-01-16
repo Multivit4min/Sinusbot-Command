@@ -23,13 +23,13 @@ registerPlugin({
     options: ["ERROR", "WARNING", "INFO", "VERBOSE"],
     default: "2"
   }]
-}, (_, config) => {
+}, (_, { DEBUGLEVEL, NOT_FOUND_MESSAGE }) => {
 
   const engine = require("engine")
   const event = require("event")
   const backend = require("backend")
   const format = require("format")
-  var commands = []
+  const commands = []
 
   function DEBUG(level) {
     return mode => (...args) => {
@@ -41,7 +41,7 @@ registerPlugin({
   DEBUG.INFO = 2
   DEBUG.WARNING = 1
   DEBUG.ERROR = 0
-  const debug = DEBUG(parseInt(config.DEBUGLEVEL, 10))
+  const debug = DEBUG(parseInt(DEBUGLEVEL, 10))
 
   const GROUP_ARGS = {
     OR: "or",
@@ -164,7 +164,7 @@ registerPlugin({
      */
     getManual() {
       if (this.isOptional()) {
-        return `[${this._display}${this.hasDefault() ? `=${this.getDefault()}`: ""}]`
+        return `[${this._display}${this.hasDefault() ? `=${this.getDefault()}` : ""}]`
       } else {
         return `<${this._display}>`
       }
@@ -195,13 +195,13 @@ registerPlugin({
       return this
     }
 
-     /**
-      * Retrieves the name of the Argument
-      * @returns {string} retrieves the arguments name
-      */
-     getName() {
-       return this._name
-     }
+    /**
+     * Retrieves the name of the Argument
+     * @returns {string} retrieves the arguments name
+     */
+    getName() {
+      return this._name
+    }
   }
 
 
@@ -239,10 +239,10 @@ registerPlugin({
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     _validateOr(args) {
-      var errors = []
-      var resolved = {}
-      var valid = this._args.some(arg => {
-        var result = arg.validate(args)
+      const errors = []
+      const resolved = {}
+      const valid = this._args.some(arg => {
+        const result = arg.validate(args)
         if (result instanceof Error)
           return (errors.push(result), false)
         resolved[arg.getName()] = result[0]
@@ -259,10 +259,10 @@ registerPlugin({
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     _validateAnd(args) {
-      var resolved = {}
-      var error = null
+      const resolved = {}
+      let error = null
       this._args.some(arg => {
-        var result = arg.validate(args)
+        const result = arg.validate(args)
         if (result instanceof Error) return (error = result, true)
         resolved[arg.getName()] = result[0]
         return (args = result[1].trim(), false)
@@ -290,7 +290,7 @@ registerPlugin({
    * @extends Argument
    */
   class StringArgument extends Argument {
-    constructor(ignoreWhitespace = false) {
+    constructor() {
       super()
       super._parent = this
       this._regex = null
@@ -308,8 +308,8 @@ registerPlugin({
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
-      var argArray = args.split(" ")
-      var str = argArray.shift()
+      const argArray = args.split(" ")
+      const str = argArray.shift()
       return this._validate(str, argArray.join(" "))
     }
 
@@ -327,7 +327,7 @@ registerPlugin({
       if (this._lowercase) str = str.toLowerCase()
       if (this._minlen !== null && this._minlen > str.length) throw new ParseError(`String length not greater or equal! Expected at least ${this._minlen}, but got ${str.length}`, this)
       if (this._maxlen !== null && this._maxlen < str.length) throw new ParseError(`String length not less or equal! Maximum ${this._maxlen} chars allowed, but got ${str.length}`, this)
-      if (this._whitelist !== null && this._whitelist.indexOf(str) === -1) throw new ParseError(`Invalid Input for ${str}. Allowed words: ${this._whitelist.join(", ")}`, this)
+      if (this._whitelist !== null && !this._whitelist.includes(str)) throw new ParseError(`Invalid Input for ${str}. Allowed words: ${this._whitelist.join(", ")}`, this)
       if (this._regex !== null && !this._regex.test(str)) throw new ParseError(`Regex missmatch, the input '${str}' did not match the expression ${this._regex.toString()}`, this)
       return [str, ...rest]
     }
@@ -419,9 +419,9 @@ registerPlugin({
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
-      var match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[\/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[\/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
+      const match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
       if (!match) throw new ParseError("Client not found!", this)
-      return [match.groups.url_uid||match.groups.uid, match.groups.rest]
+      return [match.groups.url_uid || match.groups.uid, match.groups.rest]
     }
   }
 
@@ -478,8 +478,8 @@ registerPlugin({
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
-      var argArray = args.split(" ")
-      var num = argArray.shift()
+      const argArray = args.split(" ")
+      let num = argArray.shift()
       if (isNaN(num)) throw new ParseError(`Searched for number but found "${num}"`, this)
       num = parseFloat(num)
       if (isNaN(num)) throw new ParseError(`Given input is not typeof Number (typeof ${typeof num})`, this)
@@ -515,30 +515,30 @@ registerPlugin({
      * Specifies that the Number must be an integer (no floating point)
      * @returns {NumberArgument} returns this to chain Functions
      */
-     integer() {
-       this._integer = true
-       return this
-     }
+    integer() {
+      this._integer = true
+      return this
+    }
 
-     /**
-      * Specifies that the Number must be a positive Number
-      * @returns {NumberArgument} returns this to chain Functions
-      */
-     positive() {
-       this._forcePositive = true
-       this._forceNegative = false
-       return this
-     }
+    /**
+     * Specifies that the Number must be a positive Number
+     * @returns {NumberArgument} returns this to chain Functions
+     */
+    positive() {
+      this._forcePositive = true
+      this._forceNegative = false
+      return this
+    }
 
-     /**
-      * Specifies that the Number must be a negative Number
-      * @returns {NumberArgument} returns this to chain Functions
-      */
-     negative() {
-       this._forcePositive = false
-       this._forceNegative = true
-       return this
-     }
+    /**
+     * Specifies that the Number must be a negative Number
+     * @returns {NumberArgument} returns this to chain Functions
+     */
+    negative() {
+      this._forcePositive = false
+      this._forceNegative = true
+      return this
+    }
 
   }
 
@@ -649,7 +649,7 @@ registerPlugin({
      */
     addCommand(name) {
       validateCommandName(name)
-      var cmd = new Command(name)
+      const cmd = new Command(name)
       this._cmds.push(cmd)
       return cmd
     }
@@ -662,11 +662,11 @@ registerPlugin({
      */
     findSubCommandByName(name) {
       if (name.length === 0) throw new SubCommandNotFound(`No subcommand specified for Command ${this.getCommand()}`)
-      var cmd = this._cmds.find(cmd => cmd.getCommand() === name)
+      const cmd = this._cmds.find(c => c.getCommand() === name)
       if (!cmd) throw new SubCommandNotFound(`Sub command with name "${name}" has not been found for Command ${this.getCommand()}!`)
       return cmd
     }
-    
+
     /**
      * retrievel all available subcommands
      * @param {Client} [client] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
@@ -674,7 +674,7 @@ registerPlugin({
      * @return
      */
     getAvailableSubCommands(client = false, cmd = false) {
-      var cmds = this._cmds
+      const cmds = this._cmds
         .filter(c => c.getCommand() === cmd || cmd === false)
         .filter(c => c.isEnabled())
       if (!client) return cmds
@@ -700,7 +700,7 @@ registerPlugin({
     run(args, ev) {
       if (!super.isEnabled()) throw new CommandDisabledError("Command not enabled!")
       if (!this.isAllowed(ev.client)) throw new PermissionError("Missing Permissions")
-      var [sub, ...rest] = args.split(" ")
+      const [sub, ...rest] = args.split(" ")
       return this.findSubCommandByName(sub).run(rest.join(" "), ev)
     }
   }
@@ -823,7 +823,7 @@ registerPlugin({
      * @returns {object} returns the resolved arguments
      */
     validate(args) {
-      var [result, possibleErrors, remaining] = this.validateArgs(args)
+      const [result, possibleErrors, remaining] = this.validateArgs(args)
       if (remaining.length > 0) throw new TooManyArguments(`Too many argument!`, possibleErrors.length > 0 ? possibleErrors[0] : null)
       return result
     }
@@ -835,11 +835,11 @@ registerPlugin({
      */
     validateArgs(args) {
       args = args.trim()
-      var resolved = {}
-      var possibleErrors = []
+      const resolved = {}
+      const possibleErrors = []
       this.getArguments().forEach(arg => {
         try {
-          var [val, rest] = arg.validate(args)
+          const [val, rest] = arg.validate(args)
           resolved[arg.getName()] = val
           args = rest.trim()
         } catch (e) {
@@ -903,7 +903,7 @@ registerPlugin({
     if (typeof name !== "string") throw new Error("Expected a string as command name!")
     if (name.length === 0) throw new Error(`Command should have a minimum length of ${allowSingleChar ? "1" : "2"}!`)
     if (name.length === 1 && !allowSingleChar) throw new Error("Command should have a minimum length of 2!")
-    if (!/^[a-z0-9_-]+$/i.test(name)) throw new Error("the command should match the following pattern '/^[a-z0-9_-]+$/i'")
+    if (!(/^[a-z0-9_-]+$/i).test(name)) throw new Error("the command should match the following pattern '/^[a-z0-9_-]+$/i'")
     return true
   }
 
@@ -960,10 +960,10 @@ registerPlugin({
    * @returns {GroupArgument} returns the created Group Argument
    */
   function createGroupedArgument(type) {
-    if (Object.values(GROUP_ARGS).indexOf(type) === -1) throw new Error(`Unexpected GroupArgument type, expected one of [${Object.values(GROUP_ARGS).join(", ")}] but got ${type}!`)
+    if (!Object.values(GROUP_ARGS).includes(type)) throw new Error(`Unexpected GroupArgument type, expected one of [${Object.values(GROUP_ARGS).join(", ")}] but got ${type}!`)
     return new GroupArgument(type)
   }
- 
+
   /**
    * Creates a new Argument Instance
    * @name getCommandByName
@@ -980,7 +980,7 @@ registerPlugin({
    * @returns {string} returns the command prefix
    */
   function getCommandPrefix() {
-    var prefix = engine.getCommandPrefix()
+    const prefix = engine.getCommandPrefix()
     if (typeof prefix !== "string" || prefix.length === 0) return "!"
     return prefix
   }
@@ -997,8 +997,8 @@ registerPlugin({
     return commands
       .filter(c => c.getCommand() === cmd || cmd === false)
       .filter(c => c.isEnabled())
-      if (!client) return cmds
-      return cmds.filter(c => c.isAllowed(client))
+    if (!client) return cmds
+    return cmds.filter(c => c.isAllowed(client))
   }
 
   /**
@@ -1010,12 +1010,12 @@ registerPlugin({
    * @param {Channel} ev.channel the channel from where the command has been received
    * @returns {function} returns a function where the chat message gets redirected to
    */
-  function getReplyOutput(ev) {
-    switch (ev.mode) {
-      case 1: return ev.client.chat.bind(ev.client)
-      case 2: return ev.channel.chat.bind(ev.channel)
+  function getReplyOutput({ mode, client, channel }) {
+    switch (mode) {
+      case 1: return client.chat.bind(client)
+      case 2: return channel.chat.bind(channel)
       case 3: return backend.chat.bind(backend)
-      default: return msg => debug(DEBUG.WARNING)(`WARN no reply channel set for mode ${ev.mode}, message "${msg}" not sent!`)
+      default: return msg => debug(DEBUG.WARNING)(`WARN no reply channel set for mode ${mode}, message "${msg}" not sent!`)
     }
   }
 
@@ -1025,14 +1025,12 @@ registerPlugin({
     .manual(`Displays a list of useable commands`)
     .manual(`you can search/filter for a specific commands by adding a keyword`)
     .addArgument(createArgument("string").setName("filter").min(1).optional())
-    .exec((client, {filter}, reply) => {
-      var cmds = getAvailableCommands(client)
+    .exec((client, { filter }, reply) => {
+      const cmds = getAvailableCommands(client)
         .filter(cmd => cmd.hasHelp())
-        .filter(cmd => {
-          return !filter ||
-            cmd.getCommand().match(new RegExp(filter, "i")) ||
-            cmd.getHelp().match(new RegExp(filter, "i"))
-          })
+        .filter(cmd => !filter ||
+          cmd.getCommand().match(new RegExp(filter, "i")) ||
+          cmd.getHelp().match(new RegExp(filter, "i")))
       reply(`${format.bold(cmds.length)} Commands found:`)
       cmds.forEach(cmd => reply(`${format.bold(`${getCommandPrefix()}${cmd.getCommand()}`)} - ${cmd.getHelp()}`))
     })
@@ -1043,13 +1041,13 @@ registerPlugin({
     .manual(`Displays detailed usage help for a specific command`)
     .addArgument(createArgument("string").setName("command").min(1))
     .addArgument(createArgument("string").setName("subcommand").min(1).optional(false))
-    .exec((client, {command, subcommand}, reply) => {
-      var getManual = cmd => {
+    .exec((client, { command, subcommand }, reply) => {
+      const getManual = cmd => {
         if (cmd.hasManual()) return cmd.getManual()
         if (cmd.hasHelp()) return cmd.getHelp()
         return "No manual available"
       }
-      var cmds = getAvailableCommands(client, command)
+      const cmds = getAvailableCommands(client, command)
       if (cmds.length === 0) return reply(`No command with name ${format.bold(command)} found! Did you misstype the command?`)
       cmds.forEach(cmd => {
         if (cmd instanceof CommandGroup) {
@@ -1069,35 +1067,35 @@ registerPlugin({
     //do not do anything when the bot sends a message
     if (ev.client.isSelf()) return
     //get the basic command with arguments and command splitted
-    var match = ev.text.match(new RegExp(`^${getCommandPrefix().split("").map(char => char.match(/[0-9\w]/) ? char : "\\"+char).join("")}(?<command>\\w*)[ \r\n]*(?<args>.*) *$`, "si"))
+    const match = ev.text.match(new RegExp(`^${getCommandPrefix().split("").map(char => char.match(/[0-9\w]/) ? char : `\\${char}`).join("")}(?<command>\\w*)[ \r\n]*(?<args>.*) *$`, "si"))
     //return if no valid command has been found
     if (ev.text[0] !== getCommandPrefix() && !match) return
     const { command, args } = match.groups
     //check if command exists
-    var cmds = commands
+    const cmds = commands
       .filter(cmd => cmd.getCommand() === command)
       .filter(cmd => cmd.isEnabled())
     if (cmds.length === 0) {
       //depending on the config setting return without error
-      if (config.NOT_FOUND_MESSAGE !== "0") return
+      if (NOT_FOUND_MESSAGE !== "0") return
       //send the not found message
       return getReplyOutput(ev)(`There is no enabled command named "${format.bold(`${getCommandPrefix()}${command}`)}", check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
     }
     //handle every available command, should actually be only one command
     cmds.forEach(async cmd => {
       try {
-        var start = Date.now()
+        const start = Date.now()
         try {
           //run the cmd, this will
           // - check for permissions
           // - parse the arguments
           // - dispatch the command
           await cmd.run(args, ev)
-          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" finnished successfully after ${Date.now()-start}ms`)
-        //catch errors, parsing errors / permission errors or anything else
-        } catch(e) {
-          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" failed after ${Date.now()-start}ms`)
-          var reply = getReplyOutput(ev)
+          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" finnished successfully after ${Date.now() - start}ms`)
+          //catch errors, parsing errors / permission errors or anything else
+        } catch (e) {
+          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" failed after ${Date.now() - start}ms`)
+          const reply = getReplyOutput(ev)
           //Handle Command not found Exceptions for CommandGroups
           if (e instanceof SubCommandNotFound) {
             reply(e.message)

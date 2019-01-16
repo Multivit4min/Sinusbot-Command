@@ -1,6 +1,9 @@
 language: node_js
 node_js:
   - "lts/*"
+test:
+  - npm install -g eslint
+  - eslint Command.js
 script:
   - npm install -g documentation
   - documentation build Command.js --project-name "Command.js" -f html -o docs -c documentation.yml
