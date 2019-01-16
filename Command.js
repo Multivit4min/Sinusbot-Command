@@ -29,7 +29,6 @@ registerPlugin({
   const event = require("event")
   const backend = require("backend")
   const format = require("format")
-  const commands = []
 
   function DEBUG(level) {
     return mode => (...args) => {
@@ -48,7 +47,7 @@ registerPlugin({
     AND: "and"
   }
 
-  debug(DEBUG.INFO)(`command prefix is "${getCommandPrefix()}"`)
+  debug(DEBUG.VERBOSE)(`command prefix is "${getCommandPrefix()}"`)
 
   /**
    * Class representing a CommandDisabledError
@@ -551,18 +550,44 @@ registerPlugin({
     }
 
     /**
+     * Checks if the command uses a valid command name
+     * @static
+     * @param {string} name the name which should be checked
+     * @param {boolean} allowSingleChar wether it should allow single char commands as name
+     * @returns {boolean} returns true when the command has a valid name
+     */
+    static validateCommandName(name, allowSingleChar = true) {
+      if (typeof name !== "string") throw new Error("Expected a string as command name!")
+      if (name.length === 0) throw new Error(`Command should have a minimum length of ${allowSingleChar ? "1" : "2"}!`)
+      if (name.length === 1 && !allowSingleChar) throw new Error("Command should have a minimum length of 2!")
+      if (!(/^[a-z0-9_-]+$/i).test(name)) throw new Error("the command should match the following pattern '/^[a-z0-9_-]+$/i'")
+      return true
+    }
+
+    /**
+     * Searches for one or multiple enabled commands with its prefix
+     * @param {string} cmd the command with its prefix
+     * @returns {Commands[]} returns an array of found commands 
+     */
+    getAvailableCommandsWithPrefix(cmd) {
+      return this._commands
+        .filter(c => c.isEnabled())
+        .filter(c => `${c.getPrefix()}${c.getCommandName()}` === cmd)
+    }
+
+    /**
      * Checks if a possible 
      * @param {string} cmd the input string from a message
      * @returns {boolean} returns true when it is a command
      */
     isPossibleCommand(cmd) {
-      const [prefixedCommand] = cmd.split(" ")
-      return this._commands.some(c => `${c.getPrefix()}${c.getCommand()}` === prefixedCommand)
+      if (cmd.startsWith(getCommandPrefix())) return true
+      return this._commands.some(c => `${c.getPrefix()}${c.getCommandName()}` === cmd.split(" ")[0])
     }
 
     /**
      * Returns all possible prefixes
-     * @returns {string[]} a list of prefixes across commands
+     * @returns {string[]} a list of prefixes across all commands
      */
     getPrefixes() {
       return this._commands.reduce((acc, cmd) => {
@@ -574,11 +599,35 @@ registerPlugin({
     /**
      * Registers a new Command
      * @param {Command|CommandGroup} cmd 
-     * @returns {CommandCollector} returns this to chain functions
+     * @returns {Command|CommandGroup} returns the added Command
      */
     registerCommand(cmd) {
       this._commands.push(cmd)
-      return this
+      return cmd
+    }  
+    
+   /**
+    * gets all available commands
+    * @name getAvailableCommands
+    * @param {Client} [client=false] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
+    * @param {string|boolean} [cmd=false] - the command which should be searched for
+    * @returns {Command[]} returns an array of commands
+    */
+    getAvailableCommands(client = false, cmd = false) {
+      const cmds = this._commands
+        .filter(c => c.getCommandName() === cmd || cmd === false)
+        .filter(c => c.isEnabled())
+      if (!client) return cmds
+      return cmds.filter(c => c.isAllowed(client))
+    }
+
+    /**
+     * 
+     * @param {string} name the name which should be searched for
+     * @returns {Command|CommandGroup} returns the found Command or CommandGroup
+     */
+    getCommandByName(name) {
+      return this._commands.find(cmd => cmd.getCommandName() === name)
     }
   }
 
@@ -600,7 +649,7 @@ registerPlugin({
      * Retrieves the current command name
      * @returns {string} returns the command by its name
      */
-    getCommand() {
+    getCommandName() {
       return this._cmd
     }
 
@@ -659,7 +708,7 @@ registerPlugin({
      * @returns {Command} returns this to chain Functions
      */
     disable() {
-      debug(DEBUG.VERBOSE)(`Command "${this.getCommand()}" has been disabled`)
+      debug(DEBUG.VERBOSE)(`Command "${this.getCommandName()}" has been disabled`)
       this._enabled = false
       return this
     }
@@ -669,7 +718,7 @@ registerPlugin({
      * @returns {Command} returns this to chain Functions
      */
     enable() {
-      debug(DEBUG.VERBOSE)(`Command "${this.getCommand()}" has been enabled`)
+      debug(DEBUG.VERBOSE)(`Command "${this.getCommandName()}" has been enabled`)
       this._enabled = true
       return this
     }
@@ -702,7 +751,7 @@ registerPlugin({
      * @returns {Command} returns the new command
      */
     addCommand(name) {
-      validateCommandName(name)
+      CommandCollector.validateCommandName(name)
       const cmd = new Command(name)
       this._cmds.push(cmd)
       return cmd
@@ -715,9 +764,9 @@ registerPlugin({
      * @returns {Command} returns the Command instance if found
      */
     findSubCommandByName(name) {
-      if (name.length === 0) throw new SubCommandNotFound(`No subcommand specified for Command ${this.getCommand()}`)
-      const cmd = this._cmds.find(c => c.getCommand() === name)
-      if (!cmd) throw new SubCommandNotFound(`Sub command with name "${name}" has not been found for Command ${this.getCommand()}!`)
+      if (name.length === 0) throw new SubCommandNotFound(`No subcommand specified for Command ${this.getCommandName()}`)
+      const cmd = this._cmds.find(c => c.getCommandName() === name)
+      if (!cmd) throw new SubCommandNotFound(`Sub command with name "${name}" has not been found for Command ${this.getCommandName()}!`)
       return cmd
     }
 
@@ -729,7 +778,7 @@ registerPlugin({
      */
     getAvailableSubCommands(client = false, cmd = false) {
       const cmds = this._cmds
-        .filter(c => c.getCommand() === cmd || cmd === false)
+        .filter(c => c.getCommandName() === cmd || cmd === false)
         .filter(c => c.isEnabled())
       if (!client) return cmds
       return cmds.filter(c => c.isAllowed(client))
@@ -832,7 +881,7 @@ registerPlugin({
      * @returns {string} retrieves the complete usage of the command with its argument names
      */
     getUsage() {
-      return `${this.getCommand()} ${this.getArguments().map(arg => arg.getManual()).join(" ")}`
+      return `${this.getCommandName()} ${this.getArguments().map(arg => arg.getManual()).join(" ")}`
     }
 
     /**
@@ -947,23 +996,8 @@ registerPlugin({
   }
 
 
-  const commandCollector = new CommandCollector()
+  const collector = new CommandCollector()
 
-
-  /**
-   * Checks if the command uses a valid command name
-   * @private
-   * @param {string} name the name which should be checked
-   * @param {boolean} allowSingleChar wether it should allow single char commands as name
-   * @returns {boolean} returns true when the command has a valid name
-   */
-  function validateCommandName(name, allowSingleChar = true) {
-    if (typeof name !== "string") throw new Error("Expected a string as command name!")
-    if (name.length === 0) throw new Error(`Command should have a minimum length of ${allowSingleChar ? "1" : "2"}!`)
-    if (name.length === 1 && !allowSingleChar) throw new Error("Command should have a minimum length of 2!")
-    if (!(/^[a-z0-9_-]+$/i).test(name)) throw new Error("the command should match the following pattern '/^[a-z0-9_-]+$/i'")
-    return true
-  }
 
   /**
    * Creates a new Command Instance with the given Command Name
@@ -972,15 +1006,13 @@ registerPlugin({
    * @returns {Command} returns the created Command
    */
   function createCommand(cmd, OVERRIDES) {
-    validateCommandName(cmd, OVERRIDES === "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE")
+    CommandCollector.validateCommandName(cmd, OVERRIDES === "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE")
     debug(DEBUG.INFO)(`registering command '${cmd}'`)
-    if (getCommandByName(cmd)) {
+    if (collector.getCommandByName(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
       debug(DEBUG.WARNING)(`Command.js may work not as expected!`)
     }
-    const command = new Command(cmd)
-    commandCollector.registerCommand(command)
-    return command
+    return collector.registerCommand(new Command(cmd))
   }
 
   /**
@@ -990,15 +1022,13 @@ registerPlugin({
    * @returns {CommandGroup} returns the created CommandGroup instance
    */
   function createCommandGroup(cmd, OVERRIDES) {
-    validateCommandName(cmd, OVERRIDES === "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE")
-    debug(DEBUG.INFO)(`registering command '${cmd}'`)
-    if (getCommandByName(cmd)) {
+    CommandCollector.validateCommandName(cmd, OVERRIDES === "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE")
+    debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
+    if (collector.getCommandByName(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
       debug(DEBUG.WARNING)(`Command.js may work not as expected!`)
     }
-    const command = new CommandGroup(cmd)
-    commandCollector.registerCommand(command)
-    return command
+    return collector.registerCommand(new CommandGroup(cmd))
   }
 
   /**
@@ -1025,16 +1055,6 @@ registerPlugin({
   }
 
   /**
-   * Creates a new Argument Instance
-   * @name getCommandByName
-   * @param {string} name - the name of the command which should be retrieved
-   * @returns {Command|undefined} returns the command if found otherwise undefined
-   */
-  function getCommandByName(name) {
-    return commands.filter(cmd => cmd.getCommand() === name)[0]
-  }
-
-  /**
    * retrieves the current Command Prefix
    * @name getCommandPrefix
    * @returns {string} returns the command prefix
@@ -1043,22 +1063,6 @@ registerPlugin({
     const prefix = engine.getCommandPrefix()
     if (typeof prefix !== "string" || prefix.length === 0) return "!"
     return prefix
-  }
-
-
-  /**
-   * gets all available commands
-   * @name getAvailableCommands
-   * @param {Client} [client] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
-   * @param {string|boolean} [cmd=false] - the command which should be searched for
-   * @returns {Command[]} returns an array of commands
-   */
-  function getAvailableCommands(client, cmd = false) {
-    const cmds = commands
-      .filter(c => c.getCommand() === cmd || cmd === false)
-      .filter(c => c.isEnabled())
-    if (!client) return cmds
-    return cmds.filter(c => c.isAllowed(client))
   }
 
   /**
@@ -1086,13 +1090,13 @@ registerPlugin({
     .manual(`you can search/filter for a specific commands by adding a keyword`)
     .addArgument(createArgument("string").setName("filter").min(1).optional())
     .exec((client, { filter }, reply) => {
-      const cmds = getAvailableCommands(client)
+      const cmds = collector.getAvailableCommands(client)
         .filter(cmd => cmd.hasHelp())
         .filter(cmd => !filter ||
-          cmd.getCommand().match(new RegExp(filter, "i")) ||
+          cmd.getCommandName().match(new RegExp(filter, "i")) ||
           cmd.getHelp().match(new RegExp(filter, "i")))
       reply(`${format.bold(cmds.length)} Commands found:`)
-      cmds.forEach(cmd => reply(`${format.bold(`${getCommandPrefix()}${cmd.getCommand()}`)} - ${cmd.getHelp()}`))
+      cmds.forEach(cmd => reply(`${format.bold(`${cmd.getPrefix()}${cmd.getCommandName()}`)} - ${cmd.getHelp()}`))
     })
 
   //creates the man command
@@ -1107,17 +1111,15 @@ registerPlugin({
         if (cmd.hasHelp()) return cmd.getHelp()
         return "No manual available"
       }
-      const cmds = getAvailableCommands(client, command)
+      const cmds = collector.getAvailableCommands(client, command)
       if (cmds.length === 0) return reply(`No command with name ${format.bold(command)} found! Did you misstype the command?`)
       cmds.forEach(cmd => {
         if (cmd instanceof CommandGroup) {
-          console.log("CommandGroup")
           cmd.getAvailableSubCommands(client, subcommand).forEach(sub => {
-            console.log(cmd.getCommand(), sub.getCommand())
-            reply(`\n${format.bold("Usage:")} ${getCommandPrefix()}${cmd.getCommand()} ${sub.getUsage()}\n${getManual(sub)}`)
+            reply(`\n${format.bold("Usage:")} ${cmd.getPrefix()}${cmd.getCommandName()} ${sub.getUsage()}\n${getManual(sub)}`)
           })
         } else {
-          reply(`\nManual for command: ${format.bold(`${getCommandPrefix()}${cmd.getCommand()}`)}\n${format.bold("Usage:")} ${cmd.getUsage()}\n${getManual(cmd)}`)
+          reply(`\nManual for command: ${format.bold(`${cmd.getPrefix()}${cmd.getCommandName()}`)}\n${format.bold("Usage:")} ${cmd.getUsage()}\n${getManual(cmd)}`)
         }
       })
     })
@@ -1125,25 +1127,23 @@ registerPlugin({
 
   event.on("chat", ev => {
     //do not do anything when the bot sends a message
-    if (ev.client.isSelf()) return
+    if (ev.client.isSelf()) return debug(DEBUG.VERBOSE)("Will not handle messages from myself")
+    //check if it is a possible command
+    if (!collector.isPossibleCommand(ev.text)) return debug(DEBUG.VERBOSE)("No valid possible command found!")
     //get the basic command with arguments and command splitted
-    const match = ev.text.match(new RegExp(`^${getCommandPrefix().split("").map(char => char.match(/[0-9\w]/) ? char : `\\${char}`).join("")}(?<command>\\w*)[ \r\n]*(?<args>.*) *$`, "si"))
-    //
-    //return if no valid command has been found
-    if (ev.text[0] !== getCommandPrefix() && !match) return
+    const match = ev.text.match(/^(?<command>\S*)\s*(?<args>.*)\s*$/s)
+    //const match = ev.text.match(new RegExp(`^${getCommandPrefix().split("").map(char => char.match(/[0-9\w]/) ? char : `\\${char}`).join("")}(?<command>\\w*)[ \r\n]*(?<args>.*) *$`, "si"))
     const { command, args } = match.groups
     //check if command exists
-    const cmds = commands
-      .filter(cmd => cmd.getCommand() === command)
-      .filter(cmd => cmd.isEnabled())
-    if (cmds.length === 0) {
+    const commands = collector.getAvailableCommandsWithPrefix(command)
+    if (commands.length === 0) {
       //depending on the config setting return without error
       if (NOT_FOUND_MESSAGE !== "0") return
       //send the not found message
-      return getReplyOutput(ev)(`There is no enabled command named "${format.bold(`${getCommandPrefix()}${command}`)}", check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
+      return getReplyOutput(ev)(`There is no enabled command named "${format.bold(command)}", check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
     }
     //handle every available command, should actually be only one command
-    cmds.forEach(async cmd => {
+    commands.forEach(async cmd => {
       try {
         const start = Date.now()
         try {
@@ -1152,26 +1152,26 @@ registerPlugin({
           // - parse the arguments
           // - dispatch the command
           await cmd.run(args, ev)
-          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" finnished successfully after ${Date.now() - start}ms`)
+          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommandName()}" finnished successfully after ${Date.now() - start}ms`)
           //catch errors, parsing errors / permission errors or anything else
         } catch (e) {
-          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommand()}" failed after ${Date.now() - start}ms`)
+          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommandName()}" failed after ${Date.now() - start}ms`)
           const reply = getReplyOutput(ev)
           //Handle Command not found Exceptions for CommandGroups
           if (e instanceof SubCommandNotFound) {
             reply(e.message)
-            reply(`For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
+            reply(`For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
           } else if (e instanceof ParseError) {
             reply(`Argument parsed with an error ${format.bold(e.argument.getManual())}`)
             reply(`Returned with ${format.bold(e.message)}`)
-            reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
+            reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
           } else if (e instanceof TooManyArguments) {
             reply(`Too many Arguments received for this Command!`)
             if (e.parseError) {
               reply(`Argument parsed with an error ${format.bold(e.parseError.argument.getManual())}`)
               reply(`Returned with ${format.bold(e.parseError.message)}`)
             }
-            reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommand()}`)}`)
+            reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
           } else {
             reply("An unhandled exception occured, check the sinusbot logs for more informations")
             console.log(`#### UNHANDLED EXCEPTION (${e.constructor.name}) ####`)
@@ -1191,8 +1191,7 @@ registerPlugin({
     createArgument,
     createGroupedArgument,
     getCommandPrefix,
-    getAvailableCommands,
-    getCommandByName
+    collector
   })
 
 })
