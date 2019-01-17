@@ -996,7 +996,7 @@ registerPlugin({
      * @returns {boolean} returns true if the client is allowed to use one of the subcommands
      */
     isAllowed(client) {
-      if (!super.isAllowed()) return false
+      if (!super.isAllowed(client)) return false
       if (super._hasFunction("exec")) return true
       return this._cmds.some(cmd => cmd.isAllowed(client))
     }
