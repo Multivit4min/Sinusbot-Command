@@ -9,11 +9,11 @@ const allowed = [
 ]
 
 //creates the command "come"
-Command.createCommad("come")
+Command.createCommand("come")
   //sets a helptext, this gets displayed when using the command help
-  .help("sends the sinusbot to the channel where the client is in")
+  .help("moves the sinusbot to your channel")
   //sets a manual command
-  .manual("Usage: ${Command.getCommandPrefix()}come")
+  .manual("This will let Sinusbot join into your channel")
   //checks if the client is allowed to use this command
   //the function receives the requesting client as single parameter
   //the function should return true if the client is allowed to use this command

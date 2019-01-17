@@ -1,11 +1,14 @@
 This command will send one or more pongs to the clients
 
 ```javascript
-Command.createCommad("ping")
+Command.createCommand("ping")
   //sets a helptext, this gets displayed when using the command help
   .help("replies n times with Pong!")
   //sets a manual command this
-  .manual("Usage: ${Command.getCommandPrefix()}ping [amount]")
+  .manual("replies at least one time with ping")
+  //the second manual command will add it as new line
+  //looks better than having an ultra long string
+  .manual("depending on the number given it will replies with this amount of pongs")
   //creates a number argument with the name "amount" a number of 1 to 10 is allowed
   .addArgument(Command.createArgument("number").setName("amount").min(1).max(10).optional())
   //this function gets executed when a command has been parsed successfully
@@ -17,9 +20,8 @@ Command.createCommad("ping")
   .exec((client, args, reply, raw) => {
     //args.amount is undefined when the client sent only 
     var amount = args.amount ? args.amount : 1 
-    while (amount > 0) {
+    while (amount-- > 0) {
       reply("Pong!")
-      amount--
     }
   })
 ```

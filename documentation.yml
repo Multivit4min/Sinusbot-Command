@@ -23,6 +23,8 @@ toc:
         file: examples/ASYNC.md
       - name: parse args by yourself
         file: examples/ARGS.md
+      - name: CommandGroup example
+        file: examples/COMMANDGROUP.md
   - name: Classes
     description: |
       Definition for Classes

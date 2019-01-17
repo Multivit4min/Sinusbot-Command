@@ -4,7 +4,7 @@ This command will send the defined **message** via **chat** or **poke** to all c
 const backend = require("backend")
 
 //creates the command mass
-Command.createCommad("mass")
+Command.createCommand("mass")
   //sets a helptext, this gets displayed when using the command help
   .help("sends a mass chat or poke to all clients")
   //sets a manual command this

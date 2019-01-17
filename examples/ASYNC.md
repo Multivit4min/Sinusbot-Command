@@ -9,7 +9,7 @@ function wait(time) {
 }
 
 //creates the command "async"
-Command.createCommad("async")
+Command.createCommand("async")
   //sets a helptext, this gets displayed when using the command help
   .help("tests the aync execution")
   //this function gets executed when a command has been parsed successfully
