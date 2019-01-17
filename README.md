@@ -1,33 +1,30 @@
-__Command.js__
-===
+# Command.js
 
-`Command.js` is a library for the Sinusbot it allows to easily create Commands via Sinusbots Scripting engine.
-This library requires the v8 engine to function properly.
-In addition this library comes with 2 base commands `help` and `man`.
-Work on the stuff which matters and let the command handling do someone else!
+[![Build Status](https://travis-ci.com/Multivit4min/Sinusbot-Command.svg?branch=master)](https://travis-ci.com/Multivit4min/Sinusbot-Command)
 
+`Command.js` is a library for the SinusBot. It allows to easily create commands via the SinusBots scripting engine. This library requires the v8 engine (SinusBot version 1.0.0+) to function properly. In addition to this library comes with two base commands: `help` and `man`. 
 
-__Why should I use this library?__
+> Work on the stuff which matters and let the command handling do someone else!
 
-This library will standardize the command handling for Sinusbot it will help you especially with:
-  - argument creation and validation
-  - command documentation
-  - error handling
-  - permission handling
-  - command prefix handling
+## Why should I use this library?
 
+This library will standardize the command handling for SinusBot it will help you especially with:
 
-__What it can not do YET__
+  - Argument creation and validation
+  - Command documentation
+  - Error handling
+  - Permission handling
+  - Command prefix handling
 
-  - localization
+## What it can't do yet
+
+  - Localization
   
+## Documentation
 
-__Documentation__
+You can find the full documentation for this project on [Github Pages](https://multivit4min.github.io/Sinusbot-Command).
 
-You can find the full documentation for this project on [Github Pages](https://multivit4min.github.io/Sinusbot-Command)
-
-
-__Example__
+## Example
 
 ```javascript
 Command.createCommand("roll")
