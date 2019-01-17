@@ -26,9 +26,9 @@ toc:
   - name: Classes
     description: |
       Definition for Classes
-  - Abstract
   - Command
   - CommandGroup
+  - SubCommand
   - CommandCollector
   - name: Argument Types
     description: |

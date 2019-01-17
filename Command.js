@@ -582,7 +582,7 @@ registerPlugin({
      */
     isPossibleCommand(cmd) {
       if (cmd.startsWith(getCommandPrefix())) return true
-      return this._commands.some(c => `${c.getPrefix()}${c.getCommandName()}` === cmd.split(" ")[0])
+      return this._commands.some(c => c.getFullCommandName() === cmd.split(" ")[0])
     }
 
     /**
@@ -631,17 +631,55 @@ registerPlugin({
   }
 
 
-  /**
-   * Class representing an Abstract
-   * @name Abstract
+  /** 
+   * Class representing a Command
+   * @name Command
    * @param {string} cmd - The Command which should be used
    */
-  class Abstract {
+  class Command {
     constructor(cmd) {
       this._cmd = cmd
       this._enabled = true
       this._help = ""
       this._prefix = ""
+      this._args = []
+      this._manual = []
+      this._fncs = {}
+    }
+
+    /**
+     * Searches and returns the given function name
+     * @private
+     * @param {string} name - the function name which should be searched for
+     * @param {function} [fallback] - returns a fallback function if no function under the name has been found
+     * @returns {function} - the stored function
+     */
+    _getFunction(name, fallback = () => true) {
+      if (typeof this._fncs[name] === "function") return this._fncs[name]
+      return fallback
+    }
+
+    /**
+     * Stores a function with the given name, can be used to overwrite a function
+     * @private
+     * @param {string} name - the name for which the function should be stored
+     * @param {function} [fnc] - the function which should be stored
+     * @returns {Command} returns this to chain Functions
+     */
+    _storeFunction(name, fnc = () => true) {
+      if (typeof fnc !== "function") throw new Error("Parameter is no a function!")
+      this._fncs[name] = fnc
+      return this
+    }
+
+    /**
+     * Checks if a function with the specified name has been stored
+     * @private
+     * @param {string} name the function which should be searched for
+     * @returns {boolean} returns true when a function has been found
+     */
+    _hasFunction(name) {
+      return typeof this._fncs[name] === "function"
     }
 
     /**
@@ -650,6 +688,14 @@ registerPlugin({
      */
     getCommandName() {
       return this._cmd
+    }
+
+    /**
+     * Retrieves the current command name with its prefix
+     * @returns {string} returns the command and its prefix
+     */
+    getFullCommandName() {
+      return `${this.getPrefix()}${this._cmd}`
     }
 
     /**
@@ -730,128 +776,30 @@ registerPlugin({
       return this._enabled
     }
 
-  }
-
-  /**
-   * Class representing a CommandGroup
-   * @name CommandGroup
-   * @extends Abstract
-   * @param {string} cmd - The Command which should be used
-   */
-  class CommandGroup extends Abstract {
-    constructor(cmd) {
-      super(cmd)
-      this._cmds = []
-    }
-
     /**
-     * Adds a new sub Commmand to the group
-     * @param {string} name the sub command name which should be added
-     * @returns {Command} returns the new command
-     */
-    addCommand(name) {
-      CommandCollector.validateCommandName(name)
-      const cmd = new Command(name)
-      this._cmds.push(cmd)
-      return cmd
-    }
-
-    /**
-     * Retrieves a subcommand by its command name
-     * @throws {CommandNotFound}
-     * @param {string} name the name which should be searched for
-     * @returns {Command} returns the Command instance if found
-     */
-    findSubCommandByName(name) {
-      if (name.length === 0) throw new SubCommandNotFound(`No subcommand specified for Command ${this.getCommandName()}`)
-      const cmd = this._cmds.find(c => c.getCommandName() === name)
-      if (!cmd) throw new SubCommandNotFound(`Sub command with name "${name}" has not been found for Command ${this.getCommandName()}!`)
-      return cmd
-    }
-
-    /**
-     * retrievel all available subcommands
-     * @param {Client} [client] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
-     * @param {string|boolean} [cmd=false] - the command which should be searched for
-     * @return
-     */
-    getAvailableSubCommands(client = false, cmd = false) {
-      const cmds = this._cmds
-        .filter(c => c.getCommandName() === cmd || cmd === false)
-        .filter(c => c.isEnabled())
-      if (!client) return cmds
-      return cmds.filter(c => c.isAllowed(client))
-    }
-
-    /**
-     * Checks if a Client is allowed to use one of the sub commands
-     * @param {object} client - the sinusbot client object to check against
-     * @returns {boolean} returns true if the client is allowed to use one of the subcommands
-     */
-    isAllowed(client) {
-      return this._cmds.some(cmd => cmd.isAllowed(client))
-    }
-
-    /**
-     * Runs a command
-     * @throws {CommandDisabledError}
-     * @throws {PermissionError}
-     * @param {string} args the raw argument string
-     * @param {object} ev the raw event
-     */
-    run(args, ev) {
-      if (!super.isEnabled()) throw new CommandDisabledError("Command not enabled!")
-      if (!this.isAllowed(ev.client)) throw new PermissionError("Missing Permissions")
-      const [sub, ...rest] = args.split(" ")
-      return this.findSubCommandByName(sub).run(rest.join(" "), ev)
-    }
-  }
-
-
-  /** 
-   * Class representing a Command
-   * @name Command
-   * @extends Abstract
-   * @param {string} cmd - The Command which should be used
-   */
-  class Command extends Abstract {
-    constructor(cmd) {
-      super(cmd)
-      this._args = []
-      this._manual = []
-      this._fncs = {}
-    }
-
-    /**
-     * Searches and returns the given function name
-     * @private
-     * @param {string} name - the function name which should be searched for
-     * @param {function} [fallback] - returns a fallback function if no function under the name has been found
-     * @returns {function} - the stored function
-     */
-    _getFunction(name, fallback = () => true) {
-      if (typeof this._fncs[name] === "function") return this._fncs[name]
-      return fallback
-    }
-
-    /**
-     * Stores a function with the given name, can be used to overwrite a function
-     * @private
-     * @param {string} name - the name for which the function should be stored
-     * @param {function} [fnc] - the function which should be stored
+     * Sets the function which gets executed
+     * @param {function} fnc the function which should be executed when the command has been validated successful
      * @returns {Command} returns this to chain Functions
      */
-    _storeFunction(name, fnc = () => true) {
-      if (typeof fnc !== "function") throw new Error("Parameter is no a function!")
-      this._fncs[name] = fnc
+    exec(fnc) {
+      this._storeFunction("exec", fnc)
       return this
+    }
+
+    /**
+     * Dispatches a command
+     * @param {object} args the parsed arguments
+     * @param {object} ev the raw event
+     */
+    dispatchCommand(args, ev) {
+      return this._getFunction("exec")(ev.client, args, getReplyOutput(ev), ev)
     }
 
     /**
      * Sets a detailed manual command on how to use the command
      * the manual command can be called multiple times, for every call it will add it as a new line
      * use this to create a detailed documentation for your command
-     * @param {string} text - the manual text
+     * @param {string} text the manual text
      * @returns {Command} returns this to chain Functions
      */
     manual(text = "") {
@@ -880,7 +828,7 @@ registerPlugin({
      * @returns {string} retrieves the complete usage of the command with its argument names
      */
     getUsage() {
-      return `${this.getCommandName()} ${this.getArguments().map(arg => arg.getManual()).join(" ")}`
+      return `${this.getFullCommandName()} ${this.getArguments().map(arg => arg.getManual()).join(" ")}`
     }
 
     /**
@@ -913,7 +861,7 @@ registerPlugin({
      * @param {object} ev the raw event
      */
     run(args, ev) {
-      if (!super.isEnabled()) throw new CommandDisabledError("Command not enabled!")
+      if (!this.isEnabled()) throw new CommandDisabledError("Command not enabled!")
       if (!this.isAllowed(ev.client)) throw new PermissionError("Missing Permissions")
       this.dispatchCommand(this.validate(args), ev)
     }
@@ -957,7 +905,7 @@ registerPlugin({
 
     /**
      * Adds an argument to the command
-     * @param {Argument} - the argument to add
+     * @param {Argument} argument - the argument to add
      * @returns {Command} returns this to chain the command
      */
     addArgument(argument) {
@@ -967,31 +915,135 @@ registerPlugin({
 
     /**
      * Retrieves all available arguments
-     * @param {Argument} - the argument to add
+     * @param {Argument} argument - the argument to add
      * @returns {array} returns a list of defined Arguments
      */
     getArguments() {
       return this._args
     }
+  }
 
-    /**
-     * Sets the function which gets executed
-     * @param {function} - the function which should be executed when the command has been validated successful
-     * @returns {Command} returns this to chain Functions
-     */
-    exec(fnc) {
-      this._storeFunction("exec", fnc)
-      return this
+  /**
+   * Class representing a CommandGroup
+   * @name CommandGroup
+   * @extends Command
+   * @param {string} cmd - The Command which should be used
+   */
+  class CommandGroup extends Command {
+    constructor(cmd) {
+      super(cmd)
+      this._cmds = []
     }
 
     /**
-     * Dispatches a command
-     * @param {object} args - the parsed arguments
-     * @param {object} ev - the raw event
+     * Overwrite the method of Parent class
+     * @throws {Error} command not available
      */
-    dispatchCommand(args, ev) {
-      return this._getFunction("exec")(ev.client, args, getReplyOutput(ev), ev)
+    addArgument() {
+      throw new Error("This method is not available in the CommandGroup class!")
     }
+
+    /**
+     * Adds a new sub Commmand to the group
+     * @param {string} name the sub command name which should be added
+     * @returns {SubCommand} returns the new command
+     */
+    addCommand(name) {
+      CommandCollector.validateCommandName(name)
+      const cmd = new SubCommand(name)
+      this._cmds.push(cmd)
+      return cmd
+    }
+
+    /**
+     * Retrieves a subcommand by its command name
+     * @throws {CommandNotFound}
+     * @param {string} name the name which should be searched for
+     * @returns {SubCommand} returns the Command instance if found
+     */
+    findSubCommandByName(name) {
+      if (name.length === 0) throw new SubCommandNotFound(`No subcommand specified for Command ${this.getFullCommandName()}`)
+      const cmd = this._cmds.find(c => c.getCommandName() === name)
+      if (!cmd) throw new SubCommandNotFound(`Sub command with name "${name}" has not been found for Command ${this.getFullCommandName()}!`)
+      return cmd
+    }
+
+    /**
+     * retrievel all available subcommands
+     * @param {Client} [client] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
+     * @param {string|boolean} [cmd=false] - the command which should be searched for
+     * @return
+     */
+    getAvailableSubCommands(client = false, cmd = false) {
+      const cmds = this._cmds
+        .filter(c => c.getCommandName() === cmd || cmd === false)
+        .filter(c => c.isEnabled())
+      if (!client) return cmds
+      return cmds.filter(c => c.isAllowed(client))
+    }
+
+    /**
+     * Checks if a Client is allowed to use the GroupArgument and at least one of the sub commands
+     * @param {object} client - the sinusbot client object to check against
+     * @returns {boolean} returns true if the client is allowed to use one of the subcommands
+     */
+    isAllowed(client) {
+      if (!super.isAllowed()) return false
+      return this._cmds.some(cmd => cmd.isAllowed(client))
+    }
+
+    /**
+     * Runs a command
+     * @throws {CommandDisabledError}
+     * @throws {PermissionError}
+     * @param {string} args the raw argument string
+     * @param {object} ev the raw event
+     */
+    run(args, ev) {
+      if (!super.isEnabled()) throw new CommandDisabledError("Command not enabled!")
+      if (!this.isAllowed(ev.client)) throw new PermissionError("Missing Permissions")
+      const [sub, ...rest] = args.split(" ")
+      if (sub.length === 0 && super._hasFunction("exec")) return super.dispatchCommand({}, ev)
+      return this.findSubCommandByName(sub).run(rest.join(" "), ev)
+    }
+  }
+
+  
+  /**
+   * Class representing a SubCommand which will be used within CommandGroups
+   * @name SubCommand
+   * @extends Command
+   * @param {string} cmd - The Command Name which should be used
+   */
+  class SubCommand extends Command {
+    constructor(cmd) {
+      super(cmd)
+    }
+
+    /**
+     * Overwrite the method of Parent class
+     * @throws {Error} command not available
+     */
+    getPrefix() {
+      throw new Error("This method is not available in the SubCommand class!")
+    }
+
+    /**
+     * Overwrite the method of Parent class
+     * @throws {Error} command not available
+     */
+    setPrefix() {
+      throw new Error("This method is not available in the SubCommand class!")
+    }
+
+    /**
+     * Retrieves the usage of the command with its parameterized names
+     * @returns {string} retrieves the complete usage of the command with its argument names
+     */
+    getUsage() {
+      return `${super.getCommandName()} ${super.getArguments().map(arg => arg.getManual()).join(" ")}`
+    }
+
   }
 
   /**
@@ -1098,7 +1150,7 @@ registerPlugin({
           cmd.getCommandName().match(new RegExp(filter, "i")) ||
           cmd.getHelp().match(new RegExp(filter, "i")))
       reply(`${format.bold(cmds.length)} Commands found:`)
-      cmds.forEach(cmd => reply(`${format.bold(`${cmd.getPrefix()}${cmd.getCommandName()}`)} - ${cmd.getHelp()}`))
+      cmds.forEach(cmd => reply(`${format.bold(cmd.getFullCommandName())} - ${cmd.getHelp()}`))
     })
 
   //creates the man command
@@ -1117,11 +1169,18 @@ registerPlugin({
       if (cmds.length === 0) return reply(`No command with name ${format.bold(command)} found! Did you misstype the command?`)
       cmds.forEach(cmd => {
         if (cmd instanceof CommandGroup) {
-          cmd.getAvailableSubCommands(client, subcommand).forEach(sub => {
-            reply(`\n${format.bold("Usage:")} ${cmd.getPrefix()}${cmd.getCommandName()} ${sub.getUsage()}\n${getManual(sub)}`)
-          })
+          if (subcommand) {
+            cmd.getAvailableSubCommands(client, subcommand).forEach(sub => {
+              reply(`\n${format.bold("Usage:")} ${cmd.getFullCommandName()} ${sub.getUsage()}\n${getManual(sub)}`)
+            })
+          } else {
+            reply(`${format.bold(cmd.getFullCommandName())} - ${getManual(cmd)}`)
+            cmd.getAvailableSubCommands(client).forEach(sub => {
+              reply(`${format.bold(`${cmd.getFullCommandName()} ${sub.getUsage()}`)} - ${sub.getHelp()}`)
+            })
+          }
         } else {
-          reply(`\nManual for command: ${format.bold(`${cmd.getPrefix()}${cmd.getCommandName()}`)}\n${format.bold("Usage:")} ${cmd.getUsage()}\n${getManual(cmd)}`)
+          reply(`\nManual for command: ${format.bold(cmd.getFullCommandName())}\n${format.bold("Usage:")} ${cmd.getUsage()}\n${getManual(cmd)}`)
         }
       })
     })
@@ -1144,42 +1203,38 @@ registerPlugin({
     }
     //handle every available command, should actually be only one command
     commands.forEach(async cmd => {
+      const start = Date.now()
       try {
-        const start = Date.now()
-        try {
-          //run the cmd, this will
-          // - check for permissions
-          // - parse the arguments
-          // - dispatch the command
-          await cmd.run(args, ev)
-          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommandName()}" finnished successfully after ${Date.now() - start}ms`)
-          //catch errors, parsing errors / permission errors or anything else
-        } catch (e) {
-          debug(DEBUG.VERBOSE)(`Command "${cmd.getCommandName()}" failed after ${Date.now() - start}ms`)
-          const reply = getReplyOutput(ev)
-          //Handle Command not found Exceptions for CommandGroups
-          if (e instanceof SubCommandNotFound) {
-            reply(e.message)
-            reply(`For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
-          } else if (e instanceof ParseError) {
-            reply(`Argument parsed with an error ${format.bold(e.argument.getManual())}`)
-            reply(`Returned with ${format.bold(e.message)}`)
-            reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
-          } else if (e instanceof TooManyArguments) {
-            reply(`Too many Arguments received for this Command!`)
-            if (e.parseError) {
-              reply(`Argument parsed with an error ${format.bold(e.parseError.argument.getManual())}`)
-              reply(`Returned with ${format.bold(e.parseError.message)}`)
-            }
-            reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
-          } else {
-            reply("An unhandled exception occured, check the sinusbot logs for more informations")
-            console.log(`#### UNHANDLED EXCEPTION (${e.constructor.name}) ####`)
-            console.log(e)
-          }
-        }
+        //run the cmd, this will
+        // - check for permissions
+        // - parse the arguments
+        // - dispatch the command
+        await cmd.run(args, ev)
+        debug(DEBUG.VERBOSE)(`Command "${cmd.getFullCommandName()}" finnished successfully after ${Date.now() - start}ms`)
+      //catch errors, parsing errors / permission errors or anything else
       } catch (e) {
-        console.log(e)
+        debug(DEBUG.VERBOSE)(`Command "${cmd.getFullCommandName()}" failed after ${Date.now() - start}ms`)
+        const reply = getReplyOutput(ev)
+        //Handle Command not found Exceptions for CommandGroups
+        if (e instanceof SubCommandNotFound) {
+          reply(e.message)
+          reply(`For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
+        } else if (e instanceof ParseError) {
+          reply(`Argument parsed with an error ${format.bold(e.argument.getManual())}`)
+          reply(`Returned with ${format.bold(e.message)}`)
+          reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
+        } else if (e instanceof TooManyArguments) {
+          reply(`Too many Arguments received for this Command!`)
+          if (e.parseError) {
+            reply(`Argument parsed with an error ${format.bold(e.parseError.argument.getManual())}`)
+            reply(`Returned with ${format.bold(e.parseError.message)}`)
+          }
+          reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
+        } else {
+          reply("An unhandled exception occured, check the sinusbot logs for more informations")
+          debug(DEBUG.ERROR)(`#### UNHANDLED EXCEPTION (${e.constructor.name}) ####`)
+          debug(DEBUG.ERROR)(e.stack)
+        }
       }
     })
   })
