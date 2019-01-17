@@ -1070,7 +1070,7 @@ registerPlugin({
    */
   function createCommand(cmd, OVERRIDES) {
     CommandCollector.validateCommandName(cmd, OVERRIDES === "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE")
-    debug(DEBUG.INFO)(`registering command '${cmd}'`)
+    debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
     if (collector.getCommandByName(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
       debug(DEBUG.WARNING)(`Command.js may work not as expected!`)
@@ -1086,7 +1086,7 @@ registerPlugin({
    */
   function createCommandGroup(cmd, OVERRIDES) {
     CommandCollector.validateCommandName(cmd, OVERRIDES === "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE")
-    debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
+    debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
     if (collector.getCommandByName(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
       debug(DEBUG.WARNING)(`Command.js may work not as expected!`)
