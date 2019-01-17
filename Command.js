@@ -857,7 +857,12 @@ registerPlugin({
      * @returns {boolean} returns true if the client is allowed to use the command
      */
     isAllowed(client) {
-      return Boolean(this._getFunction("perms")(client))
+      try {
+        return Boolean(this._getFunction("perms")(client))
+      } catch(e) {
+        debug(DEBUG.ERROR)(e.stack)
+        return false
+      }
     }
 
     /**
