@@ -116,16 +116,19 @@ registerPlugin({
       this._optional = false
       this._name = "_"
       this._display = "_"
+      this._displayDefault = true
       this._default = undefined
     }
 
     /**
      * Sets an Argument as optional
      * if the argument has not been parsed successful it will use the first argument which has been given inside this method
-     * @param {any} [fallback] - the default value which should be set if this parameter has not been found
+     * @param {any} [fallback] the default value which should be set if this parameter has not been found
+     * @param {boolean} [displayDefault=true] wether it should display the default value when called with the #getUsage method
      * @returns {Argument} returns this to chain functions
      */
-    optional(fallback) {
+    optional(fallback, displayDefault = true) {
+      this._displayDefault = displayDefault
       this._default = fallback
       this._optional = true
       return this
@@ -153,7 +156,11 @@ registerPlugin({
      */
     getManual() {
       if (this.isOptional()) {
-        return `[${this._display}${this.hasDefault() ? `=${this.getDefault()}` : ""}]`
+        if (this._displayDefault && this.hasDefault()) {
+          return `[${this._display}=${this.getDefault()}]`
+        } else {
+          return `[${this._display}]`
+        }
       } else {
         return `<${this._display}>`
       }
@@ -984,11 +991,13 @@ registerPlugin({
 
     /**
      * Checks if a Client is allowed to use the GroupArgument and at least one of the sub commands
+     * When the GroupArgument Permission check returns false then every the client is not allowed to access any sub command
      * @param {object} client - the sinusbot client object to check against
      * @returns {boolean} returns true if the client is allowed to use one of the subcommands
      */
     isAllowed(client) {
       if (!super.isAllowed()) return false
+      if (super._hasFunction("exec")) return true
       return this._cmds.some(cmd => cmd.isAllowed(client))
     }
 
@@ -1157,8 +1166,10 @@ registerPlugin({
   createCommand("man")
     .help("Displays detailed help about a command if available")
     .manual(`Displays detailed usage help for a specific command`)
+    .manual(`Arguments with Arrow Brackets (eg. < > ) are mandatory arguments`)
+    .manual(`Arguments with Square Brackets (eg. [ ] ) are optional arguments`)
     .addArgument(createArgument("string").setName("command").min(1))
-    .addArgument(createArgument("string").setName("subcommand").min(1).optional(false))
+    .addArgument(createArgument("string").setName("subcommand").min(1).optional(false, false))
     .exec((client, { command, subcommand }, reply) => {
       const getManual = cmd => {
         if (cmd.hasManual()) return cmd.getManual()
