@@ -608,7 +608,6 @@ registerPlugin({
     
    /**
     * gets all available commands
-    * @name getAvailableCommands
     * @param {Client} [client=false] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
     * @param {string|boolean} [cmd=false] - the command which should be searched for
     * @returns {Command[]} returns an array of commands
@@ -995,7 +994,10 @@ registerPlugin({
     }
   }
 
-
+  /**
+   * @type {CommandCollector}
+   * @const
+   */
   const collector = new CommandCollector()
 
 
@@ -1130,17 +1132,15 @@ registerPlugin({
     if (ev.client.isSelf()) return debug(DEBUG.VERBOSE)("Will not handle messages from myself")
     //check if it is a possible command
     if (!collector.isPossibleCommand(ev.text)) return debug(DEBUG.VERBOSE)("No valid possible command found!")
-    //get the basic command with arguments and command splitted
-    const match = ev.text.match(/^(?<command>\S*)\s*(?<args>.*)\s*$/s)
-    //const match = ev.text.match(new RegExp(`^${getCommandPrefix().split("").map(char => char.match(/[0-9\w]/) ? char : `\\${char}`).join("")}(?<command>\\w*)[ \r\n]*(?<args>.*) *$`, "si"))
-    const { command, args } = match.groups
+    //get the basic command with arguments and command splitted 
+    const { command, args } = ev.text.match(new RegExp(`^(?<command>\\S*)\\s*(?<args>.*)\\s*$`, "s")).groups
     //check if command exists
     const commands = collector.getAvailableCommandsWithPrefix(command)
     if (commands.length === 0) {
       //depending on the config setting return without error
       if (NOT_FOUND_MESSAGE !== "0") return
       //send the not found message
-      return getReplyOutput(ev)(`There is no enabled command named "${format.bold(command)}", check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
+      return getReplyOutput(ev)(`There is no enabled command named ${format.bold(command)}, check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
     }
     //handle every available command, should actually be only one command
     commands.forEach(async cmd => {

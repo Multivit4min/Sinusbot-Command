@@ -1,4 +1,12 @@
 toc:
+  - name: Changelog
+    children:
+      - name: 1.1.0 - tba
+        file: changelog/1.1.0.md
+      - name: 1.0.1 - 14.1.2018
+        file: changelog/1.0.1.md
+      - name: 1.0.0 - 10.1.2018
+        file: changelog/1.0.0.md
   - name: Examples
     children:
       - name: How to load the library
@@ -21,6 +29,7 @@ toc:
   - Abstract
   - Command
   - CommandGroup
+  - CommandCollector
   - name: Argument Types
     description: |
       Available Argument Types which can be added to a Command
@@ -38,15 +47,14 @@ toc:
   - createArgument
   - createGroupedArgument
   - getCommandPrefix
-  - getCommandByName
-  - getAvailableCommands
-  - name: Internal Errors
+  - collector
+  - name: Internal
     description: |
-      Internal Error Types
-  - CommandDisabledError
-  - TooManyArguments
-  - SubCommandNotFound
-  - CommandNotFound
-  - ParseError
-  - PermissionError
-  - name: Internal Functions
+      Internal functions / types / classes
+    children:
+    - CommandDisabledError
+    - TooManyArguments
+    - SubCommandNotFound
+    - ParseError
+    - PermissionError
+    - getReplyOutput
