@@ -3,7 +3,7 @@ node_js:
   - "lts/*"
 script:
   - npm install -g eslint
-  - eslint Command.js
+  - eslint command.js
   - npm install -g documentation
   - documentation build command.js --project-name "command.js" -f html -o docs -c documentation.yml
 deploy:
