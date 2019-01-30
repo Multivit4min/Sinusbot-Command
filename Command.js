@@ -6,7 +6,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage Commands",
-  version: "1.1.1",
+  version: "1.1.2",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -1235,6 +1235,9 @@ registerPlugin({
         if (e instanceof SubCommandNotFound) {
           reply(e.message)
           reply(`For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
+        } else if (e instanceof PermissionError) {
+          reply(`You do not have permissions to use this command!`)
+          reply(`To get a list of available commands see ${format.bold(`${getCommandPrefix()}help`)}`)
         } else if (e instanceof ParseError) {
           reply(`Argument parsed with an error ${format.bold(e.argument.getManual())}`)
           reply(`Returned with ${format.bold(e.message)}`)
