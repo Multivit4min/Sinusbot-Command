@@ -3,9 +3,9 @@ node_js:
   - "lts/*"
 script:
   - npm install -g eslint
-  - eslint Command.js
+  - eslint command.js
   - npm install -g documentation
-  - documentation build Command.js --project-name "Command.js" -f html -o docs -c documentation.yml
+  - documentation build command.js --project-name "command.js" -f html -o docs -c documentation.yml
 deploy:
   provider: pages
   github-token: $GITHUB_TOKEN
