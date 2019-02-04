@@ -1,6 +1,4 @@
 ```javascript
-const backend = require("backend")
-
 //create a function which uses asynchronous functions
 function wait(time) {
   return new Promise(fulfill => {

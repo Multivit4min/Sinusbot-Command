@@ -47,16 +47,21 @@ Command.createCommand("roll")
     }
   })
   //adds an optional argument
-  .addArgument(Command.createArgument("number").setName("max").integer().min(1).optional())
+  //createArgument("number") creates a new argument which expects a number
+  //setName("max") sets the name of the argument to identify the argument later
+  //integer() tells the number argument to expect a whole number (not a floating point)
+  //min(1) tells the argument that the number should be greater or equal to 1
+  //optional(defaultVal) this flag tells it to be a value which does not necessarily be omitted
+  //  the defaultVal will be used when no argument has been omitted
+  .addArgument(Command.createArgument("number").setName("max").integer().min(1).optional(10))
   //this function gets called when validation was successful and all arguments have been parsed successful
   //client - is the user which executed the command
   //arg - is an object which holds all parsed arguments which name has been set via the arguments .setName() function
   //reply - depending on where the client has sent the message it will automatically reply to the client, channel or server chat
   //ev - the raw event which has been received
-  .exec((client, arg, reply, ev) => {
-    var max = arg.max || 10
+  .exec((client, { max }, reply, ev) => {
     reply(`Rolling with 0-${max}`)
-    var random = require("helpers").getRandom(max)
+    const random = require("helpers").getRandom(max)
     reply(`You rolled ${random}`)
   })
 ```

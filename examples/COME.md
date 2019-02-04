@@ -30,7 +30,7 @@ Command.createCommand("come")
   //3) reply, depending on where the client has sent the message it will automatically reply to the client, channel or server chat
   //4) the raw text of the message
   .exec((client, args, reply, raw) => {
-    var channel = client.getChannels()[0]
+    const channel = client.getChannels()[0]
     if (channel === undefined) return reply("Channel you are in has not been found!")
     backend.getBotClient().moveTo(channel)
   })

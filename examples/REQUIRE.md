@@ -11,7 +11,7 @@ After this you can import the library with `require("command")`
     //try to load the library
     const Command = require("command")
     //check if the library has been loaded successfully
-    if (!Command) throw new Error("Command.js library not found! Please download Command.js and enable it to be able use this script!")
+    if (!Command) throw new Error("command.js library not found! Please download Command.js and enable it to be able use this script!")
 
     //start declaring your Commands from here
     engine.log(`Command prefix is ${Command.getCommandPrefix()}`)

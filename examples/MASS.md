@@ -18,10 +18,10 @@ Command.createCommand("mass")
   //1) the client which has executed the command
   //2) the arguments which had been parsed
   //3) reply, depending on where the client has sent the message it will automatically reply to the client, channel or server chat
-  //4) the raw text of the message
-  .exec((client, args, reply, raw) => {
-    var sent = 0
-    var ignoreUids = [client.uid(), backend.getBotClient().uid()]
+  //4) the ev text of the message
+  .exec((client, args, reply, ev) => {
+    let sent = 0
+    const ignoreUids = [client.uid(), backend.getBotClient().uid()]
     backend.getClients().forEach(client => {
       if (ignoreUids === client.uid()) return
       sent++

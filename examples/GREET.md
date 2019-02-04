@@ -17,7 +17,7 @@ Command.createCommand("greet")
   //4) the raw text of the message
   .exec((client, args, reply, raw) => {
     //args.uid holds the detected client uid
-    var receiver = backend.getClientByUID(args.uid) 
+    const receiver = backend.getClientByUID(args.uid) 
     if (!receiver) return reply(`No online client with uid ${args.uid} found!`)
     receiver.chat(`${client.nick()} sends you his greetings!`)
     reply(`Greetings sent to ${receiver.nick()}`)
