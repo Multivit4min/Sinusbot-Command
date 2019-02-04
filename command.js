@@ -6,7 +6,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage Commands",
-  version: "1.1.2",
+  version: "1.1.3",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -1164,7 +1164,12 @@ registerPlugin({
           cmd.getCommandName().match(new RegExp(filter, "i")) ||
           cmd.getHelp().match(new RegExp(filter, "i")))
       reply(`${format.bold(cmds.length)} Commands found:`)
-      cmds.forEach(cmd => reply(`${format.bold(cmd.getFullCommandName())} - ${cmd.getHelp()}`))
+      switch (engine.getBackend()) {
+        case "discord":
+          return reply(cmds.map(cmd => `${format.bold(cmd.getFullCommandName())} - ${cmd.getHelp()}`).join("\n"))
+        case "ts3":
+          return cmds.forEach(cmd => reply(`${format.bold(cmd.getFullCommandName())} - ${cmd.getHelp()}`))
+      }
     })
 
   //creates the man command
