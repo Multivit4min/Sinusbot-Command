@@ -1,6 +1,8 @@
 toc:
   - name: Changelog
     children:
+      - name: 1.2.0 - 5.2.2019
+        file: changelog/1.2.0.md
       - name: 1.1.3 - 4.2.2019
         file: changelog/1.1.3.md
       - name: 1.1.2 - 30.1.2019
@@ -38,6 +40,7 @@ toc:
   - CommandGroup
   - SubCommand
   - CommandCollector
+  - Throttle
   - name: Argument Types
     description: |
       Available Argument Types which can be added to a Command
@@ -56,10 +59,13 @@ toc:
   - createGroupedArgument
   - getCommandPrefix
   - collector
+  - getVersion
+  - createThrottle
   - name: Internal
     description: |
       Internal functions / types / classes
     children:
+    - ThrottleError
     - CommandDisabledError
     - TooManyArguments
     - SubCommandNotFound

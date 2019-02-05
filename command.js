@@ -6,7 +6,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage Commands",
-  version: "1.1.3",
+  version: "1.2.0",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -23,7 +23,7 @@ registerPlugin({
     options: ["ERROR", "WARNING", "INFO", "VERBOSE"],
     default: "2"
   }]
-}, (_, { DEBUGLEVEL, NOT_FOUND_MESSAGE }) => {
+}, (_, { DEBUGLEVEL, NOT_FOUND_MESSAGE }, { version }) => {
 
   const engine = require("engine")
   const event = require("event")
@@ -60,6 +60,16 @@ registerPlugin({
   }
 
   /**
+   * Class representing a ThrottleError
+   * @extends Error
+   */
+  class ThrottleError extends Error {
+    constructor(err) {
+      super(err)
+    }
+  }
+
+  /**
    * Class representing a TooManyArguments
    * @extends Error
    * @param {string} err the error which will be handed over to the Error instance
@@ -77,7 +87,7 @@ registerPlugin({
    * gets thrown when an Argument has not been parsed successful
    * @extends Error
    * @param {string} err the error which will be handed over to the Error instance
-   * @param {Argument} argument the argument which failed 
+   * @param {Argument} argument the argument which failed
    */
   class ParseError extends Error {
     constructor(err, argument) {
@@ -107,7 +117,7 @@ registerPlugin({
   }
 
 
-  /** 
+  /**
    * Class representing an Argument
    * @name Argument
    */
@@ -201,7 +211,7 @@ registerPlugin({
   }
 
 
-  /** 
+  /**
    * Class representing a GroupArgument
    * @name GroupArgument
    * @extends Argument
@@ -224,6 +234,7 @@ registerPlugin({
       switch (this._type) {
         case GROUP_ARGS.OR: return this._validateOr(args)
         case GROUP_ARGS.AND: return this._validateAnd(args)
+        default: throw new Error(`${this._type} not a valid Group Type`)
       }
     }
 
@@ -280,7 +291,7 @@ registerPlugin({
 
 
 
-  /** 
+  /**
    * Class representing a StringArgument
    * @name StringArgument
    * @extends Argument
@@ -300,7 +311,7 @@ registerPlugin({
     /**
      * Validates the given String to the StringArgument
      * @private
-     * @param {string} args - the remaining args       
+     * @param {string} args - the remaining args
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
@@ -394,7 +405,7 @@ registerPlugin({
 
 
 
-  /** 
+  /**
    * Class representing a ClientArgument
    * this Argument is capable to parse a Client UID or a simple UID
    * inside the exec function it will resolve the found uid
@@ -423,7 +434,7 @@ registerPlugin({
 
 
 
-  /** 
+  /**
    * Class representing a RestArgument
    * this will parse everything remaining
    * you can use all methods from the StringArgument here
@@ -438,7 +449,7 @@ registerPlugin({
     /**
      * Validates the given String to the RestArgument
      * @private
-     * @param {string} args - the remaining args       
+     * @param {string} args - the remaining args
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
     validate(args) {
@@ -449,7 +460,7 @@ registerPlugin({
 
 
 
-  /** 
+  /**
    * Class representing a NumberArgument
    * this will try to parse a number
    * @name NumberArgument
@@ -574,7 +585,7 @@ registerPlugin({
     /**
      * Searches for one or multiple enabled commands with its prefix
      * @param {string} cmd the command with its prefix
-     * @returns {Commands[]} returns an array of found commands 
+     * @returns {Commands[]} returns an array of found commands
      */
     getAvailableCommandsWithPrefix(cmd) {
       return this._commands
@@ -583,7 +594,7 @@ registerPlugin({
     }
 
     /**
-     * Checks if a possible 
+     * Checks if a possible
      * @param {string} cmd the input string from a message
      * @returns {boolean} returns true when it is a command
      */
@@ -605,20 +616,20 @@ registerPlugin({
 
     /**
      * Registers a new Command
-     * @param {Command|CommandGroup} cmd 
+     * @param {Command|CommandGroup} cmd the command which should be registered
      * @returns {Command|CommandGroup} returns the added Command
      */
     registerCommand(cmd) {
       this._commands.push(cmd)
       return cmd
-    }  
-    
-   /**
-    * gets all available commands
-    * @param {Client} [client=false] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
-    * @param {string|boolean} [cmd=false] - the command which should be searched for
-    * @returns {Command[]} returns an array of commands
-    */
+    }
+
+    /**
+     * gets all available commands
+     * @param {Client} [client=false] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
+     * @param {string|boolean} [cmd=false] - the command which should be searched for
+     * @returns {Command[]} returns an array of commands
+     */
     getAvailableCommands(client = false, cmd = false) {
       const cmds = this._commands
         .filter(c => c.getCommandName() === cmd || cmd === false)
@@ -628,7 +639,7 @@ registerPlugin({
     }
 
     /**
-     * 
+     *
      * @param {string} name the name which should be searched for
      * @returns {Command|CommandGroup} returns the found Command or CommandGroup
      */
@@ -638,7 +649,142 @@ registerPlugin({
   }
 
 
-  /** 
+  /**
+   * Class representing a Command
+   * @name Throttle
+   */
+  class Throttle {
+    constructor() {
+      this._throttled = {}
+      this._penaltyPerCommand = 1
+      this._initialPoints = 1
+      this._restorePerTick = 1
+      this._tickrate = 1000
+    }
+
+    /**
+     * Defines how fast points will get restored
+     * @param {number} duration - number in ms how fast points should get restored
+     * @returns {Throttle} returns this in order to chain functions
+     */
+    tickRate(duration) {
+      this._tickrate = duration
+      return this
+    }
+
+    /**
+     * The amount of points a command request costs
+     * @param {number} amount - the amount of points that should be reduduced
+     * @returns {Throttle} returns this in order to chain functions
+     */
+    penaltyPerCommand(amount) {
+      this._penaltyPerCommand = amount
+      return this
+    }
+
+    /**
+     * The Amount of Points that should get restored per tick
+     * @param {number} amount - the amount that should get restored
+     * @returns {Throttle} returns this in order to chain functions
+     */
+    restorePerTick(amount) {
+      this._restorePerTick = amount
+      return this
+    }
+
+    /**
+     * Sets the initial Points a user has at beginning
+     * @param {number} initial - the Initial amount of Points a user has
+     * @returns {Throttle} returns this in order to chain functions
+     */
+    initialPoints(initial) {
+      this._initialPoints = initial
+      return this
+    }
+
+    /**
+     * Reduces the given points for a Command for the given Client
+     * @param {object} client the client which points should be removed
+     * @returns {boolean} returns true when a client is not throttled
+     */
+    throttle(client) {
+      this._reducePoints(client.uid())
+      return this.isThrottled(client)
+    }
+
+    /**
+     * Restores points from the given id
+     * @private
+     * @param {string} id - the identifier for which the points should be stored
+     */
+    _restorePoints(id) {
+      const throttle = this._throttled[id]
+      if (throttle === undefined) return false
+      throttle.points += this._restorePerTick
+      if (throttle.points >= this._initialPoints)
+        return Reflect.deleteProperty(this._throttled, id)
+      this._refreshTimeout(id)
+    }
+
+    /**
+     * Resets the timeout counter for a stored id
+     * @private
+     * @param {string} id - the identifier which should be added
+     */
+    _refreshTimeout(id) {
+      if (this._throttled[id] === undefined) return
+      clearTimeout(this._throttled[id].timeout)
+      this._throttled[id].timeout = setTimeout(this._restorePoints.bind(this, id), this._tickrate)
+      this._throttled[id].next = Date.now() + this._tickrate
+    }
+
+    /**
+     * Removes points from an id
+     * @private
+     * @param {string} id - the identifier which should be added
+     */
+    _reducePoints(id) {
+      const throttle = this._createIdIfNotExists(id)
+      throttle.points -= this._penaltyPerCommand
+      this._refreshTimeout(id)
+    }
+
+    /**
+     * Creates the identifier in the _throttled object
+     * @private
+     * @param {string} id - the identifier which should be added
+     * @returns {boolean} returns true when the client has been created otherwise returns false
+     */
+    _createIdIfNotExists(id) {
+      if (Object.keys(this._throttled).includes(id)) return this._throttled[id]
+      this._throttled[id] = { points: this._initialPoints }
+      return this._throttled[id]
+    }
+
+    /**
+     * Checks if the given Client is affected by throttle limitations
+     * @param {object} client - the sinusbot client that should get checked
+     * @returns {boolean} returns true when a client is not throttled
+     */
+    isThrottled(client) {
+      const throttle = this._throttled[client.uid()]
+      console.log(throttle)
+      if (throttle === undefined) return false
+      return throttle.points <= 0
+    }
+
+    /**
+     * retrieves the time in milliseconds until a client can send his next command
+     * @param {object} client the client which should be checked
+     * @returns {number} returns the time in ms
+     */
+    timeTillNextCommand(client) {
+      if (this._throttled[client.uid()] === undefined) return 0
+      return this._throttled[client.uid()].next - Date.now()
+    }
+  }
+
+  /**
    * Class representing a Command
    * @name Command
    * @param {string} cmd - The Command which should be used
@@ -649,6 +795,7 @@ registerPlugin({
       this._enabled = true
       this._help = ""
       this._prefix = ""
+      this._throttle = false
       this._args = []
       this._manual = []
       this._fncs = {}
@@ -687,6 +834,23 @@ registerPlugin({
      */
     _hasFunction(name) {
       return typeof this._fncs[name] === "function"
+    }
+
+    /**
+     * Checks if the client is throttled and reduces points
+     * @private
+     * @throws {ThrottleError}
+     * @param {object} client the client for which throttling should be handled
+     */
+    _handleThrottle(client) {
+      const throttle = this._throttle
+      if (!(throttle instanceof Throttle)) return
+      if (throttle.isThrottled(client)) {
+        const time = (throttle.timeTillNextCommand(client) / 1000).toFixed(1)
+        throw new ThrottleError(`You can use this command again in ${time} seconds!`)
+      } else {
+        throttle.throttle(client)
+      }
     }
 
     /**
@@ -752,6 +916,18 @@ registerPlugin({
      */
     getHelp() {
       return this._help
+    }
+
+    /**
+     * Adds an Instance of the Throttle class
+     * @param {Throttle} throttle adds the throttle instance
+     * @returns {Command} returns this to chain Functions
+     */
+    throttle(throttle) {
+      if (!(throttle instanceof Throttle))
+        throw new Error("throttle requires as first argument an instance of throttle")
+      this._throttle = throttle
+      return this
     }
 
     /**
@@ -859,7 +1035,7 @@ registerPlugin({
     isAllowed(client) {
       try {
         return Boolean(this._getFunction("perms")(client))
-      } catch(e) {
+      } catch (e) {
         debug(DEBUG.ERROR)(e.stack)
         return false
       }
@@ -875,6 +1051,7 @@ registerPlugin({
     run(args, ev) {
       if (!this.isEnabled()) throw new CommandDisabledError("Command not enabled!")
       if (!this.isAllowed(ev.client)) throw new PermissionError("Missing Permissions")
+      this._handleThrottle(ev.client)
       this.dispatchCommand(this.validate(args), ev)
     }
 
@@ -1022,7 +1199,7 @@ registerPlugin({
     }
   }
 
-  
+
   /**
    * Class representing a SubCommand which will be used within CommandGroups
    * @name SubCommand
@@ -1123,6 +1300,15 @@ registerPlugin({
   }
 
   /**
+   * Creates a new Throttle Instance
+   * @name createThrottle
+   * @returns {Throttle} returns the created Throttle
+   */
+  function createThrottle() {
+    return new Throttle()
+  }
+
+  /**
    * retrieves the current Command Prefix
    * @name getCommandPrefix
    * @returns {string} returns the command prefix
@@ -1131,6 +1317,15 @@ registerPlugin({
     const prefix = engine.getCommandPrefix()
     if (typeof prefix !== "string" || prefix.length === 0) return "!"
     return prefix
+  }
+
+  /**
+   * retrieves the semantic version of this script
+   * @name getVersion
+   * @returns {string} returns the semantic version of this script
+   */
+  function getVersion() {
+    return version
   }
 
   /**
@@ -1167,6 +1362,7 @@ registerPlugin({
       switch (engine.getBackend()) {
         case "discord":
           return reply(cmds.map(cmd => `${format.bold(cmd.getFullCommandName())} - ${cmd.getHelp()}`).join("\n"))
+        default:
         case "ts3":
           return cmds.forEach(cmd => reply(`${format.bold(cmd.getFullCommandName())} - ${cmd.getHelp()}`))
       }
@@ -1212,7 +1408,7 @@ registerPlugin({
     if (ev.client.isSelf()) return debug(DEBUG.VERBOSE)("Will not handle messages from myself")
     //check if it is a possible command
     if (!collector.isPossibleCommand(ev.text)) return debug(DEBUG.VERBOSE)("No valid possible command found!")
-    //get the basic command with arguments and command splitted 
+    //get the basic command with arguments and command splitted
     const { command, args } = ev.text.match(new RegExp(`^(?<command>\\S*)\\s*(?<args>.*)\\s*$`, "s")).groups
     //check if command exists
     const commands = collector.getAvailableCommandsWithPrefix(command)
@@ -1247,6 +1443,8 @@ registerPlugin({
           reply(`Argument parsed with an error ${format.bold(e.argument.getManual())}`)
           reply(`Returned with ${format.bold(e.message)}`)
           reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
+        } else if (e instanceof ThrottleError) {
+          reply(e.message)
         } else if (e instanceof TooManyArguments) {
           reply(`Too many Arguments received for this Command!`)
           if (e.parseError) {
@@ -1270,6 +1468,8 @@ registerPlugin({
     createArgument,
     createGroupedArgument,
     getCommandPrefix,
+    createThrottle,
+    getVersion,
     collector
   })
 
