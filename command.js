@@ -6,7 +6,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage Commands",
-  version: "1.2.0",
+  version: "1.2.1",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -632,7 +632,7 @@ registerPlugin({
      */
     getAvailableCommands(client = false, cmd = false) {
       const cmds = this._commands
-        .filter(c => c.getCommandName() === cmd || cmd === false)
+        .filter(c => c.getCommandName() === cmd || c.getFullCommandName() === cmd || cmd === false)
         .filter(c => c.isEnabled())
       if (!client) return cmds
       return cmds.filter(c => c.isAllowed(client))
@@ -1454,8 +1454,16 @@ registerPlugin({
           reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
         } else {
           reply("An unhandled exception occured, check the sinusbot logs for more informations")
-          debug(DEBUG.ERROR)(`#### UNHANDLED EXCEPTION (${e.constructor.name}) ####`)
-          debug(DEBUG.ERROR)(e.stack)
+          const match = e.stack.match(/^(?<type>\w+): *(?<msg>.+?)\s+(at .+?\(((?<script>\w+):(?<line>\d+):(?<row>\d+))\))/s)
+          if (match) {
+            const { type, msg, script, line, row } = match.groups
+            debug(DEBUG.ERROR)(`Unhandled Script Error in Script ${script}`)
+            debug(DEBUG.ERROR)(`${type}: ${msg} on line ${line} at char ${row}`)
+            debug(DEBUG.VERBOSE)(e.stack)
+          } else {
+            debug(DEBUG.ERROR)("This is _probably_ an Error with a Script which is using Command.js!")
+            debug(DEBUG.ERROR)(e.stack)
+          }
         }
       }
     })
