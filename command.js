@@ -1454,7 +1454,7 @@ registerPlugin({
           reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
         } else {
           reply("An unhandled exception occured, check the sinusbot logs for more informations")
-          const match = e.stack.match(/^(?<type>\w+): *(?<msg>.+?)\s+(at .+?\(((?<script>\w+):(?<line>\d+):(?<row>\d+))\))/s)
+          const match = e.stack.match(new RegExp("^(?<type>\\w+): *(?<msg>.+?)\\s+(at .+?\\(((?<script>\\w+):(?<line>\\d+):(?<row>\\d+))\\))", "s"))
           if (match) {
             const { type, msg, script, line, row } = match.groups
             debug(DEBUG.ERROR)(`Unhandled Script Error in Script ${script}`)
