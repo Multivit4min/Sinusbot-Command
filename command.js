@@ -425,10 +425,47 @@ registerPlugin({
      * @param {string} args - the input from where the client gets extracted
      * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
-    validate(args) {
+    validate(...args) {
+      switch (engine.getBackend()) {
+        case "ts3": return this._validateTS3(...args)
+        case "discord": return this._validateDiscord(...args)
+        default: throw new Error(`Unknown Backend ${engine.getBackend()}`)
+      }
+    }
+
+    /**
+     * Tries to validate a TeamSpeak Client URL or UID
+     * @private
+     * @throws {ParseError}
+     * @param {string} args - the input from where the client gets extracted
+     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     */
+    _validateTS3(args) {
       const match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
       if (!match) throw new ParseError("Client not found!", this)
       return [match.groups.url_uid || match.groups.uid, match.groups.rest]
+    }
+
+    /**
+     * Tries to validate a Discord Client Name or ID
+     * @private
+     * @throws {ParseError}
+     * @param {string} args - the input from where the client gets extracted
+     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     */
+    _validateDiscord(args) {
+      const match = args.match(/^(<@(?<id>\d{18})>|@(?<name>.*?)#\d{4}) *(?<rest>.*)$/i)
+      if (!match) throw new ParseError("Client not found!", this)
+      const { id, name, rest } = match.groups
+      if (id) {
+        return [id, rest]
+      } else if (name) {
+        const client = backend.getClientByName(name)
+        if (!client) throw new ParseError("Client not found!", this)
+        return [client.uid().split("/")[1], rest]
+      } else {
+        throw new ParseError("Client not found!", this)
+      }
     }
   }
 
@@ -768,7 +805,6 @@ registerPlugin({
      */
     isThrottled(client) {
       const throttle = this._throttled[client.uid()]
-      console.log(throttle)
       if (throttle === undefined) return false
       return throttle.points <= 0
     }
@@ -1353,18 +1389,45 @@ registerPlugin({
     .manual(`you can search/filter for a specific commands by adding a keyword`)
     .addArgument(createArgument("string").setName("filter").min(1).optional())
     .exec((client, { filter }, reply) => {
+      const fixLen = (str, len) => str + Array(len - str.length).fill(" ").join("")
+      let length = 0
       const cmds = collector.getAvailableCommands(client)
         .filter(cmd => cmd.hasHelp())
         .filter(cmd => !filter ||
           cmd.getCommandName().match(new RegExp(filter, "i")) ||
           cmd.getHelp().match(new RegExp(filter, "i")))
       reply(`${format.bold(cmds.length)} Commands found:`)
+      const commands = []
+      cmds
+        .forEach(cmd => {
+          if (cmd instanceof CommandGroup) {
+            if (cmd.getFullCommandName().length > length) length = cmd.getFullCommandName().length
+            cmd.getAvailableSubCommands(client).forEach(sub => {
+              if (cmd.getFullCommandName().length + sub.getCommandName().length + 1 > length)
+                length = cmd.getFullCommandName().length + sub.getCommandName().length + 1
+              commands.push([`${cmd.getFullCommandName()} ${sub.getCommandName()}`, sub.getHelp()])
+            })
+          } else {
+            if (cmd.getFullCommandName().length > length) length = cmd.getFullCommandName().length
+            commands.push([cmd.getFullCommandName(), cmd.getHelp()])
+          }
+        })
       switch (engine.getBackend()) {
         case "discord":
-          return reply(cmds.map(cmd => `${format.bold(cmd.getFullCommandName())} - ${cmd.getHelp()}`).join("\n"))
+          return commands
+            .map(([cmd, help]) => `${fixLen(cmd, length)}  ${help}`)
+            .reduce((acc, curr) => {
+              if (acc[acc.length - 1].length + acc.join("\n").length + 6 >= 2000) {
+                acc[acc.length] = [curr]
+              } else {
+                acc[acc.length - 1].push(curr)
+              }
+              return acc
+            }, [[]])
+            .forEach(lines => reply(format.code(lines.join("\n"))))
         default:
         case "ts3":
-          return cmds.forEach(cmd => reply(`${format.bold(cmd.getFullCommandName())} - ${cmd.getHelp()}`))
+          return commands.forEach(([cmd, help]) => reply(`${format.bold(cmd)} - ${help}`))
       }
     })
 
@@ -1407,7 +1470,7 @@ registerPlugin({
     //do not do anything when the bot sends a message
     if (ev.client.isSelf()) return debug(DEBUG.VERBOSE)("Will not handle messages from myself")
     //check if it is a possible command
-    if (!collector.isPossibleCommand(ev.text)) return debug(DEBUG.VERBOSE)("No valid possible command found!")
+    if (!collector.isPossibleCommand(ev.text)) return debug(DEBUG.VERBOSE)("No possible valid command found!")
     //get the basic command with arguments and command splitted
     const { command, args } = ev.text.match(new RegExp(`^(?<command>\\S*)\\s*(?<args>.*)\\s*$`, "s")).groups
     //check if command exists
@@ -1433,32 +1496,35 @@ registerPlugin({
         debug(DEBUG.VERBOSE)(`Command "${cmd.getFullCommandName()}" failed after ${Date.now() - start}ms`)
         const reply = getReplyOutput(ev)
         //Handle Command not found Exceptions for CommandGroups
+        let response = (engine.getBackend() === "ts3" ? "\n" : "")
         if (e instanceof SubCommandNotFound) {
-          reply(e.message)
-          reply(`For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
+          response += `${e.message}\n`
+          response += `For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}\n`
+          reply(response)
         } else if (e instanceof PermissionError) {
-          reply(`You do not have permissions to use this command!`)
-          reply(`To get a list of available commands see ${format.bold(`${getCommandPrefix()}help`)}`)
+          response += `You do not have permissions to use this command!\n`
+          response += `To get a list of available commands see ${format.bold(`${getCommandPrefix()}help`)}`
+          reply(response)
         } else if (e instanceof ParseError) {
-          reply(`Argument parsed with an error ${format.bold(e.argument.getManual())}`)
-          reply(`Returned with ${format.bold(e.message)}`)
-          reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
+          response += `Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}\n`
+          reply(response)
         } else if (e instanceof ThrottleError) {
           reply(e.message)
         } else if (e instanceof TooManyArguments) {
-          reply(`Too many Arguments received for this Command!`)
+          response += `Too many Arguments received for this Command!\n`
           if (e.parseError) {
-            reply(`Argument parsed with an error ${format.bold(e.parseError.argument.getManual())}`)
-            reply(`Returned with ${format.bold(e.parseError.message)}`)
+            response += `Argument parsed with an error ${format.bold(e.parseError.argument.getManual())}\n`
+            response += `Returned with ${format.bold(e.parseError.message)}\n`
           }
-          reply(`Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`)
+          response += `Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`
+          reply(response)
         } else {
           reply("An unhandled exception occured, check the sinusbot logs for more informations")
           const match = e.stack.match(new RegExp("^(?<type>\\w+): *(?<msg>.+?)\\s+(at .+?\\(((?<script>\\w+):(?<line>\\d+):(?<row>\\d+))\\))", "s"))
           if (match) {
             const { type, msg, script, line, row } = match.groups
-            debug(DEBUG.ERROR)(`Unhandled Script Error in Script ${script}`)
-            debug(DEBUG.ERROR)(`${type}: ${msg} on line ${line} at char ${row}`)
+            debug(DEBUG.ERROR)(`Unhandled Script Error in Script "${script.endsWith(".js") ? script : `${script}.js`}" on line ${line} at index ${row}`)
+            debug(DEBUG.ERROR)(`${type}: ${msg}`)
             debug(DEBUG.VERBOSE)(e.stack)
           } else {
             debug(DEBUG.ERROR)("This is _probably_ an Error with a Script which is using Command.js!")
