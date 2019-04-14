@@ -249,11 +249,14 @@ registerPlugin({
       const errors = []
       const resolved = {}
       const valid = this._args.some(arg => {
-        const result = arg.validate(args)
-        if (result instanceof Error)
-          return (errors.push(result), false)
-        resolved[arg.getName()] = result[0]
-        return (args = result[1].trim(), true)
+        try {
+          const result = arg.validate(args)
+          resolved[arg.getName()] = result[0]
+          return (args = result[1].trim(), true)
+        } catch (e) {
+          errors.push(e)
+          return false
+        }
       })
       if (!valid) throw new ParseError(`No valid match found`, this)
       return [resolved, args]
@@ -269,10 +272,14 @@ registerPlugin({
       const resolved = {}
       let error = null
       this._args.some(arg => {
-        const result = arg.validate(args)
-        if (result instanceof Error) return (error = result, true)
-        resolved[arg.getName()] = result[0]
-        return (args = result[1].trim(), false)
+        try {
+          const result = arg.validate(args)
+          resolved[arg.getName()] = result[0]
+          return (args = result[1].trim(), false)
+        } catch (e) {
+          error = e
+          return true
+        }
       })
       if (error !== null) return error
       return [resolved, args]

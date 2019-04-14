@@ -1,6 +1,8 @@
 toc:
   - name: Changelog
     children:
+      - name: 1.2.3 - 14.4.2019
+        file: changelog/1.2.2.md
       - name: 1.2.2 - 10.2.2019
         file: changelog/1.2.2.md
       - name: 1.2.1 - 9.2.2019
