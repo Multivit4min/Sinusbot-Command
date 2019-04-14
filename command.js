@@ -6,7 +6,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage Commands",
-  version: "1.2.1",
+  version: "1.2.3",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
