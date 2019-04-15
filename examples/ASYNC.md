@@ -7,7 +7,7 @@ function wait(time) {
 }
 
 //creates the command "async"
-Command.createCommand("async")
+command.createCommand("async")
   //sets a helptext, this gets displayed when using the command help
   .help("tests the aync execution")
   //this function gets executed when a command has been parsed successfully
@@ -16,7 +16,7 @@ Command.createCommand("async")
   //2) the arguments which had been parsed
   //3) reply, depending on where the client has sent the message it will automatically reply to the client, channel or server chat
   //4) the raw text of the message
-  //in order to use async functions and have correct error handling within the Command.js usage do it like this
+  //in order to use async functions and have correct error handling within the command.js usage do it like this
   .exec((client, args, reply, raw) => {
     //return an instance of promise
     return new Promie(async (fulfill, reject) => {

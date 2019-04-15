@@ -1,4 +1,4 @@
-This Command lets some defined clients use the command **!come** which will move the Sinusbot to the channel of the requesting User
+This command lets some defined clients use the command **!come** which will move the Sinusbot to the channel of the requesting User
 
 ```javascript
 const backend = require("backend")
@@ -9,7 +9,7 @@ const allowed = [
 ]
 
 //creates the command "come"
-Command.createCommand("come")
+command.createCommand("come")
   //sets a helptext, this gets displayed when using the command help
   .help("moves the sinusbot to your channel")
   //sets a manual command
