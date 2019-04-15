@@ -5,7 +5,7 @@
  */
 registerPlugin({
   name: "Command",
-  description: "Library to handle and manage Commands",
+  description: "Library to handle and manage commands",
   version: "1.2.3",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
@@ -185,15 +185,15 @@ registerPlugin({
     }
 
     /**
-     * Sets a name for the argument to identify it later when the Command gets dispatched
+     * Sets a name for the argument to identify it later when the command gets dispatched
      * This name will be used when passing the parsed argument to the exec function
      * @param {string} name - sets the name of the argument
      * @param {string} [display] - sets a beautified display name which will be used when the getManual command gets executed, if none given it will use the first parameter as display value
+     * @throws {Error}
      * @returns {Argument} returns this to make functions chainable
      */
-    setName(name, display = false) {
-      this._display = display
-      if (this._display === false) this._display = name
+    setName(name, display) {
+      this._display = display === undefined ? name : display
       if (typeof name !== "string") throw new Error("Argument of setName needs to be a string")
       if (name.length < 1) throw new Error("Argument of setName needs to be at least 1 char long")
       if (!name.match(/^[a-z0-9_]+$/i)) throw new Error("Argument of setName should contain only chars A-z, 0-9 and _")
@@ -287,7 +287,7 @@ registerPlugin({
 
     /**
      * Adds one or multiple argument to the validation chain
-     * @param {string} args - the remaining args
+     * @param {...string} args - the remaining args
      * @returns {this} returns this to make it chainable
      */
     argument(...args) {
@@ -306,7 +306,6 @@ registerPlugin({
   class StringArgument extends Argument {
     constructor() {
       super()
-      super._parent = this
       this._regex = null
       this._maxlen = null
       this._minlen = null
@@ -319,7 +318,8 @@ registerPlugin({
      * Validates the given String to the StringArgument
      * @private
      * @param {string} args - the remaining args
-     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     * @throws {ParseError} Trows an error if validation fails
+     * @returns {string[]} Array containing two strings: argument and the rest
      */
     validate(args) {
       const argArray = args.split(" ")
@@ -331,19 +331,20 @@ registerPlugin({
      * Validates the given string to the StringArgument params
      * @private
      * @throws {ParseError}
-     * @param {string} args - args which should get parsed
-     * @param {string} rest - the remaining args
-     * @returns {Error|boolean} returns true when validation was successful otherwise returns an Error
+     * @param {string} arg - string argument that should be parsed
+     * @param {...string} rest - the remaining args
+     * @throws {ParseError} Trows an error if validation fails
+     * @returns {string[]} Array containing two strings: argument and the rest
      */
-    _validate(str, ...rest) {
-      if (typeof str !== "string") throw new ParseError(`Given input is not typeof string (typeof ${typeof str})`, this)
-      if (this._uppercase) str = str.toUpperCase()
-      if (this._lowercase) str = str.toLowerCase()
-      if (this._minlen !== null && this._minlen > str.length) throw new ParseError(`String length not greater or equal! Expected at least ${this._minlen}, but got ${str.length}`, this)
-      if (this._maxlen !== null && this._maxlen < str.length) throw new ParseError(`String length not less or equal! Maximum ${this._maxlen} chars allowed, but got ${str.length}`, this)
-      if (this._whitelist !== null && !this._whitelist.includes(str)) throw new ParseError(`Invalid Input for ${str}. Allowed words: ${this._whitelist.join(", ")}`, this)
-      if (this._regex !== null && !this._regex.test(str)) throw new ParseError(`Regex missmatch, the input '${str}' did not match the expression ${this._regex.toString()}`, this)
-      return [str, ...rest]
+    _validate(arg, ...rest) {
+      if (typeof arg !== "string") throw new ParseError(`Given input is not typeof string (typeof ${typeof arg})`, this)
+      if (this._uppercase) arg = arg.toUpperCase()
+      if (this._lowercase) arg = arg.toLowerCase()
+      if (this._minlen !== null && this._minlen > arg.length) throw new ParseError(`String length not greater or equal! Expected at least ${this._minlen}, but got ${arg.length}`, this)
+      if (this._maxlen !== null && this._maxlen < arg.length) throw new ParseError(`String length not less or equal! Maximum ${this._maxlen} chars allowed, but got ${arg.length}`, this)
+      if (this._whitelist !== null && !this._whitelist.includes(arg)) throw new ParseError(`Invalid Input for ${arg}. Allowed words: ${this._whitelist.join(", ")}`, this)
+      if (this._regex !== null && !this._regex.test(arg)) throw new ParseError(`Regex missmatch, the input '${arg}' did not match the expression ${this._regex.toString()}`, this)
+      return [arg, ...rest]
     }
 
     /**
@@ -420,22 +421,18 @@ registerPlugin({
    * @extends Argument
    */
   class ClientArgument extends Argument {
-    constructor() {
-      super()
-      super._parent = this
-    }
 
     /**
      * Validates and tries to parse the Client from the given input string
      * @private
      * @throws {ParseError}
      * @param {string} args - the input from where the client gets extracted
-     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     * @returns {Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
      */
-    validate(...args) {
+    validate(args) {
       switch (engine.getBackend()) {
-        case "ts3": return this._validateTS3(...args)
-        case "discord": return this._validateDiscord(...args)
+        case "ts3": return this._validateTS3(args)
+        case "discord": return this._validateDiscord(args)
         default: throw new Error(`Unknown Backend ${engine.getBackend()}`)
       }
     }
@@ -443,9 +440,9 @@ registerPlugin({
     /**
      * Tries to validate a TeamSpeak Client URL or UID
      * @private
-     * @throws {ParseError}
      * @param {string} args - the input from where the client gets extracted
-     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     * @throws {ParseError} An error is thrown when argument is invalid
+     * @returns {string[]} Array containing two strings: client UID and the rest
      */
     _validateTS3(args) {
       const match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
@@ -456,9 +453,9 @@ registerPlugin({
     /**
      * Tries to validate a Discord Client Name or ID
      * @private
-     * @throws {ParseError}
      * @param {string} args - the input from where the client gets extracted
-     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     * @throws {ParseError} An error is thrown when argument is invalid
+     * @returns {string[]} Array containing two strings: client ID and the rest
      */
     _validateDiscord(args) {
       const match = args.match(/^(<@(?<id>\d{18})>|@(?<name>.*?)#\d{4}) *(?<rest>.*)$/i)
@@ -476,8 +473,6 @@ registerPlugin({
     }
   }
 
-
-
   /**
    * Class representing a RestArgument
    * this will parse everything remaining
@@ -486,23 +481,18 @@ registerPlugin({
    * @extends StringArgument
    */
   class RestArgument extends StringArgument {
-    constructor() {
-      super()
-    }
 
     /**
      * Validates the given String to the RestArgument
      * @private
      * @param {string} args - the remaining args
-     * @returns {Error|Array} returns an Error if the validation failed or the resolved arg as first index and the remaining args as second index
+     * @throws {ParseError} Trows an error if validation fails
+     * @returns {string[]} Array containing two strings: argument and the rest
      */
     validate(args) {
       return super._validate(args, "")
     }
   }
-
-
-
 
   /**
    * Class representing a NumberArgument
@@ -513,7 +503,6 @@ registerPlugin({
   class NumberArgument extends Argument {
     constructor() {
       super()
-      super._parent = this
       this._min = null
       this._max = null
       this._integer = false
@@ -530,10 +519,11 @@ registerPlugin({
      */
     validate(args) {
       const argArray = args.split(" ")
-      let num = argArray.shift()
-      if (isNaN(num)) throw new ParseError(`Searched for number but found "${num}"`, this)
-      num = parseFloat(num)
-      if (isNaN(num)) throw new ParseError(`Given input is not typeof Number (typeof ${typeof num})`, this)
+      const arg = argArray.shift()
+      // @ts-ignore (isNaN can also check strings)
+      if (isNaN(arg)) throw new ParseError(`"${arg}" is not a number"`, this)
+      const num = parseFloat(arg)
+      if (isNaN(num)) throw new ParseError(`"${arg}" is not a valid number`, this)
       if (this._min !== null && this._min > num) throw new ParseError(`Number not greater or equal! Expected at least ${this._min}, but got ${num}`, this)
       if (this._max !== null && this._max < num) throw new ParseError(`Number not less or equal! Expected at least ${this._max}, but got ${num}`, this)
       if (this._integer && num % 1 !== 0) throw new ParseError(`Given Number is not an Integer! (${num})`, this)
@@ -544,7 +534,7 @@ registerPlugin({
 
     /**
      * Specifies the minimum value
-     * @param {number} len - the maximum length of the argument
+     * @param {number} min - the minimum length of the argument
      * @returns {NumberArgument} returns this to chain Functions
      */
     min(min) {
@@ -554,7 +544,7 @@ registerPlugin({
 
     /**
      * Specifies the maximum value
-     * @param {number} len - the maximum length of the argument
+     * @param {number} max - the maximum length of the argument
      * @returns {NumberArgument} returns this to chain Functions
      */
     max(max) {
@@ -603,7 +593,7 @@ registerPlugin({
 
 
   /**
-   * A collection of registered Commands in this library
+   * A collection of registered commands in this library
    * @name CommandCollector
    */
   class CommandCollector {
@@ -629,7 +619,7 @@ registerPlugin({
     /**
      * Searches for one or multiple enabled commands with its prefix
      * @param {string} cmd the command with its prefix
-     * @returns {Commands[]} returns an array of found commands
+     * @returns {Command[]} returns an array of found commands
      */
     getAvailableCommandsWithPrefix(cmd) {
       return this._commands
@@ -670,13 +660,13 @@ registerPlugin({
 
     /**
      * gets all available commands
-     * @param {Client} [client=false] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
-     * @param {string|boolean} [cmd=false] - the command which should be searched for
+     * @param {Client} [client] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
+     * @param {string} [cmd] - the command which should be searched for
      * @returns {Command[]} returns an array of commands
      */
-    getAvailableCommands(client = false, cmd = false) {
+    getAvailableCommands(client, cmd) {
       const cmds = this._commands
-        .filter(c => c.getCommandName() === cmd || c.getFullCommandName() === cmd || cmd === false)
+        .filter(c => c.getCommandName() === cmd || c.getFullCommandName() === cmd || !cmd)
         .filter(c => c.isEnabled())
       if (!client) return cmds
       return cmds.filter(c => c.isAllowed(client))
@@ -794,10 +784,17 @@ registerPlugin({
     }
 
     /**
+     * @ignore
+     * @private
+     * @typedef {Object} ThrottleEntry
+     * @property {number} points
+     */
+
+    /**
      * Creates the identifier in the _throttled object
      * @private
      * @param {string} id - the identifier which should be added
-     * @returns {boolean} returns true when the client has been created otherwise returns false
+     * @returns {ThrottleEntry} returns an object with a points property
      */
     _createIdIfNotExists(id) {
       if (Object.keys(this._throttled).includes(id)) return this._throttled[id]
@@ -838,7 +835,9 @@ registerPlugin({
       this._enabled = true
       this._help = ""
       this._prefix = ""
-      this._throttle = false
+
+      /** @type {Throttle} */
+      this._throttle = null
       this._args = []
       this._manual = []
       this._fncs = {}
@@ -1147,7 +1146,6 @@ registerPlugin({
 
     /**
      * Retrieves all available arguments
-     * @param {Argument} argument - the argument to add
      * @returns {array} returns a list of defined Arguments
      */
     getArguments() {
@@ -1171,6 +1169,7 @@ registerPlugin({
      * Overwrite the method of Parent class
      * @throws {Error} command not available
      */
+    // @ts-ignore (different signature doesn't matter since it throws an error anyway)
     addArgument() {
       throw new Error("This method is not available in the CommandGroup class!")
     }
@@ -1203,12 +1202,12 @@ registerPlugin({
     /**
      * retrievel all available subcommands
      * @param {Client} [client] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
-     * @param {string|boolean} [cmd=false] - the command which should be searched for
+     * @param {string} [cmd] - the command which should be searched for
      * @return
      */
-    getAvailableSubCommands(client = false, cmd = false) {
+    getAvailableSubCommands(client, cmd) {
       const cmds = this._cmds
-        .filter(c => c.getCommandName() === cmd || cmd === false)
+        .filter(c => c.getCommandName() === cmd || !cmd)
         .filter(c => c.isEnabled())
       if (!client) return cmds
       return cmds.filter(c => c.isAllowed(client))
@@ -1258,6 +1257,7 @@ registerPlugin({
      * Overwrite the method of Parent class
      * @throws {Error} command not available
      */
+    // @ts-ignore (different signature doesn't matter since it throws an error anyway)
     getPrefix() {
       throw new Error("This method is not available in the SubCommand class!")
     }
@@ -1291,6 +1291,7 @@ registerPlugin({
    * Creates a new Command Instance with the given Command Name
    * @name createCommand
    * @param {string} cmd - the command which should be added
+   * @param {string} [OVERRIDES] - enter `"YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE"` to allow commands with the length of one
    * @returns {Command} returns the created Command
    */
   function createCommand(cmd, OVERRIDES) {
@@ -1298,8 +1299,9 @@ registerPlugin({
     debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
     if (collector.getCommandByName(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
-      debug(DEBUG.WARNING)(`Command.js may work not as expected!`)
+      debug(DEBUG.WARNING)(`command.js may work not as expected!`)
     }
+    // @ts-ignore (returns Command since Command is given)
     return collector.registerCommand(new Command(cmd))
   }
 
@@ -1307,6 +1309,7 @@ registerPlugin({
    * Creates a new CommandsCommand Instance with the given Command Name
    * @name createCommandGroup
    * @param {string} cmd - the command which should be added
+   * @param {string} [OVERRIDES] - enter `"YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE"` to allow commands with the length of one
    * @returns {CommandGroup} returns the created CommandGroup instance
    */
   function createCommandGroup(cmd, OVERRIDES) {
@@ -1314,8 +1317,9 @@ registerPlugin({
     debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
     if (collector.getCommandByName(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
-      debug(DEBUG.WARNING)(`Command.js may work not as expected!`)
+      debug(DEBUG.WARNING)(`command.js may work not as expected!`)
     }
+    // @ts-ignore (returns CommandGroup since CommandGroup is given)
     return collector.registerCommand(new CommandGroup(cmd))
   }
 
@@ -1394,6 +1398,7 @@ registerPlugin({
     .help("Displays this text")
     .manual(`Displays a list of useable commands`)
     .manual(`you can search/filter for a specific commands by adding a keyword`)
+    // @ts-ignore (StringArgument has min)
     .addArgument(createArgument("string").setName("filter").min(1).optional())
     .exec((client, { filter }, reply) => {
       const fixLen = (str, len) => str + Array(len - str.length).fill(" ").join("")
@@ -1403,7 +1408,7 @@ registerPlugin({
         .filter(cmd => !filter ||
           cmd.getCommandName().match(new RegExp(filter, "i")) ||
           cmd.getHelp().match(new RegExp(filter, "i")))
-      reply(`${format.bold(cmds.length)} Commands found:`)
+      reply(`${format.bold(cmds.length.toString())} Commands found:`)
       const commands = []
       cmds
         .forEach(cmd => {
@@ -1444,7 +1449,9 @@ registerPlugin({
     .manual(`Displays detailed usage help for a specific command`)
     .manual(`Arguments with Arrow Brackets (eg. < > ) are mandatory arguments`)
     .manual(`Arguments with Square Brackets (eg. [ ] ) are optional arguments`)
+    // @ts-ignore (StringArgument has min)
     .addArgument(createArgument("string").setName("command").min(1))
+    // @ts-ignore (StringArgument has min)
     .addArgument(createArgument("string").setName("subcommand").min(1).optional(false, false))
     .exec((client, { command, subcommand }, reply) => {
       const getManual = cmd => {
@@ -1534,7 +1541,7 @@ registerPlugin({
             debug(DEBUG.ERROR)(`${type}: ${msg}`)
             debug(DEBUG.VERBOSE)(e.stack)
           } else {
-            debug(DEBUG.ERROR)("This is _probably_ an Error with a Script which is using Command.js!")
+            debug(DEBUG.ERROR)("This is _probably_ an Error with a Script which is using command.js!")
             debug(DEBUG.ERROR)(e.stack)
           }
         }
@@ -1542,8 +1549,7 @@ registerPlugin({
     })
   })
 
-
-  engine.export({
+  module.exports = {
     createCommandGroup,
     createCommand,
     createArgument,
@@ -1552,6 +1558,5 @@ registerPlugin({
     createThrottle,
     getVersion,
     collector
-  })
-
+  }
 })

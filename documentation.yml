@@ -58,7 +58,7 @@ toc:
   - GroupArgument
   - name: Exports
     description: |
-      These Functions gets exported as object when imported through `require("Command.js")`
+      These Functions gets exported as object when imported through `require("command.js")`
   - createCommand
   - createCommandGroup
   - createArgument
