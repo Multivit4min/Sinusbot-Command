@@ -1479,8 +1479,27 @@ registerPlugin({
       })
     })
 
+  if (engine.getBackend() === "discord") {
+    event.on("message", ev => {
+      // create compatible Message object
+      messageHandler({
+        text: ev.content(),
+        channel: ev.channel(),
+        client: ev.author(),
+        mode: ev.guildID() ? 2 : 1,
+        // @ts-ignore
+        message: ev
+      })
+    })
+  } else {
+    event.on("chat", messageHandler)
+  }
 
-  event.on("chat", ev => {
+  /**
+   * Handles chat/message events
+   * @param {Message} ev
+   */
+  function messageHandler(ev) {
     //do not do anything when the bot sends a message
     if (ev.client.isSelf()) return debug(DEBUG.VERBOSE)("Will not handle messages from myself")
     //check if it is a possible command
@@ -1547,7 +1566,7 @@ registerPlugin({
         }
       }
     })
-  })
+  }
 
   module.exports = {
     createCommandGroup,
