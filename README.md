@@ -77,3 +77,7 @@ event.on("load", () => {
     })
 })
 ```
+
+## Contribute
+
+Before editing, it's recommended to use `npm install` to install the sinusbot-typings.

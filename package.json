@@ -1,0 +1,25 @@
+{
+  "name": "sinusbot-command",
+  "version": "1.0.0",
+  "description": "Command Library for the SinusBot",
+  "main": "command.js",
+  "directories": {
+    "example": "examples"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Multivit4min/Sinusbot-Command.git"
+  },
+  "keywords": [
+    "SinusBot"
+  ],
+  "author": "David Kartnaller",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Multivit4min/Sinusbot-Command/issues"
+  },
+  "homepage": "https://github.com/Multivit4min/Sinusbot-Command#readme",
+  "dependencies": {
+    "sinusbot-scripting-engine": "^1.0.10"
+  }
+}
