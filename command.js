@@ -6,7 +6,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage commands",
-  version: "1.2.3",
+  version: "1.3.0",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -1014,7 +1014,7 @@ registerPlugin({
      * @property {Client} client - Client that sent the message
      * @property {number} mode - Number representing the way this message has been sent
      * (1 = private, 2 = channel, 3 = server)
-     * @property {DiscordMessage} [message] - When backend is `discord` this will be the callback parameter of the message event, otherwise undefined
+     * @property {DiscordMessage} [message] - When backend is `discord` this will be the callback parameter of the message event, otherwise undefined. Available since v1.3.0
      */
 
     /**
