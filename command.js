@@ -6,7 +6,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage commands",
-  version: "1.2.3",
+  version: "1.3.0",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -61,6 +61,7 @@ registerPlugin({
 
   /**
    * Class representing a ThrottleError
+   * @private
    * @extends Error
    */
   class ThrottleError extends Error {
@@ -71,6 +72,7 @@ registerPlugin({
 
   /**
    * Class representing a TooManyArguments
+   * @private
    * @extends Error
    * @param {string} err the error which will be handed over to the Error instance
    * @param {ParseError} parseError a possible ParseError
@@ -85,6 +87,7 @@ registerPlugin({
   /**
    * Class representing a ParseError
    * gets thrown when an Argument has not been parsed successful
+   * @private
    * @extends Error
    * @param {string} err the error which will be handed over to the Error instance
    * @param {Argument} argument the argument which failed
@@ -98,6 +101,7 @@ registerPlugin({
 
   /**
    * Class representing a SubCommandNotFound
+   * @private
    * @extends Error
    */
   class SubCommandNotFound extends Error {
@@ -108,6 +112,7 @@ registerPlugin({
 
   /**
    * Class representing a PermissionError
+   * @private
    * @extends Error
    */
   class PermissionError extends Error {
@@ -784,7 +789,6 @@ registerPlugin({
     }
 
     /**
-     * @ignore
      * @private
      * @typedef {Object} ThrottleEntry
      * @property {number} points
@@ -1002,8 +1006,27 @@ registerPlugin({
     }
 
     /**
+     * @interface
+     * @typedef {object} MessageEvent
+     * @implements {Message}
+     * @property {string} text - Text of the message
+     * @property {Channel} channel - Channel (if given) this message has been sent on
+     * @property {Client} client - Client that sent the message
+     * @property {number} mode - Number representing the way this message has been sent
+     * (1 = private, 2 = channel, 3 = server)
+     * @property {DiscordMessage} [message] - When backend is `discord` this will be the callback parameter of the message event, otherwise undefined. Available since v1.3.0
+     */
+
+    /**
+     * @callback execFunction
+     * @see exec
+     * @since 1.2.3
+     * @param {MessageEvent} ev
+     */
+
+    /**
      * Sets the function which gets executed
-     * @param {function} fnc the function which should be executed when the command has been validated successful
+     * @param {execFunction} fnc the function which should be executed when the command has been validated successful
      * @returns {Command} returns this to chain Functions
      */
     exec(fnc) {
@@ -1377,6 +1400,7 @@ registerPlugin({
 
   /**
    * Returns the correct reply chat from where the client has sent the message
+   * @private
    * @name getReplyOutput
    * @param {object} ev the sinusbot chat event
    * @param {number} ev.mode the mode from where the message came from [1=client, 2=channel, 3=server]
@@ -1479,8 +1503,28 @@ registerPlugin({
       })
     })
 
+  if (engine.getBackend() === "discord") {
+    event.on("message", ev => {
+      // create compatible Message object
+      messageHandler({
+        text: ev.content(),
+        channel: ev.channel(),
+        client: ev.author(),
+        mode: ev.guildID() ? 2 : 1,
+        // @ts-ignore
+        message: ev
+      })
+    })
+  } else {
+    event.on("chat", messageHandler)
+  }
 
-  event.on("chat", ev => {
+  /**
+   * Handles chat/message events
+   * @private
+   * @param {Message} ev
+   */
+  function messageHandler(ev) {
     //do not do anything when the bot sends a message
     if (ev.client.isSelf()) return debug(DEBUG.VERBOSE)("Will not handle messages from myself")
     //check if it is a possible command
@@ -1547,7 +1591,7 @@ registerPlugin({
         }
       }
     })
-  })
+  }
 
   module.exports = {
     createCommandGroup,

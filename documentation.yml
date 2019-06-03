@@ -56,6 +56,8 @@ toc:
   - ClientArgument
   - RestArgument
   - GroupArgument
+  - execFunction
+  - MessageEvent
   - name: Exports
     description: |
       These Functions gets exported as object when imported through `require("command.js")`
@@ -67,14 +69,3 @@ toc:
   - collector
   - getVersion
   - createThrottle
-  - name: Internal
-    description: |
-      Internal functions / types / classes
-    children:
-    - ThrottleError
-    - CommandDisabledError
-    - TooManyArguments
-    - SubCommandNotFound
-    - ParseError
-    - PermissionError
-    - getReplyOutput
