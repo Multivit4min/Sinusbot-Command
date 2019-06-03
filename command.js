@@ -1020,7 +1020,7 @@ registerPlugin({
      * @property {Client} client - Client that sent the message
      * @property {number} mode - Number representing the way this message has been sent
      * (1 = private, 2 = channel, 3 = server)
-     * @property {object} [message] - When backend is `discord` this will be the message object, otherwise undefined
+     * @property {DiscordMessage} [message] - When backend is `discord` this will be the callback parameter of the message event, otherwise undefined
      */
 
     /**
