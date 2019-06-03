@@ -62,6 +62,8 @@ registerPlugin({
   /**
    * Class representing a ThrottleError
    * @extends Error
+   * @private
+   * @ignore
    */
   class ThrottleError extends Error {
     constructor(err) {
@@ -74,6 +76,8 @@ registerPlugin({
    * @extends Error
    * @param {string} err the error which will be handed over to the Error instance
    * @param {ParseError} parseError a possible ParseError
+   * @private
+   * @ignore
    */
   class TooManyArguments extends Error {
     constructor(err, parseError) {
@@ -88,6 +92,8 @@ registerPlugin({
    * @extends Error
    * @param {string} err the error which will be handed over to the Error instance
    * @param {Argument} argument the argument which failed
+   * @private
+   * @ignore
    */
   class ParseError extends Error {
     constructor(err, argument) {
@@ -99,6 +105,8 @@ registerPlugin({
   /**
    * Class representing a SubCommandNotFound
    * @extends Error
+   * @private
+   * @ignore
    */
   class SubCommandNotFound extends Error {
     constructor(err) {
@@ -109,6 +117,8 @@ registerPlugin({
   /**
    * Class representing a PermissionError
    * @extends Error
+   * @private
+   * @ignore
    */
   class PermissionError extends Error {
     constructor(err) {
@@ -1002,8 +1012,27 @@ registerPlugin({
     }
 
     /**
+     * @interface
+     * @typedef {object} MessageEvent
+     * @implements {Message}
+     * @property {string} text - Text of the message
+     * @property {Channel} channel - Channel (if given) this message has been sent on
+     * @property {Client} client - Client that sent the message
+     * @property {number} mode - Number representing the way this message has been sent
+     * (1 = private, 2 = channel, 3 = server)
+     * @property {object} [message] - When backend is `discord` this will be the message object, otherwise undefined
+     */
+
+    /**
+     * @callback execFunction
+     * @see exec
+     * @since 1.2.3
+     * @param {MessageEvent} ev
+     */
+
+    /**
      * Sets the function which gets executed
-     * @param {function} fnc the function which should be executed when the command has been validated successful
+     * @param {execFunction} fnc the function which should be executed when the command has been validated successful
      * @returns {Command} returns this to chain Functions
      */
     exec(fnc) {
@@ -1383,6 +1412,8 @@ registerPlugin({
    * @param {Client} ev.client the sinusbot client which sent the message
    * @param {Channel} ev.channel the channel from where the command has been received
    * @returns {function} returns a function where the chat message gets redirected to
+   * @private
+   * @ignore
    */
   function getReplyOutput({ mode, client, channel }) {
     switch (mode) {
@@ -1498,6 +1529,8 @@ registerPlugin({
   /**
    * Handles chat/message events
    * @param {Message} ev
+   * @private
+   * @ignore
    */
   function messageHandler(ev) {
     //do not do anything when the bot sends a message
