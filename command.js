@@ -61,9 +61,8 @@ registerPlugin({
 
   /**
    * Class representing a ThrottleError
-   * @extends Error
    * @private
-   * @ignore
+   * @extends Error
    */
   class ThrottleError extends Error {
     constructor(err) {
@@ -73,11 +72,10 @@ registerPlugin({
 
   /**
    * Class representing a TooManyArguments
+   * @private
    * @extends Error
    * @param {string} err the error which will be handed over to the Error instance
    * @param {ParseError} parseError a possible ParseError
-   * @private
-   * @ignore
    */
   class TooManyArguments extends Error {
     constructor(err, parseError) {
@@ -89,11 +87,10 @@ registerPlugin({
   /**
    * Class representing a ParseError
    * gets thrown when an Argument has not been parsed successful
+   * @private
    * @extends Error
    * @param {string} err the error which will be handed over to the Error instance
    * @param {Argument} argument the argument which failed
-   * @private
-   * @ignore
    */
   class ParseError extends Error {
     constructor(err, argument) {
@@ -104,9 +101,8 @@ registerPlugin({
 
   /**
    * Class representing a SubCommandNotFound
-   * @extends Error
    * @private
-   * @ignore
+   * @extends Error
    */
   class SubCommandNotFound extends Error {
     constructor(err) {
@@ -116,9 +112,8 @@ registerPlugin({
 
   /**
    * Class representing a PermissionError
-   * @extends Error
    * @private
-   * @ignore
+   * @extends Error
    */
   class PermissionError extends Error {
     constructor(err) {
@@ -794,7 +789,6 @@ registerPlugin({
     }
 
     /**
-     * @ignore
      * @private
      * @typedef {Object} ThrottleEntry
      * @property {number} points
@@ -1406,14 +1400,13 @@ registerPlugin({
 
   /**
    * Returns the correct reply chat from where the client has sent the message
+   * @private
    * @name getReplyOutput
    * @param {object} ev the sinusbot chat event
    * @param {number} ev.mode the mode from where the message came from [1=client, 2=channel, 3=server]
    * @param {Client} ev.client the sinusbot client which sent the message
    * @param {Channel} ev.channel the channel from where the command has been received
    * @returns {function} returns a function where the chat message gets redirected to
-   * @private
-   * @ignore
    */
   function getReplyOutput({ mode, client, channel }) {
     switch (mode) {
@@ -1528,9 +1521,8 @@ registerPlugin({
 
   /**
    * Handles chat/message events
-   * @param {Message} ev
    * @private
-   * @ignore
+   * @param {Message} ev
    */
   function messageHandler(ev) {
     //do not do anything when the bot sends a message
