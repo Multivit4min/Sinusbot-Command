@@ -1505,6 +1505,8 @@ registerPlugin({
 
   if (engine.getBackend() === "discord") {
     event.on("message", ev => {
+      if (ev.author() === undefined) return debug(DEBUG.VERBOSE)("Will not handle messages from myself")
+
       // create compatible Message object
       messageHandler({
         text: ev.content(),
