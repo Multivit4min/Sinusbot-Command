@@ -6,7 +6,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage commands",
-  version: "1.3.0",
+  version: "1.3.1",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -133,6 +133,18 @@ registerPlugin({
       this._display = "_"
       this._displayDefault = true
       this._default = undefined
+    }
+
+    /** creates a new object with all available arguments */
+    static createArgumentLayer() {
+      return {
+        string: new StringArgument(),
+        number: new NumberArgument(),
+        client: new ClientArgument(),
+        rest: new RestArgument(),
+        or: new GroupArgument(GROUP_ARGS.OR),
+        and: new GroupArgument(GROUP_ARGS.AND)
+      }
     }
 
     /**
@@ -1159,11 +1171,14 @@ registerPlugin({
 
     /**
      * Adds an argument to the command
-     * @param {Argument} argument - the argument to add
+     * @param {Argument|Function} arg the argument to add, either provide the Argument or
+     * add a callback which receives an object with instaces to all arguments and return it within the callback
      * @returns {Command} returns this to chain the command
      */
-    addArgument(argument) {
-      this._args.push(argument)
+    addArgument(arg) {
+      if (typeof arg === "function") arg = arg(Argument.createArgumentLayer())
+      if (!(arg instanceof Argument)) throw new Error(`Typeof arg should be function or instance of Argument but got ${arg}`)
+      this._args.push(arg)
       return this
     }
 

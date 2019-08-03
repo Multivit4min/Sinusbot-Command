@@ -2,10 +2,8 @@ language: node_js
 node_js:
   - "lts/*"
 script:
-  - npm install -g eslint
-  - eslint command.js
-  - npm install -g documentation
-  - documentation build command.js --project-name "command.js" -f html -o docs -c documentation.yml
+  - npm run eslint
+  - npm run generate-docs
 deploy:
   provider: pages
   github-token: $GITHUB_TOKEN
