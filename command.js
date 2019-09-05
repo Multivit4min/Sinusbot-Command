@@ -6,7 +6,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage commands",
-  version: "1.3.1",
+  version: "1.3.2",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -622,14 +622,11 @@ registerPlugin({
      * Checks if the command uses a valid command name
      * @static
      * @param {string} name the name which should be checked
-     * @param {boolean} allowSingleChar wether it should allow single char commands as name
      * @returns {boolean} returns true when the command has a valid name
      */
-    static validateCommandName(name, allowSingleChar = true) {
+    static validateCommandName(name) {
       if (typeof name !== "string") throw new Error("Expected a string as command name!")
-      if (name.length === 0) throw new Error(`Command should have a minimum length of ${allowSingleChar ? "1" : "2"}!`)
-      if (name.length === 1 && !allowSingleChar) throw new Error("Command should have a minimum length of 2!")
-      if (!(/^[a-z0-9_-]+$/i).test(name)) throw new Error("the command should match the following pattern '/^[a-z0-9_-]+$/i'")
+      if (name.length < 1) throw new Error(`Command should have a minimum length of 1!`)
       return true
     }
 
@@ -1329,11 +1326,10 @@ registerPlugin({
    * Creates a new Command Instance with the given Command Name
    * @name createCommand
    * @param {string} cmd - the command which should be added
-   * @param {string} [OVERRIDES] - enter `"YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE"` to allow commands with the length of one
    * @returns {Command} returns the created Command
    */
-  function createCommand(cmd, OVERRIDES) {
-    CommandCollector.validateCommandName(cmd, OVERRIDES === "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE")
+  function createCommand(cmd) {
+    CommandCollector.validateCommandName(cmd)
     debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
     if (collector.getCommandByName(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
@@ -1347,11 +1343,10 @@ registerPlugin({
    * Creates a new CommandsCommand Instance with the given Command Name
    * @name createCommandGroup
    * @param {string} cmd - the command which should be added
-   * @param {string} [OVERRIDES] - enter `"YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE"` to allow commands with the length of one
    * @returns {CommandGroup} returns the created CommandGroup instance
    */
-  function createCommandGroup(cmd, OVERRIDES) {
-    CommandCollector.validateCommandName(cmd, OVERRIDES === "YES_I_KNOW_THAT_I_SHOULD_NOT_USE_COMMANDS_WITH_LENGTH_OF_ONE")
+  function createCommandGroup(cmd) {
+    CommandCollector.validateCommandName(cmd)
     debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
     if (collector.getCommandByName(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
