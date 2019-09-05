@@ -627,6 +627,7 @@ registerPlugin({
     static validateCommandName(name) {
       if (typeof name !== "string") throw new Error("Expected a string as command name!")
       if (name.length < 1) throw new Error(`Command should have a minimum length of 1!`)
+      if ((/\s/).test(name)) throw new Error(`Command "${name}" should not contain spaces!`)
       return true
     }
 
