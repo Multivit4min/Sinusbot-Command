@@ -4,6 +4,7 @@
   "description": "Command Library for the SinusBot",
   "main": "command.js",
   "scripts": {
+    "test": "jest",
     "eslint": "eslint command.js",
     "generate-docs": "documentation build command.js --project-name \"command.js\" -f html -o docs -c documentation.yml"
   },
@@ -27,7 +28,10 @@
     "sinusbot-scripting-engine": "^1.0.10"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.18",
     "documentation": "^12.1.1",
-    "eslint": "^6.1.0"
+    "eslint": "^6.1.0",
+    "jest": "^24.9.0",
+    "sinusbot-test-environment": "git+https://github.com/Multivit4min/Sinusbot-Test-Environment.git"
   }
 }

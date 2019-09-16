@@ -11,7 +11,12 @@
     },
     "globals": {
         "registerPlugin": true,
-        "BigInt": true
+        "BigInt": true,
+        "describe": true,
+        "it": true,
+        "beforeEach": true,
+        "expect": true,
+        "jest": true
     },
     "rules": {
         "accessor-pairs": "error",
@@ -119,7 +124,7 @@
         "no-implicit-coercion": "error",
         "no-implicit-globals": "error",
         "no-implied-eval": "error",
-        "no-inline-comments": "error",
+        "no-inline-comments": "off",
         "no-invalid-this": "error",
         "no-iterator": "error",
         "no-label-var": "error",

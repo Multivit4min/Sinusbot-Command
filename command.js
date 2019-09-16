@@ -632,6 +632,20 @@ registerPlugin({
     }
 
     /**
+     * checks if the command string is save to register as a new command
+     * this function basically checks if there is no other command named with
+     * throws an error when CommandCollector#validateCommandName errors
+     * returns false when this command has been already registered
+     * returns true when this is a completely unused command
+     * @param {string} cmd
+     */
+    isSaveCommand(cmd) {
+      CommandCollector.validateCommandName(cmd)
+      if (collector.getCommandByName(cmd)) return false
+      return true
+    }
+
+    /**
      * Searches for one or multiple enabled commands with its prefix
      * @param {string} cmd the command with its prefix
      * @returns {Command[]} returns an array of found commands
@@ -639,7 +653,7 @@ registerPlugin({
     getAvailableCommandsWithPrefix(cmd) {
       return this._commands
         .filter(c => c.isEnabled())
-        .filter(c => `${c.getPrefix()}${c.getCommandName()}` === cmd)
+        .filter(c => `${c.getPrefix()}${c.getCommandName()}` === cmd || c.getFullAliasNames().includes(cmd))
     }
 
     /**
@@ -649,7 +663,8 @@ registerPlugin({
      */
     isPossibleCommand(cmd) {
       if (cmd.startsWith(getCommandPrefix())) return true
-      return this._commands.some(c => c.getFullCommandName() === cmd.split(" ")[0])
+      const parsed = cmd.split(" ")[0]
+      return this._commands.some(c => c.hasCommand(parsed))
     }
 
     /**
@@ -665,8 +680,8 @@ registerPlugin({
 
     /**
      * Registers a new Command
-     * @param {Command|CommandGroup} cmd the command which should be registered
-     * @returns {Command|CommandGroup} returns the added Command
+     * @param {CommandGroup|Command} cmd the command which should be registered
+     * @returns {CommandGroup|Command} returns the added Command
      */
     registerCommand(cmd) {
       this._commands.push(cmd)
@@ -675,8 +690,8 @@ registerPlugin({
 
     /**
      * gets all available commands
-     * @param {Client} [client] - the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
-     * @param {string} [cmd] - the command which should be searched for
+     * @param {Client} [client] the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
+     * @param {string} [cmd] the command which should be searched for
      * @returns {Command[]} returns an array of commands
      */
     getAvailableCommands(client, cmd) {
@@ -688,12 +703,15 @@ registerPlugin({
     }
 
     /**
-     *
+     * returns a command by its command name or alias name
      * @param {string} name the name which should be searched for
      * @returns {Command|CommandGroup} returns the found Command or CommandGroup
      */
     getCommandByName(name) {
-      return this._commands.find(cmd => cmd.getCommandName() === name)
+      return (
+        this._commands.find(cmd => cmd.getCommandName() === name) ||
+        this._commands.find(cmd => cmd.getAlias().includes(name))
+      )
     }
   }
 
@@ -845,15 +863,32 @@ registerPlugin({
    */
   class Command {
     constructor(cmd) {
+
+      /** @type {string} */
       this._cmd = cmd
+
+      /** @type {string[]} */
+      this._alias = []
+
+      /** @type {boolean} */
       this._enabled = true
+
+      /** @type {string} */
       this._help = ""
+
+      /** @type {string} */
       this._prefix = ""
 
       /** @type {Throttle} */
       this._throttle = null
+
+      /** @type {Argument[]} */
       this._args = []
+
+      /** @type {string[]} */
       this._manual = []
+
+      /** @type {Record<string, Function>} */
       this._fncs = {}
     }
 
@@ -910,6 +945,19 @@ registerPlugin({
     }
 
     /**
+     * checks if the command is calling the selected command instance
+     * @param {string} name the command to check to the Command instance
+     */
+    hasCommand(name) {
+      return (
+        this.getCommandName() === name ||
+        this.getFullCommandName() === name ||
+        this.getAlias().find(alias => alias === name) ||
+        this.getFullAliasNames().find(alias => alias === name)
+      )
+    }
+
+    /**
      * Retrieves the current command name
      * @returns {string} returns the command by its name
      */
@@ -923,6 +971,29 @@ registerPlugin({
      */
     getFullCommandName() {
       return `${this.getPrefix()}${this._cmd}`
+    }
+
+    getFullAliasNames() {
+      return this._alias.map(alias => `${this.getPrefix()}${alias}`)
+    }
+
+    /**
+     * one or more alias to add for this command
+     * @param {...string} alias
+     */
+    alias(...alias) {
+      alias.forEach(a => CommandCollector.validateCommandName(a))
+      alias.filter(a => collector.getCommandByName(a))
+      this._alias.push(...alias)
+      return this
+    }
+
+    /**
+     * retrieves the current alias
+     * @returns {string[]}
+     */
+    getAlias() {
+      return this._alias
     }
 
     /**
@@ -1031,7 +1102,7 @@ registerPlugin({
      * @callback execFunction
      * @see exec
      * @since 1.2.3
-     * @param {MessageEvent} ev
+     * @param {MessageEvent} fnc
      */
 
     /**
@@ -1330,12 +1401,11 @@ registerPlugin({
    * @returns {Command} returns the created Command
    */
   function createCommand(cmd) {
-    CommandCollector.validateCommandName(cmd)
-    debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
-    if (collector.getCommandByName(cmd)) {
+    if (!collector.isSaveCommand(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
       debug(DEBUG.WARNING)(`command.js may work not as expected!`)
     }
+    debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
     // @ts-ignore (returns Command since Command is given)
     return collector.registerCommand(new Command(cmd))
   }
@@ -1347,12 +1417,11 @@ registerPlugin({
    * @returns {CommandGroup} returns the created CommandGroup instance
    */
   function createCommandGroup(cmd) {
-    CommandCollector.validateCommandName(cmd)
-    debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
-    if (collector.getCommandByName(cmd)) {
+    if (!collector.isSaveCommand(cmd)) {
       debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
       debug(DEBUG.WARNING)(`command.js may work not as expected!`)
     }
+    debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
     // @ts-ignore (returns CommandGroup since CommandGroup is given)
     return collector.registerCommand(new CommandGroup(cmd))
   }
