@@ -51,6 +51,7 @@ registerPlugin({
 
   /**
    * Class representing a CommandDisabledError
+   * @private
    * @extends Error
    */
   class CommandDisabledError extends Error {
@@ -653,11 +654,14 @@ registerPlugin({
     getAvailableCommandsWithPrefix(cmd) {
       return this._commands
         .filter(c => c.isEnabled())
-        .filter(c => `${c.getPrefix()}${c.getCommandName()}` === cmd || c.getFullAliasNames().includes(cmd))
+        .filter(c => (
+          c.getFullCommandName() === cmd ||
+          c.getFullAliasNames().includes(cmd)
+        ))
     }
 
     /**
-     * Checks if a possible
+     * checks if the parameter could be a possible command
      * @param {string} cmd the input string from a message
      * @returns {boolean} returns true when it is a command
      */
@@ -665,17 +669,6 @@ registerPlugin({
       if (cmd.startsWith(getCommandPrefix())) return true
       const parsed = cmd.split(" ")[0]
       return this._commands.some(c => c.hasCommand(parsed))
-    }
-
-    /**
-     * Returns all possible prefixes
-     * @returns {string[]} a list of prefixes across all commands
-     */
-    getPrefixes() {
-      return this._commands.reduce((acc, cmd) => {
-        if (acc.includes(cmd.getPrefix())) return acc
-        return [...acc, cmd.getPrefix()]
-      }, [getCommandPrefix()])
     }
 
     /**
@@ -696,7 +689,13 @@ registerPlugin({
      */
     getAvailableCommands(client, cmd) {
       const cmds = this._commands
-        .filter(c => c.getCommandName() === cmd || c.getFullCommandName() === cmd || !cmd)
+        .filter(c => (
+          c.getCommandName() === cmd ||
+          c.getFullCommandName() === cmd ||
+          c.getAlias().includes(cmd) ||
+          c.getFullAliasNames().includes(cmd) ||
+          !cmd
+        ))
         .filter(c => c.isEnabled())
       if (!client) return cmds
       return cmds.filter(c => c.isAllowed(client))
