@@ -25,12 +25,12 @@
   },
   "homepage": "https://github.com/Multivit4min/Sinusbot-Command#readme",
   "dependencies": {
-    "sinusbot-scripting-engine": "^1.0.10"
+    "sinusbot-scripting-engine": "^1.0.13"
   },
   "devDependencies": {
     "@types/jest": "^24.0.18",
-    "documentation": "^12.1.1",
-    "eslint": "^6.1.0",
+    "documentation": "^12.1.2",
+    "eslint": "^6.5.1",
     "jest": "^24.9.0",
     "sinusbot-test-environment": "git+https://github.com/Multivit4min/Sinusbot-Test-Environment.git"
   }

@@ -1,12 +1,8 @@
-/**
- * @author Multivitamin <david.kartnaller@gmail.com>
- * @license MIT
- * @ignore
- */
+///<reference path="./node_modules/sinusbot-scripting-engine/tsd/types.d.ts" />
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage commands",
-  version: "1.3.2",
+  version: "1.3.3",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -538,7 +534,7 @@ registerPlugin({
     validate(args) {
       const argArray = args.split(" ")
       const arg = argArray.shift()
-      // @ts-ignore (isNaN can also check strings)
+      // @ts-ignore
       if (isNaN(arg)) throw new ParseError(`"${arg}" is not a number"`, this)
       const num = parseFloat(arg)
       if (isNaN(num)) throw new ParseError(`"${arg}" is not a valid number`, this)
@@ -1275,7 +1271,7 @@ registerPlugin({
      * Overwrite the method of Parent class
      * @throws {Error} command not available
      */
-    // @ts-ignore (different signature doesn't matter since it throws an error anyway)
+    // @ts-ignore
     addArgument() {
       throw new Error("This method is not available in the CommandGroup class!")
     }
@@ -1363,7 +1359,7 @@ registerPlugin({
      * Overwrite the method of Parent class
      * @throws {Error} command not available
      */
-    // @ts-ignore (different signature doesn't matter since it throws an error anyway)
+    // @ts-ignore
     getPrefix() {
       throw new Error("This method is not available in the SubCommand class!")
     }
@@ -1405,7 +1401,7 @@ registerPlugin({
       debug(DEBUG.WARNING)(`command.js may work not as expected!`)
     }
     debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
-    // @ts-ignore (returns Command since Command is given)
+    // @ts-ignore
     return collector.registerCommand(new Command(cmd))
   }
 
@@ -1421,7 +1417,7 @@ registerPlugin({
       debug(DEBUG.WARNING)(`command.js may work not as expected!`)
     }
     debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
-    // @ts-ignore (returns CommandGroup since CommandGroup is given)
+    // @ts-ignore
     return collector.registerCommand(new CommandGroup(cmd))
   }
 
@@ -1501,7 +1497,7 @@ registerPlugin({
     .help("Displays this text")
     .manual(`Displays a list of useable commands`)
     .manual(`you can search/filter for a specific commands by adding a keyword`)
-    // @ts-ignore (StringArgument has min)
+    // @ts-ignore
     .addArgument(createArgument("string").setName("filter").min(1).optional())
     .exec((client, { filter }, reply) => {
       const fixLen = (str, len) => str + Array(len - str.length).fill(" ").join("")
@@ -1542,7 +1538,17 @@ registerPlugin({
             .forEach(lines => reply(format.code(lines.join("\n"))))
         default:
         case "ts3":
-          return commands.forEach(([cmd, help]) => reply(`${format.bold(cmd)} - ${help}`))
+          return commands
+            .map(([cmd, help]) => `${format.bold(cmd)} ${help}`)
+            .reduce((acc, curr) => {
+              if (acc[acc.length - 1].length + acc.join("\n").length + 2 >= 8192) {
+                acc[acc.length] = [curr]
+              } else {
+                acc[acc.length - 1].push(curr)
+              }
+              return acc
+            }, [[]])
+            .forEach(lines => reply(`\n${lines.join("\n")}`))
       }
     })
 
@@ -1552,9 +1558,9 @@ registerPlugin({
     .manual(`Displays detailed usage help for a specific command`)
     .manual(`Arguments with Arrow Brackets (eg. < > ) are mandatory arguments`)
     .manual(`Arguments with Square Brackets (eg. [ ] ) are optional arguments`)
-    // @ts-ignore (StringArgument has min)
+    // @ts-ignore
     .addArgument(createArgument("string").setName("command").min(1))
-    // @ts-ignore (StringArgument has min)
+    // @ts-ignore
     .addArgument(createArgument("string").setName("subcommand").min(1).optional(false, false))
     .exec((client, { command, subcommand }, reply) => {
       const getManual = cmd => {
@@ -1577,7 +1583,9 @@ registerPlugin({
             })
           }
         } else {
-          reply(`\nManual for command: ${format.bold(cmd.getFullCommandName())}\n${format.bold("Usage:")} ${cmd.getUsage()}\n${getManual(cmd)}`)
+          let response = `\nManual for command: ${format.bold(cmd.getFullCommandName())}\n${format.bold("Usage:")} ${cmd.getUsage()}\n${getManual(cmd)}`
+          if (cmd.getAlias().length > 0) response += `\n${format.bold("Alias")}: ${cmd.getAlias()}`
+          reply(response)
         }
       })
     })
