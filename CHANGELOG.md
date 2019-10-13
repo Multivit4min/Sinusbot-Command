@@ -1,3 +1,7 @@
+### 1.3.3 - ?
+* show alias inside man command
+* teamspeak now sends less seperat chat commands when using the help command
+
 ### 1.3.1 - 03.08.2019
 * added new possibility to create arguments
 ```javascript
