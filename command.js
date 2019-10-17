@@ -637,6 +637,7 @@ registerPlugin({
      * @param {string} cmd
      */
     isSaveCommand(cmd) {
+      cmd = cmd.toLowerCase()
       CommandCollector.validateCommandName(cmd)
       if (collector.getCommandByName(cmd)) return false
       return true
@@ -648,6 +649,7 @@ registerPlugin({
      * @returns {Command[]} returns an array of found commands
      */
     getAvailableCommandsWithPrefix(cmd) {
+      cmd = cmd.toLowerCase()
       return this._commands
         .filter(c => c.isEnabled())
         .filter(c => (
@@ -662,6 +664,7 @@ registerPlugin({
      * @returns {boolean} returns true when it is a command
      */
     isPossibleCommand(cmd) {
+      cmd = cmd.toLowerCase()
       if (cmd.startsWith(getCommandPrefix())) return true
       const parsed = cmd.split(" ")[0]
       return this._commands.some(c => c.hasCommand(parsed))
@@ -703,6 +706,7 @@ registerPlugin({
      * @returns {Command|CommandGroup} returns the found Command or CommandGroup
      */
     getCommandByName(name) {
+      name = name.toLowerCase()
       return (
         this._commands.find(cmd => cmd.getCommandName() === name) ||
         this._commands.find(cmd => cmd.getAlias().includes(name))
@@ -860,7 +864,7 @@ registerPlugin({
     constructor(cmd) {
 
       /** @type {string} */
-      this._cmd = cmd
+      this._cmd = cmd.toLowerCase()
 
       /** @type {string[]} */
       this._alias = []
@@ -944,6 +948,7 @@ registerPlugin({
      * @param {string} name the command to check to the Command instance
      */
     hasCommand(name) {
+      name = name.toLowerCase()
       return (
         this.getCommandName() === name ||
         this.getFullCommandName() === name ||
@@ -977,6 +982,7 @@ registerPlugin({
      * @param {...string} alias
      */
     alias(...alias) {
+      alias = alias.map(a => a.toLowerCase())
       alias.forEach(a => CommandCollector.validateCommandName(a))
       alias.filter(a => collector.getCommandByName(a))
       this._alias.push(...alias)
@@ -1282,6 +1288,7 @@ registerPlugin({
      * @returns {SubCommand} returns the new command
      */
     addCommand(name) {
+      name = name.toLowerCase()
       CommandCollector.validateCommandName(name)
       const cmd = new SubCommand(name)
       this._cmds.push(cmd)
@@ -1295,6 +1302,7 @@ registerPlugin({
      * @returns {SubCommand} returns the Command instance if found
      */
     findSubCommandByName(name) {
+      name = name.toLowerCase()
       if (name.length === 0) throw new SubCommandNotFound(`No subcommand specified for Command ${this.getFullCommandName()}`)
       const cmd = this._cmds.find(c => c.getCommandName() === name)
       if (!cmd) throw new SubCommandNotFound(`Sub command with name "${name}" has not been found for Command ${this.getFullCommandName()}!`)
@@ -1308,6 +1316,7 @@ registerPlugin({
      * @return
      */
     getAvailableSubCommands(client, cmd) {
+      cmd = cmd.toLowerCase()
       const cmds = this._cmds
         .filter(c => c.getCommandName() === cmd || !cmd)
         .filter(c => c.isEnabled())
@@ -1626,7 +1635,7 @@ registerPlugin({
       //depending on the config setting return without error
       if (NOT_FOUND_MESSAGE !== "0") return
       //send the not found message
-      return getReplyOutput(ev)(`There is no enabled command named ${format.bold(command)}, check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
+      return getReplyOutput(ev)(`There is no enabled command named ${format.bold(command.toLowerCase())}, check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
     }
     //handle every available command, should actually be only one command
     commands.forEach(async cmd => {

@@ -34,6 +34,12 @@ describe("Command", () => {
       expect(mockFn).toBeCalledTimes(1)
     })
 
+    it("should test case insensitive commands", () => {
+      testCmd = exported.createCommand("FoO").exec(mockFn)
+      sinusbot.event.chat({ text: "!fOo" })
+      expect(mockFn).toBeCalledTimes(1)
+    })
+
     it("should test basic registration of a command with 2 alias", () => {
       testCmd.alias("test1", "test2")
       sinusbot.event.chat({ text: "!test" })
@@ -78,6 +84,46 @@ describe("Command", () => {
       })
     })
   })
+
+  describe("CommandGroup", () => {
+
+  /** @type {Sinusbot} */
+  let sinusbot = null
+
+  /** @type {jest.Mock} */
+  let mockFn = null
+
+  /** return form createCommand */
+  let cmdGroup = null
+
+  /** command.js export */
+  let exported = null
+
+  const script = fs.readFileSync("./command.js", "utf8")
+
+  beforeEach(() => {
+    sinusbot = new Sinusbot()
+    sinusbot.setScript(script)
+    sinusbot.setConfig({ DEBUGLEVEL: 0, NOT_FOUND_MESSAGE: "0" })
+    mockFn = jest.fn()
+    exported = sinusbot.run()
+    cmdGroup = exported.createCommandGroup("test")
+  })
+
+  it("should test the basic registration of a CommandGroup", () => {
+    cmdGroup.addCommand("foo").exec(mockFn)
+    sinusbot.event.chat({ text: "!test foo" })
+    expect(mockFn).toBeCalledTimes(1)
+  })
+
+  it("should test the case insensitivity of a CommandGroup", () => {
+    cmdGroup = exported.createCommandGroup("FoO")
+    cmdGroup.addCommand("bAr").exec(mockFn)
+    sinusbot.event.chat({ text: "!fOo BaR" })
+    expect(mockFn).toBeCalledTimes(1)
+  })
+
+})
 
 
   describe("Arguments", () => {
