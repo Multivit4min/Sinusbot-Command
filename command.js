@@ -2,6 +2,7 @@
 
 /**
  * @typedef CommanderTextMessage
+ * @type {object}
  * @property {function} reply function to reply back
  * @property {Client} invoker the client which invoked the command
  * @property {Record<string, any>} arguments arguments from the command
@@ -29,6 +30,7 @@
 
  /**
   * @typedef ArgType
+  * @type {object}
   * @property {StringArgument} string
   * @property {NumberArgument} number
   * @property {ClientArgument} client
@@ -36,6 +38,14 @@
   * @property {GroupArgument} or
   * @property {GroupArgument} and
   */
+
+/**
+ * @typedef ThrottleInterface
+ * @type {object}
+ * @property {number} points
+ * @property {number} next
+ * @property {number} timeout
+ */
 
 
 
@@ -256,8 +266,8 @@ registerPlugin({
         number: new NumberArgument(),
         client: new ClientArgument(),
         rest: new RestArgument(),
-        or: new GroupArgument(GroupArgument.Type.OR),
-        and: new GroupArgument(GroupArgument.Type.AND),
+        or: new GroupArgument("or"),
+        and: new GroupArgument("and"),
       }
     }
   }
@@ -267,13 +277,13 @@ registerPlugin({
     
     constructor() {
       super()
-      /** @type {RegExp|null} */
+      /** @type {?RegExp} */
       this._regex = null
-      /** @type {number|null} */
+      /** @type {?number} */
       this._maxlen = null
-      /** @type {number|null} */
+      /** @type {?number} */
       this._minlen = null
-      /** @type {string[]|null} */
+      /** @type {?string[]} */
       this._whitelist = null
       /** @type {boolean} */
       this._uppercase = false
@@ -380,9 +390,9 @@ registerPlugin({
 
     constructor() {
       super()
-      /** @type {number|null} */
+      /** @type {?number} */
       this._min = null
-      /** @type {number|null} */
+      /** @type {?number} */
       this._max = null
       /** @type {boolean} */
       this._int = false
@@ -501,6 +511,224 @@ registerPlugin({
     }
   }
 
+
+  class GroupArgument extends Argument {
+  
+    /**
+     * @param {"or"|"and"} type 
+     */
+    constructor(type) {
+      super()
+      /** @type {"or"|"and"} */
+      this.type = type
+      /** @type {Argument[]} */
+      this.arguments = []
+    }
+  
+    /**
+     * Validates the given String to the GroupArgument
+     * @param {string} args the remaining args
+     */
+    validate(args) {
+      switch (this.type) {
+        case "or": return this._validateOr(args)
+        case "and": return this._validateAnd(args)
+      }
+    }
+  
+    /**
+     * Validates the given string to the "or" of the GroupArgument
+     * @param {string} args the remaining args
+     */
+    _validateOr(args) {
+      /** @type {Error[]} */
+      const errors = []
+      /** @type {Record<string, any>} */
+      const resolved = {}
+      const valid = this.arguments.some(arg => {
+        try {
+          const result = arg.validate(args)
+          resolved[arg.getName()] = result[0]
+          return (args = result[1].trim(), true)
+        } catch (e) {
+          errors.push(e)
+          return false
+        }
+      })
+      if (!valid) throw new ParseError(`No valid match found`, this)
+      return [resolved, args]
+    }
+  
+    /**
+     * Validates the given string to the "and" of the GroupArgument
+     * @param {string} args the remaining args
+     */
+    _validateAnd(args) {
+      /** @type {Record<string, any>} */
+      const resolved = {}
+      /** @type {?Error} */
+      let error = null
+      this.arguments.some(arg => {
+        try {
+          const result = arg.validate(args)
+          resolved[arg.getName()] = result[0]
+          return (args = result[1].trim(), false)
+        } catch (e) {
+          error = e
+          return true
+        }
+      })
+      if (error !== null) return error
+      return [resolved, args]
+    }
+  
+    /**
+     * adds an argument to the command
+     * @param {createArgumentHandler} callback an argument to add
+     */
+    addArgument(callback) {
+      this.arguments.push(callback(Argument.createArgumentLayer()))
+      return this
+    }
+  }
+
+  ////////////////////////////////////////////////////////////
+  ////                    Throttle                        ////
+  ////////////////////////////////////////////////////////////
+
+  class Throttle {
+
+    constructor() {
+      /** @type {Record<string, ThrottleInterface>} */
+      this._throttled = {}
+      /** @type {number} */
+      this._penalty = 1
+      /** @type {number} */
+      this._initial = 1
+      /** @type {number} */
+      this._restore = 1
+      /** @type {number} */
+      this._tickrate = 1000
+    }
+  
+    /* clears all timers */
+    stop() {
+      Object.values(this._throttled).forEach(({ timeout }) => clearTimeout(timeout))
+      return this
+    }
+  
+    /**
+     * Defines how fast points will get restored
+     * @param {number} duration time in ms how fast points should get restored
+     */
+    tickRate(duration) {
+      this._tickrate = duration
+      return this
+    }
+  
+    /**
+     * The amount of points a command request costs
+     * @param {number} amount the amount of points that should be reduduced
+     */
+    penaltyPerCommand(amount) {
+      this._penalty = amount
+      return this
+    }
+  
+    /**
+     * The Amount of Points that should get restored per tick
+     * @param {number} amount the amount that should get restored
+     */
+    restorePerTick(amount) {
+      this._restore = amount
+      return this
+    }
+  
+    /**
+     * Sets the initial Points a user has at beginning
+     * @param {number} initial the Initial amount of Points a user has
+     */
+    initialPoints(initial) {
+      this._initial = initial
+      return this
+    }
+  
+    /**
+     * Reduces the given points for a Command for the given Client
+     * @param {Client} client the client which points should be removed
+     */
+    throttle(client) {
+      this._reducePoints(client.uniqueId())
+      return this.isThrottled(client)
+    }
+  
+    /**
+     * Restores points from the given id
+     * @param {string} id the identifier for which the points should be stored
+     */
+    _restorePoints(id) {
+      const throttle = this._throttled[id]
+      if (throttle === undefined) return
+      throttle.points += this._restore
+      if (throttle.points >= this._initial) {
+        Reflect.deleteProperty(this._throttled, id)
+      } else {
+        this._refreshTimeout(id)
+      }
+    }
+  
+    /**
+     * Resets the timeout counter for a stored id
+     * @param {string} id the identifier which should be added
+     */
+    _refreshTimeout(id) {
+      if (this._throttled[id] === undefined) return
+      clearTimeout(this._throttled[id].timeout)
+      this._throttled[id].timeout = setTimeout(this._restorePoints.bind(this, id), this._tickrate)
+      this._throttled[id].next = Date.now() + this._tickrate
+    }
+  
+    /**
+     * Removes points from an id
+     * @param {string} id the identifier which should be added
+     */
+    _reducePoints(id) {
+      const throttle = this._createIdIfNotExists(id)
+      throttle.points -= this._penalty
+      this._refreshTimeout(id)
+    }
+  
+    /**
+     * creates the identifier in the throttled object
+     * @param {string} id the identifier which should be added
+     */
+    _createIdIfNotExists(id) {
+      if (Object.keys(this._throttled).includes(id)) return this._throttled[id]
+      this._throttled[id] = { points: this._initial, next: 0, timeout: 0 }
+      return this._throttled[id]
+    }
+  
+    /**
+     * Checks if the given Client is affected by throttle limitations
+     * @param {Client} client the TeamSpeak Client which should get checked
+     */
+    isThrottled(client) {
+      const throttle = this._throttled[client.uniqueId()]
+      if (throttle === undefined) return false
+      return throttle.points <= 0
+    }
+  
+    /**
+     * retrieves the time in milliseconds until a client can send his next command
+     * @param {Client} client the client which should be checked
+     * @returns returns the time a client is throttled in ms
+     */
+    timeTillNextCommand(client) {
+      if (this._throttled[client.uniqueId()] === undefined) return 0
+      return this._throttled[client.uniqueId()].next - Date.now()
+    }
+  }
+
   ////////////////////////////////////////////////////////////
   ////                    COMMAND                         ////
   ////////////////////////////////////////////////////////////
@@ -525,7 +753,7 @@ registerPlugin({
       this._name = cmd
       /** @type {boolean} */
       this._enabled = true
-      /** @type {Throttle} */
+      /** @type {?Throttle} */
       this._throttle = null
     }
   
@@ -763,7 +991,8 @@ registerPlugin({
      */
     validate(args) {
       const { result, errors, remaining } = this.validateArgs(args)
-      if (remaining.length > 0) throw new TooManyArgumentsError(`Too many argument!`, errors.length > 0 ? errors[0] : undefined)
+      //@ts-ignore
+      if (remaining.length > 0) throw new TooManyArgumentsError(`Too many argument!`, errors.length > 0 ? errors.shift() : undefined)
       return result
     }
 
@@ -837,7 +1066,7 @@ registerPlugin({
      * @param {string} name the sub command name which should be added
      */
     addCommand(name) {
-      if (!Commander.isValidCommandName(name)) throw new Error("Can not create a command with length of 0")
+      if (!Collector.isValidCommandName(name)) throw new Error("Can not create a command with length of 0")
       const cmd = new Command(name)
       this.commands.push(cmd)
       return cmd
@@ -869,7 +1098,7 @@ registerPlugin({
         .filter(c => c.getCommandName() === cmd || !cmd)
         .filter(c => c.isEnabled())
       if (!client) return Promise.resolve(cmds)
-      return this.commander.checkPermissions(cmds, client)
+      return Collector.checkPermissions(cmds, client)
     }
   
     /**
@@ -883,6 +1112,110 @@ registerPlugin({
       return this.findSubCommandByName(cmd).handleRequest(rest.join(" "), ev)
     }
   }
+
+
+
+
+  ////////////////////////////////////////////////////////////
+  ////                    Collector                       ////
+  ////////////////////////////////////////////////////////////
+
+  class Collector {
+  
+    constructor() {
+      /** @type {BaseCommand[]} */
+      this.commands = []
+    }
+  
+    /** creates a new Throttle instance */
+    static createThrottle() {
+      return new Throttle()
+    }
+  
+    /**
+     * retrieves the correct reply chat from where the client has sent the message
+     * @param {object} event 
+     * @param {number} event.mode
+     * @param {Client} event.client
+     * @param {Channel} event.channel
+     * @returns {(msg: string) => void}
+     */
+    static getReplyOutput({ mode, client, channel }) {
+      switch (mode) {
+        case 1: return client.chat.bind(client)
+        case 2: return channel.chat.bind(channel)
+        case 3: return backend.chat.bind(backend)
+        default: return msg => debug(DEBUG.WARNING)(`WARN no reply channel set for mode ${mode}, message "${msg}" not sent!`)
+      }
+    }
+  
+    /**
+     * checks the permissions from a set of commands
+     * @param {BaseCommand[]} commands 
+     * @param {Client} client 
+     */
+    static async checkPermissions(commands, client) {
+      const result = await Promise.all(commands.map(async cmd => await cmd.hasPermission(client)))
+      return result
+        .map((res, i) => res ? commands[i] : false)
+        .filter(res => res instanceof BaseCommand)
+    }
+  
+    /**
+     * get all available commands from its command string
+     * @param {string} [name] 
+     */
+    getAvailableCommands(name) {
+      return this.commands
+        .filter(cmd => !name || cmd.getCommandName() === name || cmd.getFullCommandName() === name)
+        .filter(cmd => cmd.isEnabled())
+    }
+  
+    /**
+     * checks if a command is a possible command string
+     * @param {string} text 
+     */
+    isPossibleCommand(text) {
+      if (text.startsWith(getCommandPrefix())) return true
+      return this.commands.some(cmd => cmd.getFullCommandName() === text.split(" ")[0])
+    }
+  
+    /**
+     * creates a new command
+     * @param {string} name the name of the command
+     */
+    createCommand(name) {
+      if (!Collector.isValidCommandName(name)) throw new Error("Can not create a command with length of 0")
+      const cmd = new Command(name)
+      this.commands.push(cmd)
+      return cmd
+    }
+  
+    /**
+     * creates a new command
+     * @param {string} name the name of the command
+     */
+    createCommandGroup(name) {
+      if (!Collector.isValidCommandName(name)) throw new Error("Can not create a command with length of 0")
+      const cmd = new CommandGroup(name)
+      this.commands.push(cmd)
+      return cmd
+    }
+  
+    /**
+     * checks if the command name is valid
+     * @param {string} name 
+     */
+    static isValidCommandName(name) {
+      if (typeof name !== "string") throw new Error("Expected a string as command name!")
+      if (name.length < 1) throw new Error(`Command should have a minimum length of 1!`)
+      if ((/\s/).test(name)) throw new Error(`Command "${name}" should not contain spaces!`)
+      return true
+    }
+  }
+
+
+
 
   ////////////////////////////////////////////////////////////
   ////                    Wrappers                        ////
@@ -908,6 +1241,12 @@ registerPlugin({
   function getVersion() {
     return version
   }
+
+  ////////////////////////////////////////////////////////////
+  ////                    Logic                           ////
+  ////////////////////////////////////////////////////////////
+
+  const collector = new Collector()
 
 
   module.exports = {
