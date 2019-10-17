@@ -137,7 +137,7 @@ registerPlugin({
   }
 
   /** class representing a SubCommandNotFound */
-  class SubCommandNotFoundError extends Error {
+  class CommandNotFoundError extends Error {
     /** @param {string} err */
     constructor(err) {
       super(err)
@@ -244,8 +244,262 @@ registerPlugin({
     getName() {
       return this._name
     }
+
+
+    /** 
+     * creates new object with argument options
+     * @returns {ArgType}
+     */
+    static createArgumentLayer() {
+      return {
+        string: new StringArgument(),
+        number: new NumberArgument(),
+        client: new ClientArgument(),
+        rest: new RestArgument(),
+        or: new GroupArgument(GroupArgument.Type.OR),
+        and: new GroupArgument(GroupArgument.Type.AND),
+      }
+    }
   }
 
+
+  class StringArgument extends Argument {
+    
+    constructor() {
+      super()
+      /** @type {RegExp|null} */
+      this._regex = null
+      /** @type {number|null} */
+      this._maxlen = null
+      /** @type {number|null} */
+      this._minlen = null
+      /** @type {string[]|null} */
+      this._whitelist = null
+      /** @type {boolean} */
+      this._uppercase = false
+      /** @type {boolean} */
+      this._lowercase = false
+    }
+  
+    /**
+     * Validates the given String to the StringArgument
+     * @param {string} args the remaining args
+     */
+    validate(args) {
+      const argArray = args.split(" ")
+      const str = argArray.shift()
+      return this._validate(str||"", argArray.join(" "))
+    }
+  
+    /**
+     * Validates the given string to the StringArgument params
+     * @protected
+     * @param {string} arg string argument that should be parsed
+     * @param {string[]} rest the remaining args
+     */
+    _validate(arg, ...rest) {
+      if (this._uppercase) arg = arg.toUpperCase()
+      if (this._lowercase) arg = arg.toLowerCase()
+      if (this._minlen !== null && this._minlen > arg.length) throw new ParseError(`String length not greater or equal! Expected at least ${this._minlen}, but got ${arg.length}`, this)
+      if (this._maxlen !== null && this._maxlen < arg.length) throw new ParseError(`String length not less or equal! Maximum ${this._maxlen} chars allowed, but got ${arg.length}`, this)
+      if (this._whitelist !== null && !this._whitelist.includes(arg)) throw new ParseError(`Invalid Input for ${arg}. Allowed words: ${this._whitelist.join(", ")}`, this)
+      if (this._regex !== null && !this._regex.test(arg)) throw new ParseError(`Regex missmatch, the input '${arg}' did not match the expression ${this._regex.toString()}`, this)
+      return [arg, ...rest]
+    }
+  
+    /**
+     * Matches a regular expression pattern
+     * @param {RegExp} regex the regex which should be validated
+     */
+    match(regex) {
+      this._regex = regex
+      return this
+    }
+  
+    /**
+     * Sets the maximum Length of the String
+     * @param {number} len the maximum length of the argument
+     */
+    maximum(len) {
+      this._maxlen = len
+      return this
+    }
+  
+    /**
+     * Sets the minimum Length of the String
+     * @param {number} len the minimum length of the argument
+     */
+    minimum(len) {
+      this._minlen = len
+      return this
+    }
+  
+  
+    /** converts the input to an upper case string */
+    forceUpperCase() {
+      this._lowercase = false
+      this._uppercase = true
+      return this
+    }
+  
+  
+    /** converts the input to a lower case string */
+    forceLowerCase() {
+      this._lowercase = true
+      this._uppercase = false
+      return this
+    }
+  
+    /**
+     * creates a list of available whitelisted words
+     * @param {string[]} words array of whitelisted words
+     */
+    allow(words) {
+      if (!Array.isArray(this._whitelist)) this._whitelist = []
+      this._whitelist.push(...words)
+      return this
+    }
+  }
+
+
+
+  class RestArgument extends StringArgument {
+
+    /**
+     * Validates the given String to the RestArgument
+     * @param {string} args the remaining args
+     */
+    validate(args) {
+        return super._validate(args, "")
+    }
+  }
+
+
+
+  class NumberArgument extends Argument {
+
+    constructor() {
+      super()
+      /** @type {number|null} */
+      this._min = null
+      /** @type {number|null} */
+      this._max = null
+      /** @type {boolean} */
+      this._int = false
+      /** @type {boolean} */
+      this._forcePositive = false
+      /** @type {boolean} */
+      this._forceNegative = false
+    }
+  
+    /**
+     * Validates the given Number to the Object
+     * @param {string} args the remaining args
+     */
+    validate(args) {
+      const argArray = args.split(" ")
+      const arg = argArray.shift()|| ""
+      const num = parseFloat(arg)
+      if (!(/^-?\d+(\.\d+)?$/).test(arg) || isNaN(num)) throw new ParseError(`"${arg}" is not a valid number`, this)
+      if (this._min !== null && this._min > num) throw new ParseError(`Number not greater or equal! Expected at least ${this._min}, but got ${num}`, this)
+      if (this._max !== null && this._max < num) throw new ParseError(`Number not less or equal! Expected at least ${this._max}, but got ${num}`, this)
+      if (this._int && num % 1 !== 0) throw new ParseError(`Given Number is not an Integer! (${num})`, this)
+      if (this._forcePositive && num <= 0) throw new ParseError(`Given Number is not Positive! (${num})`, this)
+      if (this._forceNegative && num >= 0) throw new ParseError(`Given Number is not Negative! (${num})`, this)
+      return [num, argArray.join(" ")]
+    }
+  
+    /**
+     * specifies the minimum value
+     * @param {number} min the minimum length of the argument
+     */
+    minimum(min) {
+      this._min = min
+      return this
+    }
+  
+    /**
+     * specifies the maximum value
+     * @param {number} max the maximum length of the argument
+     */
+    maximum(max) {
+      this._max = max
+      return this
+    }
+  
+    /** specifies that the Number must be an integer (no floating point) */
+    integer() {
+      this._int = true
+      return this
+    }
+  
+    /** specifies that the Number must be a positive Number */
+    positive() {
+      this._forcePositive = true
+      this._forceNegative = false
+      return this
+    }
+  
+    /** specifies that the Number must be a negative Number */
+    negative() {
+      this._forcePositive = false
+      this._forceNegative = true
+      return this
+    }
+  
+  }
+
+  /**
+   * Class representing a ClientArgument
+   * this Argument is capable to parse a Client UID or a simple UID
+   * inside the exec function it will resolve the found uid
+   */
+  class ClientArgument extends Argument {
+
+    /**
+     * Validates and tries to parse the Client from the given input string
+     * @param {string} args the input from where the client gets extracted
+     */
+    validate(args) {
+      switch (engine.getBackend()) {
+        case "ts3": return this._validateTS3(args)
+        case "discord": return this._validateDiscord(args)
+        default: throw new Error(`Unknown Backend ${engine.getBackend()}`)
+      }
+    }
+
+    /**
+     * Tries to validate a TeamSpeak Client URL or UID
+     * @param {string} args the input from where the client gets extracted
+     * @throws {ParseError} An error is thrown when argument is invalid
+     */
+    _validateTS3(args) {
+      const match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
+      if (!match) throw new ParseError("Client not found!", this)
+      //@ts-ignore
+      return [match.groups.url_uid || match.groups.uid, match.groups.rest]
+    }
+
+    /**
+     * Tries to validate a Discord Client Name or ID
+     * @param {string} args the input from where the client gets extracted
+     * @throws {ParseError} An error is thrown when argument is invalid
+     */
+    _validateDiscord(args) {
+      const match = args.match(/^(<@(?<id>\d{18})>|@(?<name>.*?)#\d{4}) *(?<rest>.*)$/i)
+      if (!match || !match.groups) throw new ParseError("Client not found!", this)
+      const { id, name, rest } = match.groups
+      if (id) {
+        return [id, rest]
+      } else if (name) {
+        const client = backend.getClientByName(name)
+        if (!client) throw new ParseError("Client not found!", this)
+        return [client.uid().split("/")[1], rest]
+      } else {
+        throw new ParseError("Client not found!", this)
+      }
+    }
+  }
 
   ////////////////////////////////////////////////////////////
   ////                    COMMAND                         ////
@@ -547,267 +801,92 @@ registerPlugin({
       return { result: resolved, remaining: args, errors }
     }
 
-
-    /** 
-     * creates new object with argument options
-     * @returns {ArgType}
-     */
-    static createArgumentLayer() {
-      return {
-        string: new StringArgument(),
-        number: new NumberArgument(),
-        client: new ClientArgument(),
-        rest: new RestArgument(),
-        or: new GroupArgument(GroupArgument.Type.OR),
-        and: new GroupArgument(GroupArgument.Type.AND),
-      }
-    }
-
   }
 
+  class CommandGroup extends BaseCommand {
   
-  class StringArgument extends Argument {
-    
-    constructor() {
-      super()
-      /** @type {RegExp|null} */
-      this._regex = null
-      /** @type {number|null} */
-      this._maxlen = null
-      /** @type {number|null} */
-      this._minlen = null
-      /** @type {string[]|null} */
-      this._whitelist = null
-      /** @type {boolean} */
-      this._uppercase = false
-      /** @type {boolean} */
-      this._lowercase = false
+    /**
+     * @param {string} cmd 
+     */
+    constructor(cmd) {
+      super(cmd)
+      /** @type {Command[]} */
+      this.commands = []
     }
   
     /**
-     * Validates the given String to the StringArgument
-     * @param {string} args the remaining args
+     * Retrieves the usage of the command with its parameterized names
+     * @returns retrieves the complete usage of the command with its argument names
      */
-    validate(args) {
-      const argArray = args.split(" ")
-      const str = argArray.shift()
-      return this._validate(str||"", argArray.join(" "))
+    getUsage() {
+      return `${this.getFullCommandName()} ${this.commands.map(cmd => cmd.getCommandName()).join("|")}`
     }
   
     /**
-     * Validates the given string to the StringArgument params
-     * @protected
-     * @param {string} arg string argument that should be parsed
-     * @param {string[]} rest the remaining args
+     * checks if a client should have permission to use this command
+     * @param {Client} client the client which should be checked
      */
-    _validate(arg, ...rest) {
-      if (this._uppercase) arg = arg.toUpperCase()
-      if (this._lowercase) arg = arg.toLowerCase()
-      if (this._minlen !== null && this._minlen > arg.length) throw new ParseError(`String length not greater or equal! Expected at least ${this._minlen}, but got ${arg.length}`, this)
-      if (this._maxlen !== null && this._maxlen < arg.length) throw new ParseError(`String length not less or equal! Maximum ${this._maxlen} chars allowed, but got ${arg.length}`, this)
-      if (this._whitelist !== null && !this._whitelist.includes(arg)) throw new ParseError(`Invalid Input for ${arg}. Allowed words: ${this._whitelist.join(", ")}`, this)
-      if (this._regex !== null && !this._regex.test(arg)) throw new ParseError(`Regex missmatch, the input '${arg}' did not match the expression ${this._regex.toString()}`, this)
-      return [arg, ...rest]
+    async hasPermission(client) {
+      if (!await this.isAllowed(client)) return false
+      if (this._runHandler.length > 0) return true
+      return (await Promise.all(this.commands.map(cmd => cmd.hasPermission(client)))).some(result => result)
     }
   
     /**
-     * Matches a regular expression pattern
-     * @param {RegExp} regex the regex which should be validated
+     * Adds a new sub Commmand to the group
+     * @param {string} name the sub command name which should be added
      */
-    match(regex) {
-      this._regex = regex
-      return this
+    addCommand(name) {
+      if (!Commander.isValidCommandName(name)) throw new Error("Can not create a command with length of 0")
+      const cmd = new Command(name)
+      this.commands.push(cmd)
+      return cmd
     }
   
     /**
-     * Sets the maximum Length of the String
-     * @param {number} len the maximum length of the argument
+     * Retrieves a subcommand by its command name
+     * @param {string} name the name which should be searched for
      */
-    maximum(len) {
-      this._maxlen = len
-      return this
+    findSubCommandByName(name) {
+      if (name.length === 0) throw new CommandNotFoundError(`No subcommand specified for Command ${this.getFullCommandName()}`)
+      const cmd = this.commands.find(c => c.getCommandName() === name)
+      if (!cmd) throw new CommandNotFoundError(`Command with name "${name}" has not been found on Command ${this.getFullCommandName()}!`)
+      return cmd
+    }
+  
+    /** Command Groups generally dont have arguments */
+    validate() {
+      return {}
     }
   
     /**
-     * Sets the minimum Length of the String
-     * @param {number} len the minimum length of the argument
+     * retrievel all available subcommands
+     * @param {Client} [client] the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
+     * @param {string} [cmd] the command which should be searched for
      */
-    minimum(len) {
-      this._minlen = len
-      return this
-    }
-  
-  
-    /** converts the input to an upper case string */
-    forceUpperCase() {
-      this._lowercase = false
-      this._uppercase = true
-      return this
-    }
-  
-  
-    /** converts the input to a lower case string */
-    forceLowerCase() {
-      this._lowercase = true
-      this._uppercase = false
-      return this
+    getAvailableSubCommands(client, cmd) {
+      const cmds = this.commands
+        .filter(c => c.getCommandName() === cmd || !cmd)
+        .filter(c => c.isEnabled())
+      if (!client) return Promise.resolve(cmds)
+      return this.commander.checkPermissions(cmds, client)
     }
   
     /**
-     * creates a list of available whitelisted words
-     * @param {string[]} words array of whitelisted words
+     * 
+     * @param {string} args 
+     * @param {CommanderTextMessage} ev 
      */
-    allow(words) {
-      if (!Array.isArray(this._whitelist)) this._whitelist = []
-      this._whitelist.push(...words)
-      return this
+    handleRequest(args, ev) {
+      const [cmd, ...rest] = args.split(" ")
+      if (cmd.length === 0) return this._dispatchCommand(ev)
+      return this.findSubCommandByName(cmd).handleRequest(rest.join(" "), ev)
     }
   }
 
-
-
-  class RestArgument extends StringArgument {
-
-    /**
-     * Validates the given String to the RestArgument
-     * @param {string} args the remaining args
-     */
-    validate(args) {
-        return super._validate(args, "")
-    }
-  }
-
-
-
-  class NumberArgument extends Argument {
-
-    constructor() {
-      super()
-      /** @type {number|null} */
-      this._min = null
-      /** @type {number|null} */
-      this._max = null
-      /** @type {boolean} */
-      this._int = false
-      /** @type {boolean} */
-      this._forcePositive = false
-      /** @type {boolean} */
-      this._forceNegative = false
-    }
-  
-    /**
-     * Validates the given Number to the Object
-     * @param {string} args the remaining args
-     */
-    validate(args) {
-      const argArray = args.split(" ")
-      const arg = argArray.shift()|| ""
-      const num = parseFloat(arg)
-      if (!(/^-?\d+(\.\d+)?$/).test(arg) || isNaN(num)) throw new ParseError(`"${arg}" is not a valid number`, this)
-      if (this._min !== null && this._min > num) throw new ParseError(`Number not greater or equal! Expected at least ${this._min}, but got ${num}`, this)
-      if (this._max !== null && this._max < num) throw new ParseError(`Number not less or equal! Expected at least ${this._max}, but got ${num}`, this)
-      if (this._int && num % 1 !== 0) throw new ParseError(`Given Number is not an Integer! (${num})`, this)
-      if (this._forcePositive && num <= 0) throw new ParseError(`Given Number is not Positive! (${num})`, this)
-      if (this._forceNegative && num >= 0) throw new ParseError(`Given Number is not Negative! (${num})`, this)
-      return [num, argArray.join(" ")]
-    }
-  
-    /**
-     * specifies the minimum value
-     * @param {number} min the minimum length of the argument
-     */
-    minimum(min) {
-      this._min = min
-      return this
-    }
-  
-    /**
-     * specifies the maximum value
-     * @param {number} max the maximum length of the argument
-     */
-    maximum(max) {
-      this._max = max
-      return this
-    }
-  
-    /** specifies that the Number must be an integer (no floating point) */
-    integer() {
-      this._int = true
-      return this
-    }
-  
-    /** specifies that the Number must be a positive Number */
-    positive() {
-      this._forcePositive = true
-      this._forceNegative = false
-      return this
-    }
-  
-    /** specifies that the Number must be a negative Number */
-    negative() {
-      this._forcePositive = false
-      this._forceNegative = true
-      return this
-    }
-  
-  }
-
-  /**
-   * Class representing a ClientArgument
-   * this Argument is capable to parse a Client UID or a simple UID
-   * inside the exec function it will resolve the found uid
-   */
-  class ClientArgument extends Argument {
-
-    /**
-     * Validates and tries to parse the Client from the given input string
-     * @param {string} args the input from where the client gets extracted
-     */
-    validate(args) {
-      switch (engine.getBackend()) {
-        case "ts3": return this._validateTS3(args)
-        case "discord": return this._validateDiscord(args)
-        default: throw new Error(`Unknown Backend ${engine.getBackend()}`)
-      }
-    }
-
-    /**
-     * Tries to validate a TeamSpeak Client URL or UID
-     * @param {string} args the input from where the client gets extracted
-     * @throws {ParseError} An error is thrown when argument is invalid
-     */
-    _validateTS3(args) {
-      const match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
-      if (!match) throw new ParseError("Client not found!", this)
-      //@ts-ignore
-      return [match.groups.url_uid || match.groups.uid, match.groups.rest]
-    }
-
-    /**
-     * Tries to validate a Discord Client Name or ID
-     * @param {string} args the input from where the client gets extracted
-     * @throws {ParseError} An error is thrown when argument is invalid
-     */
-    _validateDiscord(args) {
-      const match = args.match(/^(<@(?<id>\d{18})>|@(?<name>.*?)#\d{4}) *(?<rest>.*)$/i)
-      if (!match) throw new ParseError("Client not found!", this)
-      /**
-       * @typedef 
-       */
-      const { id, name, rest } = match.groups
-      if (id) {
-        return [id, rest]
-      } else if (name) {
-        const client = backend.getClientByName(name)
-        if (!client) throw new ParseError("Client not found!", this)
-        return [client.uid().split("/")[1], rest]
-      } else {
-        throw new ParseError("Client not found!", this)
-      }
-    }
-  }
-
-
+  ////////////////////////////////////////////////////////////
+  ////                    Wrappers                        ////
+  ////////////////////////////////////////////////////////////
 
 
   /**
