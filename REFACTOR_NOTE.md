@@ -2,7 +2,7 @@ Changes:
 - Removed SubCommand, inheritance is now:
     - BaseCommand (abstract)
     - Command extends BaseCommand
-    - CommandGroup extends BaseCommand (CommandGroup now hols Command instead of SubCommand)
+    - CommandGroup extends BaseCommand (CommandGroup now holds Command instead of SubCommand)
 
 Internal:
 - Renamed `TooManyArguments` Exception to `TooManyArgumentsError` for name consistency
