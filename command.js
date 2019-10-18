@@ -140,7 +140,7 @@ registerPlugin({
   class TooManyArgumentsError extends Error {
     /**
      * @param {string} err
-     * @param {ParseError} parseError
+     * @param {ParseError} [parseError]
      */
     constructor(err, parseError) {
       super(err)
@@ -440,7 +440,7 @@ registerPlugin({
      * specifies the minimum value
      * @param {number} min the minimum length of the argument
      */
-    minimum(min) {
+    min(min) {
       this._min = min
       return this
     }
@@ -449,7 +449,7 @@ registerPlugin({
      * specifies the maximum value
      * @param {number} max the maximum length of the argument
      */
-    maximum(max) {
+    max(max) {
       this._max = max
       return this
     }
@@ -884,7 +884,7 @@ registerPlugin({
      * sets a help text (should be a very brief description)
      * @param {string} text help text
      */
-    setHelp(text) {
+    help(text) {
       this._help = text
       return this
     }
@@ -923,7 +923,7 @@ registerPlugin({
      * in order to create a multilined manual text
      * @param {string} text the manual text
      */
-    setManual(text) {
+    manual(text) {
       this._manual.push(text)
       return this
     }
@@ -1048,8 +1048,7 @@ registerPlugin({
      */
     validate(args) {
       const { result, errors, remaining } = this.validateArgs(args)
-      //@ts-ignore
-      if (remaining.length > 0) throw new TooManyArgumentsError(`Too many argument!`, errors.length > 0 ? errors.shift() : undefined)
+      if (remaining.length > 0) throw new TooManyArgumentsError(`Too many argument!`, errors.shift())
       return result
     }
 
@@ -1140,7 +1139,7 @@ registerPlugin({
      * Retrieves a subcommand by its command name
      * @param {string} name the name which should be searched for
      */
-    findSubCommandByName(name) {
+    findCommandByName(name) {
       name = name.toLowerCase()
       if (name.length === 0) throw new CommandNotFoundError(`No subcommand specified for Command ${this.getFullCommandName()}`)
       const cmd = this.commands.find(c => c.getCommandNames().includes(name))
@@ -1153,7 +1152,7 @@ registerPlugin({
      * @param {Client} [client] the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
      * @param {string} [cmd] the command which should be searched for
      */
-    getAvailableSubCommands(client, cmd) {
+    getAvailableCommands(client, cmd) {
       const cmds = this.commands
         .filter(c => c.getCommandName() === cmd || !cmd)
         .filter(c => c.isEnabled())
@@ -1173,7 +1172,7 @@ registerPlugin({
         reply: Collector.getReplyOutput(ev),
         raw: ev
       })
-      return this.findSubCommandByName(cmd).dispatch(rest.join(" "), ev)
+      return this.findCommandByName(cmd).dispatch(rest.join(" "), ev)
     }
   }
 
@@ -1221,10 +1220,12 @@ registerPlugin({
     /**
      * checks the permissions from a set of commands
      * @param {BaseCommand[]} commands 
-     * @param {Client} client 
+     * @param {Client} client
+     * @returns {Promise<BaseCommand[]>}
      */
     static async checkPermissions(commands, client) {
       const result = await Promise.all(commands.map(async cmd => await cmd.hasPermission(client)))
+      //@ts-ignore
       return result
         .map((res, i) => res ? commands[i] : false)
         .filter(res => res instanceof BaseCommand)
@@ -1239,6 +1240,18 @@ registerPlugin({
       return this._commands
         .filter(cmd => cmd.isEnabled())
         .filter(cmd => cmd.getCommandNames().includes(name))
+    }
+    
+
+    /**
+     * retrieves all available permissions for a certain client
+     * @param {Client} client 
+     */
+    getAvailableCommandsByPermission(client) {
+      return Collector.checkPermissions(
+        this._commands.filter(cmd => cmd.isEnabled()),
+        client
+      )
     }
 
     /**
@@ -1299,7 +1312,7 @@ registerPlugin({
     isSaveCommand(cmd) {
       cmd = cmd.toLowerCase()
       Collector.isValidCommandName(cmd)
-      if (this.getAvailableCommands(cmd)) return false
+      if (this.getAvailableCommands(cmd).length > 0) return false
       return true
     }
   
@@ -1320,6 +1333,120 @@ registerPlugin({
   ////////////////////////////////////////////////////////////
 
   const collector = new Collector()
+
+
+  collector.registerCommand("help")
+    .help("Displays this text")
+    .manual(`Displays a list of useable commands`)
+    .manual(`you can search/filter for a specific commands by adding a keyword`)
+    .addArgument(arg => arg.string.setName("filter").min(1).optional())
+    .exec(async (client, { filter }, reply) => {
+      /**
+       * @param {string} str
+       * @param {number} len
+       */
+      const fixLen = (str, len) => str + Array(len - str.length).fill(" ").join("")
+      let length = 0
+      const cmds = (await collector.getAvailableCommandsByPermission(client))
+        .filter(cmd => cmd.hasHelp())
+        .filter(cmd => !filter ||
+          cmd.getCommandName().match(new RegExp(filter, "i")) ||
+          cmd.getHelp().match(new RegExp(filter, "i")))
+      reply(`${format.bold(cmds.length.toString())} Commands found:`)
+      /** @type {string[][]} */
+      const commands = []
+      cmds
+        .forEach(async cmd => {
+          if (cmd instanceof CommandGroup) {
+            if (cmd.getFullCommandName().length > length) length = cmd.getFullCommandName().length
+            ;(await cmd.getAvailableCommands(client)).forEach(sub => {
+              if (cmd.getFullCommandName().length + sub.getCommandName().length + 1 > length)
+                length = cmd.getFullCommandName().length + sub.getCommandName().length + 1
+              commands.push([`${cmd.getFullCommandName()} ${sub.getCommandName()}`, sub.getHelp()])
+            })
+          } else {
+            if (cmd.getFullCommandName().length > length) length = cmd.getFullCommandName().length
+            commands.push([cmd.getFullCommandName(), cmd.getHelp()])
+          }
+        })
+      switch (engine.getBackend()) {
+        case "discord":
+          return commands
+            .map(([cmd, help]) => `${fixLen(cmd, length)}  ${help}`)
+            .reduce((acc, curr) => {
+              if (acc[acc.length - 1].length + acc.join("\n").length + 6 >= 2000) {
+                acc[acc.length] = [curr]
+              } else {
+                acc[acc.length - 1].push(curr)
+              }
+              return acc
+            }, /** @type {string[][]} */ [[]])
+            .forEach(lines => reply(format.code(lines.join("\n"))))
+        default:
+        case "ts3":
+          return commands
+            .map(([cmd, help]) => `${format.bold(cmd)} ${help}`)
+            .reduce((acc, curr) => {
+              if (acc[acc.length - 1].length + acc.join("\n").length + 2 >= 8192) {
+                acc[acc.length] = [curr]
+              } else {
+                acc[acc.length - 1].push(curr)
+              }
+              return acc
+            }, [[]])
+            .forEach(lines => reply(`\n${lines.join("\n")}`))
+      }
+    })
+
+  //creates the man command
+  collector.registerCommand("man")
+    .help("Displays detailed help about a command if available")
+    .manual(`Displays detailed usage help for a specific command`)
+    .manual(`Arguments with Arrow Brackets (eg. < > ) are mandatory arguments`)
+    .manual(`Arguments with Square Brackets (eg. [ ] ) are optional arguments`)
+    .addArgument(arg => arg.string.setName("command").min(1))
+    .addArgument(arg => arg.string.setName("subcommand").min(1).optional(false, false))
+    .exec(async (client, { command, subcommand }, reply) => {
+      /** @param {BaseCommand} cmd */
+      const getManual = cmd => {
+        if (cmd.hasManual()) return cmd.getManual()
+        if (cmd.hasHelp()) return cmd.getHelp()
+        return "No manual available"
+      }
+      const cmds = await Collector.checkPermissions(collector.getAvailableCommands(command), client)
+      if (cmds.length === 0) return reply(`No command with name ${format.bold(command)} found! Did you misstype the command?`)
+      cmds.forEach(async cmd => {
+        if (cmd instanceof CommandGroup) {
+          if (subcommand) {
+            ;(await cmd.getAvailableCommands(client, subcommand)).forEach(sub => {
+              reply(`\n${format.bold("Usage:")} ${cmd.getFullCommandName()} ${sub.getUsage()}\n${getManual(sub)}`)
+            })
+          } else {
+            reply(`${format.bold(cmd.getFullCommandName())} - ${getManual(cmd)}`)
+            ;(await cmd.getAvailableCommands(client)).forEach(sub => {
+              reply(`${format.bold(`${cmd.getFullCommandName()} ${sub.getUsage()}`)} - ${sub.getHelp()}`)
+            })
+          }
+        } else {
+          let response = `\nManual for command: ${format.bold(cmd.getFullCommandName())}\n${format.bold("Usage:")} ${cmd.getUsage()}\n${getManual(cmd)}`
+          if (cmd.getAlias().length > 0) response += `\n${format.bold("Alias")}: ${cmd.getAlias()}`
+          reply(response)
+        }
+      })
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   if (engine.getBackend() === "discord") {
     //discord message handler
@@ -1415,94 +1542,87 @@ registerPlugin({
 
 
   ////////////////////////////////////////////////////////////
-  ////                    Wrappers                        ////
+  ////                    EXPORTS                         ////
   ////////////////////////////////////////////////////////////
 
 
-  /**
-   * retrieves the current Command Prefix
-   * @returns {string} returns the command prefix
-   */
-  function getCommandPrefix() {
-    return Collector.getCommandPrefix()
-  }
-
-  /**
-   * retrieves the semantic version of this script
-   * @returns {string} returns the semantic version of this script
-   */
-  function getVersion() {
-    return version
-  }
-
-  /**
-   * Creates a new Command Instance with the given Command Name
-   * @param {string} cmd - the command which should be added
-   * @returns {Command} returns the created Command
-   */
-  function createCommand(cmd) {
-    if (!collector.isSaveCommand(cmd)) {
-      debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
-      debug(DEBUG.WARNING)(`command.js may work not as expected!`)
-    }
-    debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
-    return collector.registerCommand(cmd)
-  }
-
-  /**
-   * Creates a new CommandsCommand Instance with the given Command Name
-   * @param {string} cmd - the command which should be added
-   * @returns {CommandGroup} returns the created CommandGroup instance
-   */
-  function createCommandGroup(cmd) {
-    if (!collector.isSaveCommand(cmd)) {
-      debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
-      debug(DEBUG.WARNING)(`command.js may work not as expected!`)
-    }
-    debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
-    return collector.registerCommandGroup(cmd)
-  }
-
-  /**
-   * Creates a new Argument Instance
-   * @param {keyof ArgType} type - the argument type which should be created
-   * @returns {Argument} returns the created Argument
-   */
-  function createArgument(type) {
-    const arg = Argument.createArgumentLayer()[type]
-    if (!(arg instanceof Argument))
-      throw new Error(`Argument type not found! Available Arguments: ${Object.keys(Argument.createArgumentLayer()).join(", ")}`)
-    return arg
-  }
-
-  /**
-   * creates a new Argument Instance
-   * @param {"or"|"and"} type the argument type which should be created either "or" or "and" allowed
-   * @returns {GroupArgument} returns the created Group Argument
-   */
-  function createGroupedArgument(type) {
-    if (!Object.values(["or", "and"]).includes(type))
-      throw new Error(`Unexpected GroupArgument type, expected one of ["or", "and"] but got ${type}!`)
-    return new GroupArgument(type)
-  }
-
-  /**
-   * Creates a new Throttle Instance
-   * @returns {Throttle} returns the created Throttle
-   */
-  function createThrottle() {
-    return Collector.createThrottle()
-  }
-
-
   module.exports = {
-    createCommandGroup,
-    createCommand,
-    createArgument,
-    createGroupedArgument,
-    getCommandPrefix,
-    createThrottle,
-    getVersion,
+
+    /**
+     * Creates a new CommandsCommand Instance with the given Command Name
+     * @param {string} cmd - the command which should be added
+     * @returns {CommandGroup} returns the created CommandGroup instance
+     */
+    createCommandGroup(cmd) {
+      if (!collector.isSaveCommand(cmd)) {
+        debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
+        debug(DEBUG.WARNING)(`command.js may work not as expected!`)
+      }
+      debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
+      return collector.registerCommandGroup(cmd)
+    },
+
+    /**
+     * Creates a new Command Instance with the given Command Name
+     * @param {string} cmd - the command which should be added
+     * @returns {Command} returns the created Command
+     */
+    createCommand(cmd) {
+      if (!collector.isSaveCommand(cmd)) {
+        debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
+        debug(DEBUG.WARNING)(`command.js may work not as expected!`)
+      }
+      debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
+      return collector.registerCommand(cmd)
+    },
+
+    /**
+     * Creates a new Argument Instance
+     * @param {keyof ArgType} type - the argument type which should be created
+     * @returns {Argument} returns the created Argument
+     */
+    createArgument(type) {
+      const arg = Argument.createArgumentLayer()[type]
+      if (!(arg instanceof Argument))
+        throw new Error(`Argument type not found! Available Arguments: ${Object.keys(Argument.createArgumentLayer()).join(", ")}`)
+      return arg
+    },
+
+    /**
+     * creates a new Argument Instance
+     * @param {"or"|"and"} type the argument type which should be created either "or" or "and" allowed
+     * @returns {GroupArgument} returns the created Group Argument
+     */
+    createGroupedArgument(type) {
+      if (!Object.values(["or", "and"]).includes(type))
+        throw new Error(`Unexpected GroupArgument type, expected one of ["or", "and"] but got ${type}!`)
+      return new GroupArgument(type)
+    },
+
+    /**
+     * retrieves the current Command Prefix
+     * @returns {string} returns the command prefix
+     */
+    getCommandPrefix() {
+      return Collector.getCommandPrefix()
+    },
+
+    /**
+     * Creates a new Throttle Instance
+     * @returns {Throttle} returns the created Throttle
+     */
+    createThrottle() {
+      return Collector.createThrottle()
+    },
+
+    /**
+     * retrieves the semantic version of this script
+     * @returns {string} returns the semantic version of this script
+     */
+    getVersion() {
+      return version
+    },
+
     collector
   }
 })

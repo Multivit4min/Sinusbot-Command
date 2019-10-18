@@ -11,5 +11,5 @@ Internal:
 - Command#registerCommandGroup now takes a string as parameter instead of the created CommandGroup class and will instanciate the class by itself
 - internal function `Command#run` is now named `Command#dispatch`
 
-
-Deprecation:
+Features:
+- checkPermission now allows a Promise response
