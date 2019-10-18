@@ -1225,10 +1225,7 @@ registerPlugin({
      */
     static async checkPermissions(commands, client) {
       const result = await Promise.all(commands.map(async cmd => await cmd.hasPermission(client)))
-      //@ts-ignore
-      return result
-        .map((res, i) => res ? commands[i] : false)
-        .filter(res => res instanceof BaseCommand)
+      return commands.filter((_, i) => result[i])
     }
   
     /**
