@@ -1143,7 +1143,7 @@ registerPlugin({
     findSubCommandByName(name) {
       name = name.toLowerCase()
       if (name.length === 0) throw new CommandNotFoundError(`No subcommand specified for Command ${this.getFullCommandName()}`)
-      const cmd = this.commands.find(c => c.getCommandName() === name)
+      const cmd = this.commands.find(c => c.getCommandNames().includes(name))
       if (!cmd) throw new CommandNotFoundError(`Command with name "${name}" has not been found on Command ${this.getFullCommandName()}!`)
       return cmd
     }

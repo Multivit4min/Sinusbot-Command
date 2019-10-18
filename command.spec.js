@@ -124,6 +124,13 @@ describe("Command", () => {
     expect(mockFn).toBeCalledTimes(1)
   })
 
+  it("should test alias of a Command in a CommandGroup", () => {
+    cmdGroup = exported.createCommandGroup("foo")
+    cmdGroup.addCommand("bar").alias("b").exec(mockFn)
+    sinusbot.event.chat({ text: "!foo b" })
+    expect(mockFn).toBeCalledTimes(1)
+  })
+
 })
 
 
