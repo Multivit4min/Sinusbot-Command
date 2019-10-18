@@ -1355,20 +1355,21 @@ registerPlugin({
       reply(`${format.bold(cmds.length.toString())} Commands found:`)
       /** @type {string[][]} */
       const commands = []
-      cmds
-        .forEach(async cmd => {
-          if (cmd instanceof CommandGroup) {
-            if (cmd.getFullCommandName().length > length) length = cmd.getFullCommandName().length
-            ;(await cmd.getAvailableCommands(client)).forEach(sub => {
-              if (cmd.getFullCommandName().length + sub.getCommandName().length + 1 > length)
-                length = cmd.getFullCommandName().length + sub.getCommandName().length + 1
-              commands.push([`${cmd.getFullCommandName()} ${sub.getCommandName()}`, sub.getHelp()])
-            })
-          } else {
-            if (cmd.getFullCommandName().length > length) length = cmd.getFullCommandName().length
-            commands.push([cmd.getFullCommandName(), cmd.getHelp()])
-          }
-        })
+      await Promise.all(cmds.map(async cmd => {
+        if (cmd instanceof CommandGroup) {
+          if (cmd.getFullCommandName().length > length) length = cmd.getFullCommandName().length
+          ;(await cmd.getAvailableCommands(client)).forEach(sub => {
+            if (cmd.getFullCommandName().length + sub.getCommandName().length + 1 > length)
+              length = cmd.getFullCommandName().length + sub.getCommandName().length + 1
+            commands.push([`${cmd.getFullCommandName()} ${sub.getCommandName()}`, sub.getHelp()])
+          })
+        } else {
+          if (cmd.getFullCommandName().length > length) length = cmd.getFullCommandName().length
+          commands.push([cmd.getFullCommandName(), cmd.getHelp()])
+        }
+      }))
+      /** @type {string[][]} */
+      const init = [[]]
       switch (engine.getBackend()) {
         case "discord":
           return commands
@@ -1380,7 +1381,7 @@ registerPlugin({
                 acc[acc.length - 1].push(curr)
               }
               return acc
-            }, /** @type {string[][]} */ [[]])
+            }, init)
             .forEach(lines => reply(format.code(lines.join("\n"))))
         default:
         case "ts3":
@@ -1393,7 +1394,7 @@ registerPlugin({
                 acc[acc.length - 1].push(curr)
               }
               return acc
-            }, [[]])
+            }, init)
             .forEach(lines => reply(`\n${lines.join("\n")}`))
       }
     })
@@ -1434,17 +1435,6 @@ registerPlugin({
         }
       })
     })
-
-
-
-
-
-
-
-
-
-
-
 
 
 
