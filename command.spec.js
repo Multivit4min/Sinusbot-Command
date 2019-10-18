@@ -5,13 +5,10 @@ describe("Command", () => {
 
   /** @type {Sinusbot} */
   let sinusbot
-
   /** @type {jest.Mock} */
   let mockFn
-
   /** @type {any} */
   let testCmd
-
   /** @type {any} */
   let exported
 
@@ -64,6 +61,13 @@ describe("Command", () => {
       sinusbot.event.chat({ text: "!test", client: client.buildModule() })
       expect(mockFn).toBeCalledTimes(1)
       expect(client.chatMock).toBeCalledTimes(0)
+    })
+
+    it("should test a forced prefix", () => {
+      testCmd.forcePrefix("$")
+      sinusbot.event.chat({ text: "$test" })
+      sinusbot.event.chat({ text: "!test" })
+      expect(mockFn).toBeCalledTimes(1)
     })
 
     describe("invalid commands", () => {

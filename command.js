@@ -75,20 +75,31 @@ registerPlugin({
    * @typedef CommanderTextMessage
    * @type {object}
    * @property {(msg: string) => void} reply function to reply back
-   * @property {Client} invoker the client which invoked the command
+   * @property {Client} client the client which invoked the command
    * @property {Record<string, any>} arguments arguments from the command
    * @property {Message} raw raw message
+   * @property {DiscordMessage?} message
    */
 
   /**
    * callback for the command event
-   * @callback runHandler
+   * @callback execHandler
    * @param {Client} invoker
    * @param {Record<string, any>} args
    * @param {(msg: string) => void} reply
    * @param {Message} event
    */
   //@param {CommanderTextMessage} event
+
+  /**
+   * @typedef MessageEvent
+   * @type {object}
+   * @property {Client} client
+   * @property {Channel} channel
+   * @property {string} text
+   * @property {number} mode
+   * @property {DiscordMessage?} message
+   */
 
   /**
    * callback for the command event
@@ -491,8 +502,7 @@ registerPlugin({
      */
     _validateTS3(args) {
       const match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
-      if (!match) throw new ParseError("Client not found!", this)
-      //@ts-ignore
+      if (!match || !match.groups) throw new ParseError("Client not found!", this)
       return [match.groups.url_uid || match.groups.uid, match.groups.rest]
     }
 
@@ -690,7 +700,6 @@ registerPlugin({
     _refreshTimeout(id) {
       if (this._throttled[id] === undefined) return
       clearTimeout(this._throttled[id].timeout)
-      //@ts-ignore
       this._throttled[id].timeout = setTimeout(this._restorePoints.bind(this, id), this._tickrate)
       this._throttled[id].next = Date.now() + this._tickrate
     }
@@ -744,14 +753,17 @@ registerPlugin({
 
     /**
      * @param {string} cmd 
+     * @param {Collector} collector
      */
-    constructor(cmd) {
+    constructor(cmd, collector) {
+      /** @type {Collector} */
+      this._collector = collector
       /** @type {permissionHandler[]} */
       this._permissionHandler = []
-      /** @type {runHandler[]} */
-      this._runHandler = []
+      /** @type {execHandler[]} */
+      this._execHandler = []
       /** @type {string} */
-      this._prefix =""
+      this._prefix = ""
       /** @type {string} */
       this._help = ""
       /** @type {string[]} */
@@ -762,8 +774,9 @@ registerPlugin({
       this._enabled = true
       /** @type {?Throttle} */
       this._throttle = null
+      /** @type {string[]} */
+      this._alias = []
     }
-  
     
     /**
      * @abstract
@@ -792,12 +805,23 @@ registerPlugin({
     }
     
     /**
-     * 
+     * @abstract
      * @param {string} args
-     * @param {CommanderTextMessage} ev 
+     * @param {MessageEvent} ev 
      */
-    handleRequest(args, ev) {
+    dispatch(args, ev) {
       throw new Error("not implemented")
+    }
+
+    /**
+     * one or more alias for this command
+     * @param  {...string} alias 
+     */
+    alias(...alias) {
+      alias = alias.map(a => a.toLowerCase())
+      alias.forEach(a => Collector.isValidCommandName(a))
+      this._alias.push(...alias.filter(a => this._collector.getAvailableCommands(a)))
+      return this
     }
   
     /** checks if the command is enabled */
@@ -825,10 +849,30 @@ registerPlugin({
     getCommandName() {
       return this._name
     }
+
+    /** retrieves all registered alias names without prefix */
+    getAlias() {
+      return this._alias
+    }
   
     /** gets the command name with its prefix */
     getFullCommandName() {
       return `${this.getPrefix()}${this.getCommandName()}`
+    }
+
+    /** retrieves all registered alias names with prefix */
+    getFullAlias() {
+      return this._alias.map(a => `${this.getPrefix()}${a}`)
+    }
+
+    /** retrieves all registered command names */
+    getCommandNames() {
+      return [this.getCommandName(), ...this.getAlias()]
+    }
+
+    /** retrieves all registered command names with prefix */
+    getFullCommandNames() {
+      return [this.getFullCommandName(), ...this.getFullAlias()]
     }
   
     /** retrieves the help text */
@@ -859,14 +903,11 @@ registerPlugin({
     hasManual() {
       return this._manual.length > 0
     }
-  
+
     /**
-     * sets a prefix for this command
-     * should only used in specific cases
-     * by default the prefix gets inherited from its Commander
-     * @param {string} prefix the new prefix for this command
+     * @param {string} prefix the new prefix to set
      */
-    setPrefix(prefix) {
+    forcePrefix(prefix) {
       this._prefix = prefix
       return this
     }
@@ -874,7 +915,7 @@ registerPlugin({
     /** gets the current prefix for this command */
     getPrefix() {
       if (this._prefix.length > 0) return this._prefix
-      return getCommandPrefix()
+      return Collector.getCommandPrefix()
     }
   
     /**
@@ -897,10 +938,10 @@ registerPlugin({
   
     /**
      * register an execution handler for this command
-     * @param {runHandler} callback gets called whenever the command should do something
+     * @param {execHandler} callback gets called whenever the command should do something
      */
     exec(callback) {
-      this._runHandler.push(callback)
+      this._execHandler.push(callback)
       return this
     }
   
@@ -938,25 +979,12 @@ registerPlugin({
   
     /**
      * checks if a client is allowed to use this command
+     * this is the low level method to check permissions for a single command
      * @param {Client} client sinusbot client to check permissions from
      */
     isAllowed(client) {
       return Promise.all(this._permissionHandler.map(cb => cb(client)))
         .then(res => res.every(r => r))
-    }
-
-    /**
-     * 
-     * @param {string} args 
-     * @param {Message} event 
-     */
-    dispatch(args, event) {
-      return this._dispatchCommand({
-        invoker: event.client,
-        reply: Collector.getReplyOutput(event),
-        arguments: this.validate(args),
-        raw: event
-      })
     }
   
     /**
@@ -965,11 +993,8 @@ registerPlugin({
      * @param {CommanderTextMessage} ev 
      */
     _dispatchCommand(ev) {
-      this._handleThrottle(ev.invoker)
-      this._runHandler.forEach(handle => {
-        handle(ev.invoker, ev.arguments, ev.reply, ev.raw)
-        //handle({...ev})
-      })
+      this._handleThrottle(ev.client)
+      this._execHandler.forEach(handle => handle(ev.client, ev.arguments, ev.reply, ev.raw))
     }
   }
 
@@ -977,9 +1002,10 @@ registerPlugin({
 
     /**
      * @param {string} cmd 
+     * @param {Collector} collector 
      */
-    constructor(cmd) {
-      super(cmd)
+    constructor(cmd, collector) {
+      super(cmd, collector)
       /** @type {Argument[]} */
       this._arguments = []
     }
@@ -1029,10 +1055,15 @@ registerPlugin({
 
     /**
      * @param {string} args 
-     * @param {CommanderTextMessage} ev 
+     * @param {MessageEvent} ev 
      */
-    handleRequest(args, ev) {
-      this._dispatchCommand({ ...ev, arguments: this.validate(args) })
+    dispatch(args, ev) {
+      this._dispatchCommand({
+        ...ev,
+        arguments: this.validate(args),
+        reply: Collector.getReplyOutput(ev),
+        raw: ev
+      })
     }
 
     /**
@@ -1067,9 +1098,10 @@ registerPlugin({
   
     /**
      * @param {string} cmd 
+     * @param {Collector} collector 
      */
-    constructor(cmd) {
-      super(cmd)
+    constructor(cmd, collector) {
+      super(cmd, collector)
       /** @type {Command[]} */
       this.commands = []
     }
@@ -1088,7 +1120,7 @@ registerPlugin({
      */
     async hasPermission(client) {
       if (!await this.isAllowed(client)) return false
-      if (this._runHandler.length > 0) return true
+      if (this._execHandler.length > 0) return true
       return (await Promise.all(this.commands.map(cmd => cmd.hasPermission(client)))).some(result => result)
     }
   
@@ -1097,8 +1129,9 @@ registerPlugin({
      * @param {string} name the sub command name which should be added
      */
     addCommand(name) {
+      name = name.toLowerCase()
       if (!Collector.isValidCommandName(name)) throw new Error("Can not create a command with length of 0")
-      const cmd = new Command(name)
+      const cmd = new Command(name, this._collector)
       this.commands.push(cmd)
       return cmd
     }
@@ -1108,15 +1141,11 @@ registerPlugin({
      * @param {string} name the name which should be searched for
      */
     findSubCommandByName(name) {
+      name = name.toLowerCase()
       if (name.length === 0) throw new CommandNotFoundError(`No subcommand specified for Command ${this.getFullCommandName()}`)
       const cmd = this.commands.find(c => c.getCommandName() === name)
       if (!cmd) throw new CommandNotFoundError(`Command with name "${name}" has not been found on Command ${this.getFullCommandName()}!`)
       return cmd
-    }
-  
-    /** Command Groups generally dont have arguments */
-    validate() {
-      return {}
     }
   
     /**
@@ -1133,18 +1162,20 @@ registerPlugin({
     }
   
     /**
-     * 
      * @param {string} args 
-     * @param {CommanderTextMessage} ev 
+     * @param {MessageEvent} ev 
      */
-    handleRequest(args, ev) {
+    dispatch(args, ev) {
       const [cmd, ...rest] = args.split(" ")
-      if (cmd.length === 0) return this._dispatchCommand(ev)
-      return this.findSubCommandByName(cmd).handleRequest(rest.join(" "), ev)
+      if (cmd.length === 0) return this._dispatchCommand({
+        ...ev, 
+        arguments: {},
+        reply: Collector.getReplyOutput(ev),
+        raw: ev
+      })
+      return this.findSubCommandByName(cmd).dispatch(rest.join(" "), ev)
     }
   }
-
-
 
 
   ////////////////////////////////////////////////////////////
@@ -1156,6 +1187,16 @@ registerPlugin({
     constructor() {
       /** @type {BaseCommand[]} */
       this._commands = []
+    }
+
+    /**
+     * retrieves the current Command Prefix
+     * @returns {string} returns the command prefix
+     */
+    static getCommandPrefix() {
+      const prefix = engine.getCommandPrefix()
+      if (typeof prefix !== "string" || prefix.length === 0) return "!"
+      return prefix
     }
   
     /** creates a new Throttle instance */
@@ -1191,24 +1232,25 @@ registerPlugin({
   
     /**
      * get all available commands from its command string
-     * @param {string} [name] 
+     * @param {string} name
      */
     getAvailableCommands(name) {
+      name = name.toLowerCase()
       return this._commands
-        .filter(cmd => !name || cmd.getCommandName() === name || cmd.getFullCommandName() === name)
         .filter(cmd => cmd.isEnabled())
+        .filter(cmd => cmd.getCommandNames().includes(name))
     }
 
     /**
      * Searches for one or multiple enabled commands with its prefix
-     * @param {string} cmd the command with its prefix
+     * @param {string} name the command with its prefix
      * @returns {BaseCommand[]} returns an array of found commands
      */
-    getAvailableCommandsWithPrefix(cmd) {
-      cmd = cmd.toLowerCase()
+    getAvailableCommandsWithPrefix(name) {
+      name = name.toLowerCase()
       return this._commands
-        .filter(c => c.isEnabled())
-        .filter(c => c.getFullCommandName() === cmd)
+        .filter(cmd => cmd.isEnabled())
+        .filter(cmd => cmd.getFullCommandNames().includes(name))
     }
   
     /**
@@ -1216,7 +1258,7 @@ registerPlugin({
      * @param {string} text 
      */
     isPossibleCommand(text) {
-      if (text.startsWith(getCommandPrefix())) return true
+      if (text.startsWith(Collector.getCommandPrefix())) return true
       return this._commands.some(cmd => cmd.getFullCommandName() === text.split(" ")[0])
     }
   
@@ -1225,9 +1267,10 @@ registerPlugin({
      * @param {string} name the name of the command
      */
     registerCommand(name) {
+      name = name.toLowerCase()
       if (!Collector.isValidCommandName(name))
         throw new Error("Can not create a command with length of 0")
-      const cmd = new Command(name)
+      const cmd = new Command(name, this)
       this._commands.push(cmd)
       return cmd
     }
@@ -1237,9 +1280,10 @@ registerPlugin({
      * @param {string} name the name of the command
      */
     registerCommandGroup(name) {
+      name = name.toLowerCase()
       if (!Collector.isValidCommandName(name))
         throw new Error("Can not create a command with length of 0")
-      const cmd = new CommandGroup(name)
+      const cmd = new CommandGroup(name, this)
       this._commands.push(cmd)
       return cmd
     }
@@ -1271,126 +1315,32 @@ registerPlugin({
     }
   }
 
-
-
-
-  ////////////////////////////////////////////////////////////
-  ////                    Wrappers                        ////
-  ////////////////////////////////////////////////////////////
-
-
-  /**
-   * retrieves the current Command Prefix
-   * @name getCommandPrefix
-   * @returns {string} returns the command prefix
-   */
-  function getCommandPrefix() {
-    const prefix = engine.getCommandPrefix()
-    if (typeof prefix !== "string" || prefix.length === 0) return "!"
-    return prefix
-  }
-
-  /**
-   * retrieves the semantic version of this script
-   * @name getVersion
-   * @returns {string} returns the semantic version of this script
-   */
-  function getVersion() {
-    return version
-  }
-
-  /**
-  * Creates a new Command Instance with the given Command Name
-  * @name createCommand
-  * @param {string} cmd - the command which should be added
-  * @returns {Command} returns the created Command
-  */
- function createCommand(cmd) {
-   if (!collector.isSaveCommand(cmd)) {
-     debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
-     debug(DEBUG.WARNING)(`command.js may work not as expected!`)
-   }
-   debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
-   return collector.registerCommand(cmd)
- }
-
- /**
-  * Creates a new CommandsCommand Instance with the given Command Name
-  * @name createCommandGroup
-  * @param {string} cmd - the command which should be added
-  * @returns {CommandGroup} returns the created CommandGroup instance
-  */
- function createCommandGroup(cmd) {
-   if (!collector.isSaveCommand(cmd)) {
-     debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
-     debug(DEBUG.WARNING)(`command.js may work not as expected!`)
-   }
-   debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
-   return collector.registerCommandGroup(cmd)
- }
-
- /**
-  * Creates a new Argument Instance
-  * @name createArgument
-  * @param {keyof ArgType} type - the argument type which should be created
-  * @returns {Argument} returns the created Argument
-  */
- function createArgument(type) {
-   const arg = Argument.createArgumentLayer()[type]
-   if (!(arg instanceof Argument))
-     throw new Error(`Argument type not found! Available Arguments: ${Object.keys(Argument.createArgumentLayer()).join(", ")}`)
-   return arg
- }
-
- /**
-  * creates a new Argument Instance
-  * @param {"or"|"and"} type the argument type which should be created either "or" or "and" allowed
-  * @returns {GroupArgument} returns the created Group Argument
-  */
- function createGroupedArgument(type) {
-   if (!Object.values(["or", "and"]).includes(type))
-     throw new Error(`Unexpected GroupArgument type, expected one of ["or", "and"] but got ${type}!`)
-   return new GroupArgument(type)
- }
-
- /**
-  * Creates a new Throttle Instance
-  * @name createThrottle
-  * @returns {Throttle} returns the created Throttle
-  */
- function createThrottle() {
-   return new Throttle()
- }
-
   ////////////////////////////////////////////////////////////
   ////                    Logic                           ////
   ////////////////////////////////////////////////////////////
 
   const collector = new Collector()
 
-
   if (engine.getBackend() === "discord") {
+    //discord message handler
     event.on("message", ev => {
-      if (ev.author() === undefined) return debug(DEBUG.VERBOSE)("Will not handle messages from myself")
-
-      // create compatible Message object
       messageHandler({
         text: ev.content(),
         channel: ev.channel(),
         client: ev.author(),
         mode: ev.guildID() ? 2 : 1,
-        // @ts-ignore
         message: ev
       })
     })
   } else {
+    //teamspeak message handler
     event.on("chat", messageHandler)
   }
 
   /**
    * Handles chat/message events
    * @private
-   * @param {Message} ev
+   * @param {MessageEvent} ev
    */
   function messageHandler(ev) {
     //do not do anything when the bot sends a message
@@ -1407,13 +1357,13 @@ registerPlugin({
       //depending on the config setting return without error
       if (NOT_FOUND_MESSAGE !== "0") return
       //send the not found message
-      return Collector.getReplyOutput(ev)(`There is no enabled command named ${format.bold(command.toLowerCase())}, check ${format.bold(`${getCommandPrefix()}help`)} to get a list of available commands!`)
+      return Collector.getReplyOutput(ev)(`There is no enabled command named ${format.bold(command.toLowerCase())}, check ${format.bold(`${Collector.getCommandPrefix()}help`)} to get a list of available commands!`)
     }
     //handle every available command, should actually be only one command
     commands.forEach(async cmd => {
       const start = Date.now()
       try {
-        //run the cmd, this will
+        //dispatches the cmd, this will
         // - check for permissions
         // - parse the arguments
         // - dispatch the command
@@ -1427,14 +1377,14 @@ registerPlugin({
         let response = (engine.getBackend() === "ts3" ? "\n" : "")
         if (e instanceof CommandNotFoundError) {
           response += `${e.message}\n`
-          response += `For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}\n`
+          response += `For Command usage see ${format.bold(`${Collector.getCommandPrefix()}man ${cmd.getCommandName()}`)}\n`
           reply(response)
         } else if (e instanceof PermissionError) {
           response += `You do not have permissions to use this command!\n`
-          response += `To get a list of available commands see ${format.bold(`${getCommandPrefix()}help`)}`
+          response += `To get a list of available commands see ${format.bold(`${Collector.getCommandPrefix()}help`)}`
           reply(response)
         } else if (e instanceof ParseError) {
-          response += `Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}\n`
+          response += `Invalid Command usage! For Command usage see ${format.bold(`${Collector.getCommandPrefix()}man ${cmd.getCommandName()}`)}\n`
           reply(response)
         } else if (e instanceof ThrottleError) {
           reply(e.message)
@@ -1444,7 +1394,7 @@ registerPlugin({
             response += `Argument parsed with an error ${format.bold(e.parseError.argument.getManual())}\n`
             response += `Returned with ${format.bold(e.parseError.message)}\n`
           }
-          response += `Invalid Command usage! For Command usage see ${format.bold(`${getCommandPrefix()}man ${cmd.getCommandName()}`)}`
+          response += `Invalid Command usage! For Command usage see ${format.bold(`${Collector.getCommandPrefix()}man ${cmd.getCommandName()}`)}`
           reply(response)
         } else {
           reply("An unhandled exception occured, check the sinusbot logs for more informations")
@@ -1461,6 +1411,87 @@ registerPlugin({
         }
       }
     })
+  }
+
+
+  ////////////////////////////////////////////////////////////
+  ////                    Wrappers                        ////
+  ////////////////////////////////////////////////////////////
+
+
+  /**
+   * retrieves the current Command Prefix
+   * @returns {string} returns the command prefix
+   */
+  function getCommandPrefix() {
+    return Collector.getCommandPrefix()
+  }
+
+  /**
+   * retrieves the semantic version of this script
+   * @returns {string} returns the semantic version of this script
+   */
+  function getVersion() {
+    return version
+  }
+
+  /**
+   * Creates a new Command Instance with the given Command Name
+   * @param {string} cmd - the command which should be added
+   * @returns {Command} returns the created Command
+   */
+  function createCommand(cmd) {
+    if (!collector.isSaveCommand(cmd)) {
+      debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
+      debug(DEBUG.WARNING)(`command.js may work not as expected!`)
+    }
+    debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
+    return collector.registerCommand(cmd)
+  }
+
+  /**
+   * Creates a new CommandsCommand Instance with the given Command Name
+   * @param {string} cmd - the command which should be added
+   * @returns {CommandGroup} returns the created CommandGroup instance
+   */
+  function createCommandGroup(cmd) {
+    if (!collector.isSaveCommand(cmd)) {
+      debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
+      debug(DEBUG.WARNING)(`command.js may work not as expected!`)
+    }
+    debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
+    return collector.registerCommandGroup(cmd)
+  }
+
+  /**
+   * Creates a new Argument Instance
+   * @param {keyof ArgType} type - the argument type which should be created
+   * @returns {Argument} returns the created Argument
+   */
+  function createArgument(type) {
+    const arg = Argument.createArgumentLayer()[type]
+    if (!(arg instanceof Argument))
+      throw new Error(`Argument type not found! Available Arguments: ${Object.keys(Argument.createArgumentLayer()).join(", ")}`)
+    return arg
+  }
+
+  /**
+   * creates a new Argument Instance
+   * @param {"or"|"and"} type the argument type which should be created either "or" or "and" allowed
+   * @returns {GroupArgument} returns the created Group Argument
+   */
+  function createGroupedArgument(type) {
+    if (!Object.values(["or", "and"]).includes(type))
+      throw new Error(`Unexpected GroupArgument type, expected one of ["or", "and"] but got ${type}!`)
+    return new GroupArgument(type)
+  }
+
+  /**
+   * Creates a new Throttle Instance
+   * @returns {Throttle} returns the created Throttle
+   */
+  function createThrottle() {
+    return Collector.createThrottle()
   }
 
 
