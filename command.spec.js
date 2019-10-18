@@ -4,16 +4,16 @@ const fs = require("fs")
 describe("Command", () => {
 
   /** @type {Sinusbot} */
-  let sinusbot = null
+  let sinusbot
 
   /** @type {jest.Mock} */
-  let mockFn = null
+  let mockFn
 
-  /** return form createCommand */
-  let testCmd = null
+  /** @type {any} */
+  let testCmd
 
-  /** command.js export */
-  let exported = null
+  /** @type {any} */
+  let exported
 
   const script = fs.readFileSync("./command.js", "utf8")
 
@@ -88,15 +88,12 @@ describe("Command", () => {
   describe("CommandGroup", () => {
 
   /** @type {Sinusbot} */
-  let sinusbot = null
-
+  let sinusbot
   /** @type {jest.Mock} */
-  let mockFn = null
-
-  /** return form createCommand */
+  let mockFn
+  /** @type {any} */
   let cmdGroup = null
-
-  /** command.js export */
+  /** @type {any} */
   let exported = null
 
   const script = fs.readFileSync("./command.js", "utf8")
