@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "eslint": "eslint command.js",
-    "generate-docs": "documentation build command.js --project-name \"command.js\" -f html -o docs -c documentation.yml"
+    "generate-docs": "documentation build command.js --project-name \"command.js\" -f html -o docs -c documentation.yml",
+    "serve-docs": "documentation serve command.js --project-name \"command.js\" -f html -o docs -c documentation.yml"
   },
   "directories": {
     "example": "examples"
@@ -28,7 +29,7 @@
     "sinusbot-scripting-engine": "^1.0.13"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.18",
+    "@types/jest": "^24.0.19",
     "documentation": "^12.1.2",
     "eslint": "^6.5.1",
     "jest": "^24.9.0",

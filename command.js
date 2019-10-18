@@ -29,11 +29,13 @@ registerPlugin({
   /**
    * @param {number} level
    * @return {(mode: number) => (...args: any[]) => void}
+   * @private
    */
   function DEBUG(level) {
     /**
      * @param {number} mode the loglevel to log
      * @param {number[]} args data to log
+     * @private
      */
     const logger = (mode, ...args) => {
       if (mode > level) return
@@ -46,6 +48,7 @@ registerPlugin({
   DEBUG.INFO = 2
   DEBUG.WARNING = 1
   DEBUG.ERROR = 0
+  /** @private */
   const debug = DEBUG(parseInt(DEBUGLEVEL, 10))
 
 
@@ -72,6 +75,7 @@ registerPlugin({
    */
   
   /**
+   * @private
    * @typedef CommanderTextMessage
    * @type {object}
    * @property {(msg: string) => void} reply function to reply back
@@ -92,6 +96,7 @@ registerPlugin({
   //@param {CommanderTextMessage} event
 
   /**
+   * @private
    * @typedef MessageEvent
    * @type {object}
    * @property {Client} client
@@ -108,6 +113,7 @@ registerPlugin({
    */
 
   /**
+   * @private
    * @typedef ThrottleInterface
    * @type {object}
    * @property {number} points
@@ -120,15 +126,10 @@ registerPlugin({
   ////                   EXCEPTIONS                       ////
   ////////////////////////////////////////////////////////////
 
-  /** class representing a CommandDisabledError */
-  class CommandDisabledError extends Error {
-    /** @param {string} err */
-    constructor(err) {
-      super(err)
-    }
-  }
-
-  /** class representing a ThrottleError */
+  /** 
+   * class representing a ThrottleError
+   * @name ThrottleError
+   */
   class ThrottleError extends Error {
     /** @param {string} err  */
     constructor(err) {
@@ -136,11 +137,14 @@ registerPlugin({
     }
   }
 
-  /** class representing a TooManyArguments */
+  /** 
+   * class representing a TooManyArguments
+   * @name ParseError
+   */
   class TooManyArgumentsError extends Error {
     /**
      * @param {string} err
-     * @param {ParseError} [parseError]
+     * @param {ParseError?} parseError
      */
     constructor(err, parseError) {
       super(err)
@@ -151,6 +155,7 @@ registerPlugin({
   /**
    * class representing a ParseError
    * gets thrown when an Argument has not been parsed successful
+   * @name ParseError
    */
   class ParseError extends Error {
     /**
@@ -173,7 +178,7 @@ registerPlugin({
 
   /** class representing a PermissionError */
   class PermissionError extends Error {
-    /**  @param {string} err */
+    /** @param {string} err */
     constructor(err) {
       super(err)
     }
@@ -184,18 +189,36 @@ registerPlugin({
   ////                  ARGUMENTS                         ////
   ////////////////////////////////////////////////////////////
 
+  /**
+   * @name Argument
+   */
   class Argument {
 
     constructor() {
-      /** @type {boolean} */
+      /**
+       * @type {boolean}
+       * @private
+      */
       this._optional = false
-      /** @type {string} */
+      /**
+       * @type {string}
+       * @private
+      */
       this._name = "_"
-      /** @type {string} */
+      /**
+       * @type {string}
+       * @private
+      */
       this._display = "_"
-      /** @type {boolean} */
+      /**
+       * @type {boolean}
+       * @private
+      */
       this._displayDefault = true
-      /** @type {any} */
+      /**
+       * @type {any}
+       * @private
+      */
       this._default = undefined
     }
   
@@ -289,22 +312,42 @@ registerPlugin({
     }
   }
 
-
+  /**
+   * @name StringArgument
+   */
   class StringArgument extends Argument {
     
     constructor() {
       super()
-      /** @type {?RegExp} */
+      /**
+       * @type {?RegExp}
+       * @private
+       */
       this._regex = null
-      /** @type {?number} */
+      /**
+       * @type {?number}
+       * @private
+       */
       this._maxlen = null
-      /** @type {?number} */
+      /**
+       * @type {?number}
+       * @private
+       */
       this._minlen = null
-      /** @type {?string[]} */
+      /**
+       * @type {?string[]}
+       * @private
+       */
       this._whitelist = null
-      /** @type {boolean} */
+      /**
+       * @type {boolean}
+       * @private
+       */
       this._uppercase = false
-      /** @type {boolean} */
+      /**
+       * @type {boolean}
+       * @private
+       */
       this._lowercase = false
     }
   
@@ -388,8 +431,9 @@ registerPlugin({
     }
   }
 
-
-
+  /**
+   * @name RestArgument
+   */
   class RestArgument extends StringArgument {
 
     /**
@@ -401,21 +445,37 @@ registerPlugin({
     }
   }
 
-
-
+  /**
+   * @name NumberArgument
+   */
   class NumberArgument extends Argument {
 
     constructor() {
       super()
-      /** @type {?number} */
+      /**
+       * @type {?number}
+       * @private
+       */
       this._min = null
-      /** @type {?number} */
+      /**
+       * @type {?number}
+       * @private
+       */
       this._max = null
-      /** @type {boolean} */
+      /**
+       * @type {boolean}
+       * @private
+       */
       this._int = false
-      /** @type {boolean} */
+      /**
+       * @type {boolean}
+       * @private
+       */
       this._forcePositive = false
-      /** @type {boolean} */
+      /** 
+       * @type {boolean}
+       * @private
+       */
       this._forceNegative = false
     }
   
@@ -480,6 +540,7 @@ registerPlugin({
    * Class representing a ClientArgument
    * this Argument is capable to parse a Client UID or a simple UID
    * inside the exec function it will resolve the found uid
+   * @name ClientArgument
    */
   class ClientArgument extends Argument {
 
@@ -498,7 +559,7 @@ registerPlugin({
     /**
      * Tries to validate a TeamSpeak Client URL or UID
      * @param {string} args the input from where the client gets extracted
-     * @throws {ParseError} An error is thrown when argument is invalid
+     * @private
      */
     _validateTS3(args) {
       const match = args.match(/^(\[URL=client:\/\/\d*\/(?<url_uid>[/+a-z0-9]{27}=)~.*\].*\[\/URL\]|(?<uid>[/+a-z0-9]{27}=)) *(?<rest>.*)$/i)
@@ -509,7 +570,7 @@ registerPlugin({
     /**
      * Tries to validate a Discord Client Name or ID
      * @param {string} args the input from where the client gets extracted
-     * @throws {ParseError} An error is thrown when argument is invalid
+     * @private
      */
     _validateDiscord(args) {
       const match = args.match(/^(<@(?<id>\d{18})>|@(?<name>.*?)#\d{4}) *(?<rest>.*)$/i)
@@ -527,7 +588,9 @@ registerPlugin({
     }
   }
 
-
+  /**
+   * @name GroupArgument
+   */
   class GroupArgument extends Argument {
   
     /**
@@ -535,10 +598,16 @@ registerPlugin({
      */
     constructor(type) {
       super()
-      /** @type {"or"|"and"} */
-      this.type = type
-      /** @type {Argument[]} */
-      this.arguments = []
+      /**
+       * @type {"or"|"and"}
+       * @private
+       */
+      this._type = type
+      /** 
+       * @type {Argument[]}
+       * @private
+       */
+      this._arguments = []
     }
   
     /**
@@ -546,7 +615,7 @@ registerPlugin({
      * @param {string} args the remaining args
      */
     validate(args) {
-      switch (this.type) {
+      switch (this._type) {
         case "or": return this._validateOr(args)
         case "and": return this._validateAnd(args)
       }
@@ -555,13 +624,14 @@ registerPlugin({
     /**
      * Validates the given string to the "or" of the GroupArgument
      * @param {string} args the remaining args
+     * @private
      */
     _validateOr(args) {
       /** @type {Error[]} */
       const errors = []
       /** @type {Record<string, any>} */
       const resolved = {}
-      const valid = this.arguments.some(arg => {
+      const valid = this._arguments.some(arg => {
         try {
           const result = arg.validate(args)
           resolved[arg.getName()] = result[0]
@@ -578,13 +648,14 @@ registerPlugin({
     /**
      * Validates the given string to the "and" of the GroupArgument
      * @param {string} args the remaining args
+     * @private
      */
     _validateAnd(args) {
       /** @type {Record<string, any>} */
       const resolved = {}
       /** @type {?Error} */
       let error = null
-      this.arguments.some(arg => {
+      this._arguments.some(arg => {
         try {
           const result = arg.validate(args)
           resolved[arg.getName()] = result[0]
@@ -603,7 +674,7 @@ registerPlugin({
      * @param {createArgumentHandler} callback an argument to add
      */
     addArgument(callback) {
-      this.arguments.push(callback(Argument.createArgumentLayer()))
+      this._arguments.push(callback(Argument.createArgumentLayer()))
       return this
     }
   }
@@ -612,18 +683,36 @@ registerPlugin({
   ////                    Throttle                        ////
   ////////////////////////////////////////////////////////////
 
+  /**
+   * @name Throttle
+   */
   class Throttle {
 
     constructor() {
-      /** @type {Record<string, ThrottleInterface>} */
+      /**
+       * @type {Record<string, ThrottleInterface>}
+       * @private
+       */
       this._throttled = {}
-      /** @type {number} */
+      /**
+       * @type {number}
+       * @private
+       */
       this._penalty = 1
-      /** @type {number} */
+      /**
+       * @type {number}
+       * @private
+       */
       this._initial = 1
-      /** @type {number} */
+      /**
+       * @type {number}
+       * @private
+       */
       this._restore = 1
-      /** @type {number} */
+      /**
+       * @type {number}
+       * @private
+       */
       this._tickrate = 1000
     }
   
@@ -681,6 +770,7 @@ registerPlugin({
     /**
      * Restores points from the given id
      * @param {string} id the identifier for which the points should be stored
+     * @private
      */
     _restorePoints(id) {
       const throttle = this._throttled[id]
@@ -696,6 +786,7 @@ registerPlugin({
     /**
      * Resets the timeout counter for a stored id
      * @param {string} id the identifier which should be added
+     * @private
      */
     _refreshTimeout(id) {
       if (this._throttled[id] === undefined) return
@@ -707,6 +798,7 @@ registerPlugin({
     /**
      * Removes points from an id
      * @param {string} id the identifier which should be added
+     * @private
      */
     _reducePoints(id) {
       const throttle = this._createIdIfNotExists(id)
@@ -717,6 +809,7 @@ registerPlugin({
     /**
      * creates the identifier in the throttled object
      * @param {string} id the identifier which should be added
+     * @private
      */
     _createIdIfNotExists(id) {
       if (Object.keys(this._throttled).includes(id)) return this._throttled[id]
@@ -749,6 +842,9 @@ registerPlugin({
   ////                    COMMAND                         ////
   ////////////////////////////////////////////////////////////
 
+  /**
+   * @name BaseCommand
+   */
   class BaseCommand {
 
     /**
@@ -756,25 +852,55 @@ registerPlugin({
      * @param {Collector} collector
      */
     constructor(cmd, collector) {
-      /** @type {Collector} */
+      /** 
+       * @type {Collector} 
+       * @private
+       */
       this._collector = collector
-      /** @type {permissionHandler[]} */
+      /**
+       * @type {permissionHandler[]}
+       * @private
+       */
       this._permissionHandler = []
-      /** @type {execHandler[]} */
+      /**
+       * @type {execHandler[]}
+       * @private
+       */
       this._execHandler = []
-      /** @type {string} */
+      /**
+       * @type {string}
+       * @private
+       */
       this._prefix = ""
-      /** @type {string} */
+      /** 
+       * @type {string}
+       * @private
+       */
       this._help = ""
-      /** @type {string[]} */
+      /** 
+       * @type {string[]}
+       * @private
+       */
       this._manual = []
-      /** @type {string} */
+      /** 
+       * @type {string}
+       * @private
+       */
       this._name = cmd
-      /** @type {boolean} */
+      /**
+       * @type {boolean}
+       * @private
+       */
       this._enabled = true
-      /** @type {?Throttle} */
+      /**
+       * @type {?Throttle}
+       * @private
+       */
       this._throttle = null
-      /** @type {string[]} */
+      /**
+       * @type {string[]}
+       * @private
+       */
       this._alias = []
     }
     
@@ -955,8 +1081,8 @@ registerPlugin({
     }
   
     /**
-     * 
      * @param {Client} client the sinusbot client
+     * @private
      */
     _handleThrottle(client) {
       if (!(this._throttle instanceof Throttle)) return
@@ -998,6 +1124,9 @@ registerPlugin({
     }
   }
 
+  /**
+   * @name Command
+   */
   class Command extends BaseCommand {
 
     /**
@@ -1006,7 +1135,10 @@ registerPlugin({
      */
     constructor(cmd, collector) {
       super(cmd, collector)
-      /** @type {Argument[]} */
+      /**
+       * @type {Argument[]}
+       * @private
+       */
       this._arguments = []
     }
 
@@ -1093,6 +1225,9 @@ registerPlugin({
 
   }
 
+  /**
+   * @name CommandGroup
+   */
   class CommandGroup extends BaseCommand {
   
     /**
@@ -1101,8 +1236,11 @@ registerPlugin({
      */
     constructor(cmd, collector) {
       super(cmd, collector)
-      /** @type {Command[]} */
-      this.commands = []
+      /**
+       * @type {Command[]}
+       * @private
+       */
+      this._commands = []
     }
   
     /**
@@ -1110,7 +1248,7 @@ registerPlugin({
      * @returns retrieves the complete usage of the command with its argument names
      */
     getUsage() {
-      return `${this.getFullCommandName()} ${this.commands.map(cmd => cmd.getCommandName()).join("|")}`
+      return `${this.getFullCommandName()} ${this._commands.map(cmd => cmd.getCommandName()).join("|")}`
     }
   
     /**
@@ -1120,7 +1258,7 @@ registerPlugin({
     async hasPermission(client) {
       if (!await this.isAllowed(client)) return false
       if (this._execHandler.length > 0) return true
-      return (await Promise.all(this.commands.map(cmd => cmd.hasPermission(client)))).some(result => result)
+      return (await Promise.all(this._commands.map(cmd => cmd.hasPermission(client)))).some(result => result)
     }
   
     /**
@@ -1131,7 +1269,7 @@ registerPlugin({
       name = name.toLowerCase()
       if (!Collector.isValidCommandName(name)) throw new Error("Can not create a command with length of 0")
       const cmd = new Command(name, this._collector)
-      this.commands.push(cmd)
+      this._commands.push(cmd)
       return cmd
     }
   
@@ -1142,7 +1280,7 @@ registerPlugin({
     findCommandByName(name) {
       name = name.toLowerCase()
       if (name.length === 0) throw new CommandNotFoundError(`No subcommand specified for Command ${this.getFullCommandName()}`)
-      const cmd = this.commands.find(c => c.getCommandNames().includes(name))
+      const cmd = this._commands.find(c => c.getCommandNames().includes(name))
       if (!cmd) throw new CommandNotFoundError(`Command with name "${name}" has not been found on Command ${this.getFullCommandName()}!`)
       return cmd
     }
@@ -1153,7 +1291,7 @@ registerPlugin({
      * @param {string} [cmd] the command which should be searched for
      */
     getAvailableCommands(client, cmd) {
-      const cmds = this.commands
+      const cmds = this._commands
         .filter(c => c.getCommandName() === cmd || !cmd)
         .filter(c => c.isEnabled())
       if (!client) return Promise.resolve(cmds)
@@ -1181,10 +1319,16 @@ registerPlugin({
   ////                    Collector                       ////
   ////////////////////////////////////////////////////////////
 
+  /**
+   * @name Collector
+   */
   class Collector {
-  
+
     constructor() {
-      /** @type {BaseCommand[]} */
+      /** 
+       * @type {BaseCommand[]}
+       * @private
+      */
       this._commands = []
     }
 
@@ -1226,6 +1370,17 @@ registerPlugin({
     static async checkPermissions(commands, client) {
       const result = await Promise.all(commands.map(async cmd => await cmd.hasPermission(client)))
       return commands.filter((_, i) => result[i])
+    }
+  
+    /**
+     * checks if the command name is valid
+     * @param {string} name 
+     */
+    static isValidCommandName(name) {
+      if (typeof name !== "string") throw new Error("Expected a string as command name!")
+      if (name.length < 1) throw new Error(`Command should have a minimum length of 1!`)
+      if ((/\s/).test(name)) throw new Error(`Command "${name}" should not contain spaces!`)
+      return true
     }
   
     /**
@@ -1312,17 +1467,6 @@ registerPlugin({
       if (this.getAvailableCommands(cmd).length > 0) return false
       return true
     }
-  
-    /**
-     * checks if the command name is valid
-     * @param {string} name 
-     */
-    static isValidCommandName(name) {
-      if (typeof name !== "string") throw new Error("Expected a string as command name!")
-      if (name.length < 1) throw new Error(`Command should have a minimum length of 1!`)
-      if ((/\s/).test(name)) throw new Error(`Command "${name}" should not contain spaces!`)
-      return true
-    }
   }
 
   ////////////////////////////////////////////////////////////
@@ -1330,7 +1474,6 @@ registerPlugin({
   ////////////////////////////////////////////////////////////
 
   const collector = new Collector()
-
 
   collector.registerCommand("help")
     .help("Displays this text")
@@ -1341,6 +1484,7 @@ registerPlugin({
       /**
        * @param {string} str
        * @param {number} len
+       * @private
        */
       const fixLen = (str, len) => str + Array(len - str.length).fill(" ").join("")
       let length = 0
@@ -1350,7 +1494,10 @@ registerPlugin({
           cmd.getCommandName().match(new RegExp(filter, "i")) ||
           cmd.getHelp().match(new RegExp(filter, "i")))
       reply(`${format.bold(cmds.length.toString())} Commands found:`)
-      /** @type {string[][]} */
+      /** 
+       * @type {string[][]}
+       * @private
+       */
       const commands = []
       await Promise.all(cmds.map(async cmd => {
         if (cmd instanceof CommandGroup) {
@@ -1365,7 +1512,10 @@ registerPlugin({
           commands.push([cmd.getFullCommandName(), cmd.getHelp()])
         }
       }))
-      /** @type {string[][]} */
+      /** 
+       * @type {string[][]}
+       * @private
+       */
       const init = [[]]
       switch (engine.getBackend()) {
         case "discord":
@@ -1405,7 +1555,10 @@ registerPlugin({
     .addArgument(arg => arg.string.setName("command").min(1))
     .addArgument(arg => arg.string.setName("subcommand").min(1).optional(false, false))
     .exec(async (client, { command, subcommand }, reply) => {
-      /** @param {BaseCommand} cmd */
+      /**
+       * @param {BaseCommand} cmd
+       * @private
+       */
       const getManual = cmd => {
         if (cmd.hasManual()) return cmd.getManual()
         if (cmd.hasHelp()) return cmd.getHelp()
