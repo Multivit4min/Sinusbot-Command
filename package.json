@@ -7,7 +7,7 @@
     "test": "jest",
     "eslint": "eslint command.js",
     "generate-docs": "documentation build command.js --project-name \"command.js\" -f html -o docs -c documentation.yml",
-    "serve-docs": "documentation serve command.js --project-name \"command.js\" -f html -o docs -c documentation.yml"
+    "serve-docs": "documentation serve command.js --project-name \"command.js\" -f html -c documentation.yml"
   },
   "directories": {
     "example": "examples"

@@ -73,9 +73,11 @@ registerPlugin({
    * @property {GroupArgument} or
    * @property {GroupArgument} and
    */
+  // eslint-disable-next-line no-unused-vars
+  const ArgType = {}
 
   /**
-   * @private
+   * @ignore
    * @typedef CommanderTextMessage
    * @type {object}
    * @property {(msg: string) => void} reply function to reply back
@@ -93,10 +95,9 @@ registerPlugin({
    * @param {(msg: string) => void} reply
    * @param {Message} event
    */
-  //@param {CommanderTextMessage} event
 
   /**
-   * @private
+   * @ignore
    * @typedef MessageEvent
    * @type {object}
    * @property {Client} client
@@ -113,9 +114,8 @@ registerPlugin({
    */
 
   /**
-   * @private
+   * @ignore
    * @typedef ThrottleInterface
-   * @type {object}
    * @property {number} points
    * @property {number} next
    * @property {number} timeout
@@ -128,7 +128,7 @@ registerPlugin({
 
   /**
    * class representing a ThrottleError
-   * @name ThrottleError
+   * @private
    */
   class ThrottleError extends Error {
     /** @param {string} err  */
@@ -139,7 +139,7 @@ registerPlugin({
 
   /**
    * class representing a TooManyArguments
-   * @name ParseError
+   * @private
    */
   class TooManyArgumentsError extends Error {
     /**
@@ -155,7 +155,7 @@ registerPlugin({
   /**
    * class representing a ParseError
    * gets thrown when an Argument has not been parsed successful
-   * @name ParseError
+   * @private
    */
   class ParseError extends Error {
     /**
@@ -168,7 +168,10 @@ registerPlugin({
     }
   }
 
-  /** class representing a SubCommandNotFound */
+  /**
+   * class representing a SubCommandNotFoundError
+   * @private
+   */
   class CommandNotFoundError extends Error {
     /** @param {string} err */
     constructor(err) {
@@ -176,7 +179,10 @@ registerPlugin({
     }
   }
 
-  /** class representing a PermissionError */
+  /**
+   * class representing a PermissionError
+   * @private
+   */
   class PermissionError extends Error {
     /** @param {string} err */
     constructor(err) {
@@ -628,9 +634,15 @@ registerPlugin({
      * @private
      */
     _validateOr(args) {
-      /** @type {Error[]} */
+      /**
+       * @type {Error[]}
+       * @private
+       */
       const errors = []
-      /** @type {Record<string, any>} */
+      /**
+       * @type {Record<string, any>}
+       * @private
+       */
       const resolved = {}
       const valid = this._arguments.some(arg => {
         try {
@@ -652,9 +664,15 @@ registerPlugin({
      * @private
      */
     _validateAnd(args) {
-      /** @type {Record<string, any>} */
+      /**
+       * @type {Record<string, any>}
+       * @private
+       */
       const resolved = {}
-      /** @type {?Error} */
+      /**
+       * @type {?Error}
+       * @private
+       */
       let error = null
       this._arguments.some(arg => {
         try {
@@ -1206,9 +1224,15 @@ registerPlugin({
      */
     validateArgs(args) {
       args = args.trim()
-      /** @type {Record<string, any>} */
+      /**
+       * @type {Record<string, any>}
+       * @private
+       */
       const result = {}
-      /** @type {ParseError[]} */
+      /**
+       * @type {ParseError[]}
+       * @private
+       */
       const errors = []
       this.getArguments().forEach(arg => {
         try {
@@ -1476,6 +1500,7 @@ registerPlugin({
   ////                    Logic                           ////
   ////////////////////////////////////////////////////////////
 
+  /** @name collector */
   const collector = new Collector()
 
   collector.registerCommand("help")
@@ -1688,84 +1713,96 @@ registerPlugin({
   ////                    EXPORTS                         ////
   ////////////////////////////////////////////////////////////
 
+  /**
+   * @name createCommandGroup
+   * Creates a new CommandsCommand Instance with the given Command Name
+   * @param {string} cmd - the command which should be added
+   * @returns {CommandGroup} returns the created CommandGroup instance
+   */
+  function createCommandGroup(cmd) {
+    if (!collector.isSaveCommand(cmd)) {
+      debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
+      debug(DEBUG.WARNING)(`command.js may work not as expected!`)
+    }
+    debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
+    return collector.registerCommandGroup(cmd)
+  }
+
+  /**
+   * @name createCommand
+   * Creates a new Command Instance with the given Command Name
+   * @param {string} cmd - the command which should be added
+   * @returns {Command} returns the created Command
+   */
+  function createCommand(cmd) {
+    if (!collector.isSaveCommand(cmd)) {
+      debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
+      debug(DEBUG.WARNING)(`command.js may work not as expected!`)
+    }
+    debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
+    return collector.registerCommand(cmd)
+  }
+
+  /**
+   * @name createArgument
+   * Creates a new Argument Instance
+   * @param {keyof ArgType} type - the argument type which should be created
+   * @returns {Argument} returns the created Argument
+   */
+  function createArgument(type) {
+    const arg = Argument.createArgumentLayer()[type]
+    if (!(arg instanceof Argument))
+      throw new Error(`Argument type not found! Available Arguments: ${Object.keys(Argument.createArgumentLayer()).join(", ")}`)
+    return arg
+  }
+
+  /**
+   * @name createGroupedArgument
+   * creates a new Argument Instance
+   * @param {"or"|"and"} type the argument type which should be created either "or" or "and" allowed
+   * @returns {GroupArgument} returns the created Group Argument
+   */
+  function createGroupedArgument(type) {
+    if (!Object.values(["or", "and"]).includes(type))
+      throw new Error(`Unexpected GroupArgument type, expected one of ["or", "and"] but got ${type}!`)
+    return new GroupArgument(type)
+  }
+
+  /**
+   * @name getCommandPrefix
+   * retrieves the current Command Prefix
+   * @returns {string} returns the command prefix
+   */
+  function getCommandPrefix() {
+    return Collector.getCommandPrefix()
+  }
+
+  /**
+   * @name createThrottle
+   * Creates a new Throttle Instance
+   * @returns {Throttle} returns the created Throttle
+   */
+  function createThrottle() {
+    return Collector.createThrottle()
+  }
+
+  /**
+   * @name getVersion
+   * retrieves the semantic version of this script
+   * @returns {string} returns the semantic version of this script
+   */
+  function getVersion() {
+    return version
+  }
 
   module.exports = {
-
-    /**
-     * Creates a new CommandsCommand Instance with the given Command Name
-     * @param {string} cmd - the command which should be added
-     * @returns {CommandGroup} returns the created CommandGroup instance
-     */
-    createCommandGroup(cmd) {
-      if (!collector.isSaveCommand(cmd)) {
-        debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
-        debug(DEBUG.WARNING)(`command.js may work not as expected!`)
-      }
-      debug(DEBUG.VERBOSE)(`registering commandGroup '${cmd}'`)
-      return collector.registerCommandGroup(cmd)
-    },
-
-    /**
-     * Creates a new Command Instance with the given Command Name
-     * @param {string} cmd - the command which should be added
-     * @returns {Command} returns the created Command
-     */
-    createCommand(cmd) {
-      if (!collector.isSaveCommand(cmd)) {
-        debug(DEBUG.WARNING)(`WARNING there is already a command with name '${cmd}' enabled!`)
-        debug(DEBUG.WARNING)(`command.js may work not as expected!`)
-      }
-      debug(DEBUG.VERBOSE)(`registering command '${cmd}'`)
-      return collector.registerCommand(cmd)
-    },
-
-    /**
-     * Creates a new Argument Instance
-     * @param {keyof ArgType} type - the argument type which should be created
-     * @returns {Argument} returns the created Argument
-     */
-    createArgument(type) {
-      const arg = Argument.createArgumentLayer()[type]
-      if (!(arg instanceof Argument))
-        throw new Error(`Argument type not found! Available Arguments: ${Object.keys(Argument.createArgumentLayer()).join(", ")}`)
-      return arg
-    },
-
-    /**
-     * creates a new Argument Instance
-     * @param {"or"|"and"} type the argument type which should be created either "or" or "and" allowed
-     * @returns {GroupArgument} returns the created Group Argument
-     */
-    createGroupedArgument(type) {
-      if (!Object.values(["or", "and"]).includes(type))
-        throw new Error(`Unexpected GroupArgument type, expected one of ["or", "and"] but got ${type}!`)
-      return new GroupArgument(type)
-    },
-
-    /**
-     * retrieves the current Command Prefix
-     * @returns {string} returns the command prefix
-     */
-    getCommandPrefix() {
-      return Collector.getCommandPrefix()
-    },
-
-    /**
-     * Creates a new Throttle Instance
-     * @returns {Throttle} returns the created Throttle
-     */
-    createThrottle() {
-      return Collector.createThrottle()
-    },
-
-    /**
-     * retrieves the semantic version of this script
-     * @returns {string} returns the semantic version of this script
-     */
-    getVersion() {
-      return version
-    },
-
+    createCommandGroup,
+    createCommand,
+    createArgument,
+    createGroupedArgument,
+    getCommandPrefix,
+    createThrottle,
+    getVersion,
     collector
   }
 })
