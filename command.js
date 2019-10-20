@@ -811,7 +811,6 @@ registerPlugin({
     _refreshTimeout(id) {
       if (this._throttled[id] === undefined) return
       clearTimeout(this._throttled[id].timeout)
-      // @ts-ignore
       this._throttled[id].timeout = setTimeout(this._restorePoints.bind(this, id), this._tickrate)
       this._throttled[id].next = Date.now() + this._tickrate
     }
