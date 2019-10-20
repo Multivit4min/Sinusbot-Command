@@ -1,4 +1,3 @@
-///<reference path="./node_modules/sinusbot-scripting-engine/tsd/types.d.ts" />
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage commands",
@@ -84,16 +83,7 @@ registerPlugin({
    * @property {Client} client the client which invoked the command
    * @property {Record<string, any>} arguments arguments from the command
    * @property {Message} raw raw message
-   * @property {DiscordMessage?} message
-   */
-
-  /**
-   * callback for the command event
-   * @callback execHandler
-   * @param {Client} invoker
-   * @param {Record<string, any>} args
-   * @param {(msg: string) => void} reply
-   * @param {Message} event
+   * @property {DiscordMessage} [message]
    */
 
   /**
@@ -104,7 +94,16 @@ registerPlugin({
    * @property {Channel} channel
    * @property {string} text
    * @property {number} mode
-   * @property {DiscordMessage?} message
+   * @property {DiscordMessage} [message]
+   */
+
+  /**
+   * callback for the command event
+   * @callback execHandler
+   * @param {Client} invoker
+   * @param {Record<string, any>} args
+   * @param {(msg: string) => void} reply
+   * @param {MessageEvent} event
    */
 
   /**
