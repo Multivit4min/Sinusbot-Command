@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/Multivit4min/Sinusbot-Command#readme",
   "dependencies": {
-    "sinusbot-scripting-engine": "^1.0.13"
+    "sinusbot-scripting-engine": "^1.0.14"
   },
   "devDependencies": {
     "@types/jest": "^24.0.19",

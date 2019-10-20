@@ -73,7 +73,7 @@ registerPlugin({
    * @property {GroupArgument} or
    * @property {GroupArgument} and
    */
-  
+
   /**
    * @private
    * @typedef CommanderTextMessage
@@ -126,7 +126,7 @@ registerPlugin({
   ////                   EXCEPTIONS                       ////
   ////////////////////////////////////////////////////////////
 
-  /** 
+  /**
    * class representing a ThrottleError
    * @name ThrottleError
    */
@@ -137,14 +137,14 @@ registerPlugin({
     }
   }
 
-  /** 
+  /**
    * class representing a TooManyArguments
    * @name ParseError
    */
   class TooManyArgumentsError extends Error {
     /**
      * @param {string} err
-     * @param {ParseError?} parseError
+     * @param {ParseError|undefined} parseError
      */
     constructor(err, parseError) {
       super(err)
@@ -221,7 +221,7 @@ registerPlugin({
       */
       this._default = undefined
     }
-  
+
     /**
      * @abstract
      * @param {string} args
@@ -230,7 +230,7 @@ registerPlugin({
     validate(args) {
       throw new Error("not implemented")
     }
-  
+
     /**
      * Sets an Argument as optional
      * if the argument has not been parsed successful it will use the first argument which has been given inside this method
@@ -243,17 +243,17 @@ registerPlugin({
       this._optional = true
       return this
     }
-  
+
     /** retrieves the default value if it had been set */
     getDefault() {
       return this._default
     }
-  
+
     /** checks if the Argument has a default value */
     hasDefault() {
       return this._default !== undefined
     }
-  
+
     /** gets the manual of a command */
     getManual() {
       if (this.isOptional()) {
@@ -266,12 +266,12 @@ registerPlugin({
         return `<${this._display}>`
       }
     }
-  
+
     /** checks if the Argument is optional */
     isOptional() {
       return this._optional
     }
-  
+
     /**
      * Sets a name for the argument to identify it later when the command gets dispatched
      * This name will be used when passing the parsed argument to the exec function
@@ -286,7 +286,7 @@ registerPlugin({
       this._name = name
       return this
     }
-  
+
     /**
      * Retrieves the name of the Argument
      * @returns {string} retrieves the arguments name
@@ -296,7 +296,7 @@ registerPlugin({
     }
 
 
-    /** 
+    /**
      * creates new object with argument options
      * @returns {ArgType}
      */
@@ -307,7 +307,7 @@ registerPlugin({
         client: new ClientArgument(),
         rest: new RestArgument(),
         or: new GroupArgument("or"),
-        and: new GroupArgument("and"),
+        and: new GroupArgument("and")
       }
     }
   }
@@ -316,7 +316,7 @@ registerPlugin({
    * @name StringArgument
    */
   class StringArgument extends Argument {
-    
+
     constructor() {
       super()
       /**
@@ -350,7 +350,7 @@ registerPlugin({
        */
       this._lowercase = false
     }
-  
+
     /**
      * Validates the given String to the StringArgument
      * @param {string} args the remaining args
@@ -360,7 +360,7 @@ registerPlugin({
       const str = argArray.shift()
       return this._validate(str||"", argArray.join(" "))
     }
-  
+
     /**
      * Validates the given string to the StringArgument params
      * @protected
@@ -376,7 +376,7 @@ registerPlugin({
       if (this._regex !== null && !this._regex.test(arg)) throw new ParseError(`Regex missmatch, the input '${arg}' did not match the expression ${this._regex.toString()}`, this)
       return [arg, ...rest]
     }
-  
+
     /**
      * Matches a regular expression pattern
      * @param {RegExp} regex the regex which should be validated
@@ -385,7 +385,7 @@ registerPlugin({
       this._regex = regex
       return this
     }
-  
+
     /**
      * Sets the maximum Length of the String
      * @param {number} len the maximum length of the argument
@@ -394,7 +394,7 @@ registerPlugin({
       this._maxlen = len
       return this
     }
-  
+
     /**
      * Sets the minimum Length of the String
      * @param {number} len the minimum length of the argument
@@ -403,23 +403,23 @@ registerPlugin({
       this._minlen = len
       return this
     }
-  
-  
+
+
     /** converts the input to an upper case string */
     forceUpperCase() {
       this._lowercase = false
       this._uppercase = true
       return this
     }
-  
-  
+
+
     /** converts the input to a lower case string */
     forceLowerCase() {
       this._lowercase = true
       this._uppercase = false
       return this
     }
-  
+
     /**
      * creates a list of available whitelisted words
      * @param {string[]} words array of whitelisted words
@@ -441,7 +441,7 @@ registerPlugin({
      * @param {string} args the remaining args
      */
     validate(args) {
-        return super._validate(args, "")
+      return super._validate(args, "")
     }
   }
 
@@ -472,13 +472,13 @@ registerPlugin({
        * @private
        */
       this._forcePositive = false
-      /** 
+      /**
        * @type {boolean}
        * @private
        */
       this._forceNegative = false
     }
-  
+
     /**
      * Validates the given Number to the Object
      * @param {string} args the remaining args
@@ -495,7 +495,7 @@ registerPlugin({
       if (this._forceNegative && num >= 0) throw new ParseError(`Given Number is not Negative! (${num})`, this)
       return [num, argArray.join(" ")]
     }
-  
+
     /**
      * specifies the minimum value
      * @param {number} min the minimum length of the argument
@@ -504,7 +504,7 @@ registerPlugin({
       this._min = min
       return this
     }
-  
+
     /**
      * specifies the maximum value
      * @param {number} max the maximum length of the argument
@@ -513,27 +513,27 @@ registerPlugin({
       this._max = max
       return this
     }
-  
+
     /** specifies that the Number must be an integer (no floating point) */
     integer() {
       this._int = true
       return this
     }
-  
+
     /** specifies that the Number must be a positive Number */
     positive() {
       this._forcePositive = true
       this._forceNegative = false
       return this
     }
-  
+
     /** specifies that the Number must be a negative Number */
     negative() {
       this._forcePositive = false
       this._forceNegative = true
       return this
     }
-  
+
   }
 
   /**
@@ -592,9 +592,9 @@ registerPlugin({
    * @name GroupArgument
    */
   class GroupArgument extends Argument {
-  
+
     /**
-     * @param {"or"|"and"} type 
+     * @param {"or"|"and"} type
      */
     constructor(type) {
       super()
@@ -603,13 +603,13 @@ registerPlugin({
        * @private
        */
       this._type = type
-      /** 
+      /**
        * @type {Argument[]}
        * @private
        */
       this._arguments = []
     }
-  
+
     /**
      * Validates the given String to the GroupArgument
      * @param {string} args the remaining args
@@ -618,9 +618,10 @@ registerPlugin({
       switch (this._type) {
         case "or": return this._validateOr(args)
         case "and": return this._validateAnd(args)
+        default: throw new Error(`got invalid group type '${this._type}'`)
       }
     }
-  
+
     /**
      * Validates the given string to the "or" of the GroupArgument
      * @param {string} args the remaining args
@@ -644,7 +645,7 @@ registerPlugin({
       if (!valid) throw new ParseError(`No valid match found`, this)
       return [resolved, args]
     }
-  
+
     /**
      * Validates the given string to the "and" of the GroupArgument
      * @param {string} args the remaining args
@@ -668,13 +669,15 @@ registerPlugin({
       if (error !== null) return error
       return [resolved, args]
     }
-  
+
     /**
      * adds an argument to the command
-     * @param {createArgumentHandler} callback an argument to add
+     * @param {createArgumentHandler|Argument} arg an argument to add
      */
-    addArgument(callback) {
-      this._arguments.push(callback(Argument.createArgumentLayer()))
+    addArgument(arg) {
+      if (typeof arg === "function") arg = arg(Argument.createArgumentLayer())
+      if (!(arg instanceof Argument)) throw new Error(`Typeof arg should be function or instance of Argument but got ${arg}`)
+      this._arguments.push(arg)
       return this
     }
   }
@@ -715,13 +718,13 @@ registerPlugin({
        */
       this._tickrate = 1000
     }
-  
+
     /* clears all timers */
     stop() {
       Object.values(this._throttled).forEach(({ timeout }) => clearTimeout(timeout))
       return this
     }
-  
+
     /**
      * Defines how fast points will get restored
      * @param {number} duration time in ms how fast points should get restored
@@ -730,7 +733,7 @@ registerPlugin({
       this._tickrate = duration
       return this
     }
-  
+
     /**
      * The amount of points a command request costs
      * @param {number} amount the amount of points that should be reduduced
@@ -739,7 +742,7 @@ registerPlugin({
       this._penalty = amount
       return this
     }
-  
+
     /**
      * The Amount of Points that should get restored per tick
      * @param {number} amount the amount that should get restored
@@ -748,7 +751,7 @@ registerPlugin({
       this._restore = amount
       return this
     }
-  
+
     /**
      * Sets the initial Points a user has at beginning
      * @param {number} initial the Initial amount of Points a user has
@@ -757,7 +760,7 @@ registerPlugin({
       this._initial = initial
       return this
     }
-  
+
     /**
      * Reduces the given points for a Command for the given Client
      * @param {Client} client the client which points should be removed
@@ -766,7 +769,7 @@ registerPlugin({
       this._reducePoints(client.uniqueId())
       return this.isThrottled(client)
     }
-  
+
     /**
      * Restores points from the given id
      * @param {string} id the identifier for which the points should be stored
@@ -782,7 +785,7 @@ registerPlugin({
         this._refreshTimeout(id)
       }
     }
-  
+
     /**
      * Resets the timeout counter for a stored id
      * @param {string} id the identifier which should be added
@@ -794,7 +797,7 @@ registerPlugin({
       this._throttled[id].timeout = setTimeout(this._restorePoints.bind(this, id), this._tickrate)
       this._throttled[id].next = Date.now() + this._tickrate
     }
-  
+
     /**
      * Removes points from an id
      * @param {string} id the identifier which should be added
@@ -805,7 +808,7 @@ registerPlugin({
       throttle.points -= this._penalty
       this._refreshTimeout(id)
     }
-  
+
     /**
      * creates the identifier in the throttled object
      * @param {string} id the identifier which should be added
@@ -816,7 +819,7 @@ registerPlugin({
       this._throttled[id] = { points: this._initial, next: 0, timeout: 0 }
       return this._throttled[id]
     }
-  
+
     /**
      * Checks if the given Client is affected by throttle limitations
      * @param {Client} client the TeamSpeak Client which should get checked
@@ -826,7 +829,7 @@ registerPlugin({
       if (throttle === undefined) return false
       return throttle.points <= 0
     }
-  
+
     /**
      * retrieves the time in milliseconds until a client can send his next command
      * @param {Client} client the client which should be checked
@@ -848,12 +851,12 @@ registerPlugin({
   class BaseCommand {
 
     /**
-     * @param {string} cmd 
+     * @param {string} cmd
      * @param {Collector} collector
      */
     constructor(cmd, collector) {
-      /** 
-       * @type {Collector} 
+      /**
+       * @type {Collector}
        * @private
        */
       this._collector = collector
@@ -872,17 +875,17 @@ registerPlugin({
        * @private
        */
       this._prefix = ""
-      /** 
+      /**
        * @type {string}
        * @private
        */
       this._help = ""
-      /** 
+      /**
        * @type {string[]}
        * @private
        */
       this._manual = []
-      /** 
+      /**
        * @type {string}
        * @private
        */
@@ -903,7 +906,7 @@ registerPlugin({
        */
       this._alias = []
     }
-    
+
     /**
      * @abstract
      * @returns {string}
@@ -914,7 +917,7 @@ registerPlugin({
 
     /**
      * @abstract
-     * @param {Client} client 
+     * @param {Client} client
      * @returns {Promise<boolean>}
      */
     hasPermission(client) {
@@ -929,11 +932,11 @@ registerPlugin({
     validate(args) {
       throw new Error("not implemented")
     }
-    
+
     /**
      * @abstract
      * @param {string} args
-     * @param {MessageEvent} ev 
+     * @param {MessageEvent} ev
      */
     dispatch(args, ev) {
       throw new Error("not implemented")
@@ -941,7 +944,7 @@ registerPlugin({
 
     /**
      * one or more alias for this command
-     * @param  {...string} alias 
+     * @param  {...string} alias
      */
     alias(...alias) {
       alias = alias.map(a => a.toLowerCase())
@@ -949,12 +952,12 @@ registerPlugin({
       this._alias.push(...alias.filter(a => this._collector.getAvailableCommands(a)))
       return this
     }
-  
+
     /** checks if the command is enabled */
     isEnabled() {
       return this._enabled
     }
-  
+
     /**
      * enables the current command
      */
@@ -962,7 +965,7 @@ registerPlugin({
       this._enabled = true
       return this
     }
-  
+
     /**
      * disables the current command
      */
@@ -970,7 +973,7 @@ registerPlugin({
       this._enabled = false
       return this
     }
-  
+
     /** gets the command name without its prefix */
     getCommandName() {
       return this._name
@@ -980,7 +983,7 @@ registerPlugin({
     getAlias() {
       return this._alias
     }
-  
+
     /** gets the command name with its prefix */
     getFullCommandName() {
       return `${this.getPrefix()}${this.getCommandName()}`
@@ -1000,12 +1003,12 @@ registerPlugin({
     getFullCommandNames() {
       return [this.getFullCommandName(), ...this.getFullAlias()]
     }
-  
+
     /** retrieves the help text */
     getHelp() {
       return this._help
     }
-  
+
     /**
      * sets a help text (should be a very brief description)
      * @param {string} text help text
@@ -1014,17 +1017,17 @@ registerPlugin({
       this._help = text
       return this
     }
-  
+
     /** returns a boolean wether a help text has been set or not */
     hasHelp() {
       return this._help !== ""
     }
-  
+
     /** retrieves the current manual text */
     getManual() {
       return this._manual.join("\r\n")
     }
-  
+
     /** returns a boolean wether a help text has been set or not */
     hasManual() {
       return this._manual.length > 0
@@ -1037,13 +1040,13 @@ registerPlugin({
       this._prefix = prefix
       return this
     }
-  
+
     /** gets the current prefix for this command */
     getPrefix() {
       if (this._prefix.length > 0) return this._prefix
       return Collector.getCommandPrefix()
     }
-  
+
     /**
      * sets a manual text, this function can be called multiple times
      * in order to create a multilined manual text
@@ -1053,7 +1056,7 @@ registerPlugin({
       this._manual.push(text)
       return this
     }
-  
+
     /**
      * clears the current manual text
      */
@@ -1061,7 +1064,7 @@ registerPlugin({
       this._manual = []
       return this
     }
-  
+
     /**
      * register an execution handler for this command
      * @param {execHandler} callback gets called whenever the command should do something
@@ -1070,7 +1073,7 @@ registerPlugin({
       this._execHandler.push(callback)
       return this
     }
-  
+
     /**
      * adds an instance of a throttle class
      * @param {Throttle} throttle adds the throttle instance
@@ -1079,7 +1082,7 @@ registerPlugin({
       this._throttle = throttle
       return this
     }
-  
+
     /**
      * @param {Client} client the sinusbot client
      * @private
@@ -1093,7 +1096,7 @@ registerPlugin({
         this._throttle.throttle(client)
       }
     }
-  
+
     /**
      * register a permission handler for this command
      * @param {permissionHandler} callback gets called whenever the permission for a client gets checked
@@ -1102,7 +1105,7 @@ registerPlugin({
       this._permissionHandler.push(callback)
       return this
     }
-  
+
     /**
      * checks if a client is allowed to use this command
      * this is the low level method to check permissions for a single command
@@ -1112,11 +1115,11 @@ registerPlugin({
       return Promise.all(this._permissionHandler.map(cb => cb(client)))
         .then(res => res.every(r => r))
     }
-  
+
     /**
      * dispatches a command
      * @private
-     * @param {CommanderTextMessage} ev 
+     * @param {CommanderTextMessage} ev
      */
     _dispatchCommand(ev) {
       this._handleThrottle(ev.client)
@@ -1130,8 +1133,8 @@ registerPlugin({
   class Command extends BaseCommand {
 
     /**
-     * @param {string} cmd 
-     * @param {Collector} collector 
+     * @param {string} cmd
+     * @param {Collector} collector
      */
     constructor(cmd, collector) {
       super(cmd, collector)
@@ -1185,8 +1188,8 @@ registerPlugin({
     }
 
     /**
-     * @param {string} args 
-     * @param {MessageEvent} ev 
+     * @param {string} args
+     * @param {MessageEvent} ev
      */
     dispatch(args, ev) {
       this._dispatchCommand({
@@ -1218,7 +1221,7 @@ registerPlugin({
             return errors.push(e)
           }
           throw e
-      }
+        }
       })
       return { result, remaining: args, errors }
     }
@@ -1229,10 +1232,10 @@ registerPlugin({
    * @name CommandGroup
    */
   class CommandGroup extends BaseCommand {
-  
+
     /**
-     * @param {string} cmd 
-     * @param {Collector} collector 
+     * @param {string} cmd
+     * @param {Collector} collector
      */
     constructor(cmd, collector) {
       super(cmd, collector)
@@ -1242,7 +1245,7 @@ registerPlugin({
        */
       this._commands = []
     }
-  
+
     /**
      * Retrieves the usage of the command with its parameterized names
      * @returns retrieves the complete usage of the command with its argument names
@@ -1250,7 +1253,7 @@ registerPlugin({
     getUsage() {
       return `${this.getFullCommandName()} ${this._commands.map(cmd => cmd.getCommandName()).join("|")}`
     }
-  
+
     /**
      * checks if a client should have permission to use this command
      * @param {Client} client the client which should be checked
@@ -1260,7 +1263,7 @@ registerPlugin({
       if (this._execHandler.length > 0) return true
       return (await Promise.all(this._commands.map(cmd => cmd.hasPermission(client)))).some(result => result)
     }
-  
+
     /**
      * Adds a new sub Commmand to the group
      * @param {string} name the sub command name which should be added
@@ -1272,7 +1275,7 @@ registerPlugin({
       this._commands.push(cmd)
       return cmd
     }
-  
+
     /**
      * Retrieves a subcommand by its command name
      * @param {string} name the name which should be searched for
@@ -1284,7 +1287,7 @@ registerPlugin({
       if (!cmd) throw new CommandNotFoundError(`Command with name "${name}" has not been found on Command ${this.getFullCommandName()}!`)
       return cmd
     }
-  
+
     /**
      * retrievel all available subcommands
      * @param {Client} [client] the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
@@ -1297,15 +1300,15 @@ registerPlugin({
       if (!client) return Promise.resolve(cmds)
       return Collector.checkPermissions(cmds, client)
     }
-  
+
     /**
-     * @param {string} args 
-     * @param {MessageEvent} ev 
+     * @param {string} args
+     * @param {MessageEvent} ev
      */
     dispatch(args, ev) {
       const [cmd, ...rest] = args.split(" ")
       if (cmd.length === 0) return this._dispatchCommand({
-        ...ev, 
+        ...ev,
         arguments: {},
         reply: Collector.getReplyOutput(ev),
         raw: ev
@@ -1325,7 +1328,7 @@ registerPlugin({
   class Collector {
 
     constructor() {
-      /** 
+      /**
        * @type {BaseCommand[]}
        * @private
       */
@@ -1341,15 +1344,15 @@ registerPlugin({
       if (typeof prefix !== "string" || prefix.length === 0) return "!"
       return prefix
     }
-  
+
     /** creates a new Throttle instance */
     static createThrottle() {
       return new Throttle()
     }
-  
+
     /**
      * retrieves the correct reply chat from where the client has sent the message
-     * @param {Message} event 
+     * @param {Message} event
      * @returns {(msg: string) => void}
      */
     static getReplyOutput({ mode, client, channel }) {
@@ -1360,21 +1363,21 @@ registerPlugin({
         default: return msg => debug(DEBUG.WARNING)(`WARN no reply channel set for mode ${mode}, message "${msg}" not sent!`)
       }
     }
-  
+
     /**
      * checks the permissions from a set of commands
-     * @param {BaseCommand[]} commands 
+     * @param {BaseCommand[]} commands
      * @param {Client} client
      * @returns {Promise<BaseCommand[]>}
      */
     static async checkPermissions(commands, client) {
-      const result = await Promise.all(commands.map(async cmd => await cmd.hasPermission(client)))
+      const result = await Promise.all(commands.map(cmd => cmd.hasPermission(client)))
       return commands.filter((_, i) => result[i])
     }
-  
+
     /**
      * checks if the command name is valid
-     * @param {string} name 
+     * @param {string} name
      */
     static isValidCommandName(name) {
       if (typeof name !== "string") throw new Error("Expected a string as command name!")
@@ -1382,7 +1385,7 @@ registerPlugin({
       if ((/\s/).test(name)) throw new Error(`Command "${name}" should not contain spaces!`)
       return true
     }
-  
+
     /**
      * get all available commands from its command string
      * @param {string} name
@@ -1393,11 +1396,11 @@ registerPlugin({
         .filter(cmd => cmd.isEnabled())
         .filter(cmd => cmd.getCommandNames().includes(name))
     }
-    
+
 
     /**
      * retrieves all available permissions for a certain client
-     * @param {Client} client 
+     * @param {Client} client
      */
     getAvailableCommandsByPermission(client) {
       return Collector.checkPermissions(
@@ -1417,16 +1420,16 @@ registerPlugin({
         .filter(cmd => cmd.isEnabled())
         .filter(cmd => cmd.getFullCommandNames().includes(name))
     }
-  
+
     /**
      * checks if a command is a possible command string
-     * @param {string} text 
+     * @param {string} text
      */
     isPossibleCommand(text) {
       if (text.startsWith(Collector.getCommandPrefix())) return true
       return this._commands.some(cmd => cmd.getFullCommandName() === text.split(" ")[0])
     }
-  
+
     /**
      * creates a new command
      * @param {string} name the name of the command
@@ -1439,7 +1442,7 @@ registerPlugin({
       this._commands.push(cmd)
       return cmd
     }
-  
+
     /**
      * creates a new command
      * @param {string} name the name of the command
@@ -1494,7 +1497,7 @@ registerPlugin({
           cmd.getCommandName().match(new RegExp(filter, "i")) ||
           cmd.getHelp().match(new RegExp(filter, "i")))
       reply(`${format.bold(cmds.length.toString())} Commands found:`)
-      /** 
+      /**
        * @type {string[][]}
        * @private
        */
@@ -1512,7 +1515,7 @@ registerPlugin({
           commands.push([cmd.getFullCommandName(), cmd.getHelp()])
         }
       }))
-      /** 
+      /**
        * @type {string[][]}
        * @private
        */
@@ -1569,7 +1572,7 @@ registerPlugin({
       cmds.forEach(async cmd => {
         if (cmd instanceof CommandGroup) {
           if (subcommand) {
-            ;(await cmd.getAvailableCommands(client, subcommand)).forEach(sub => {
+            (await cmd.getAvailableCommands(client, subcommand)).forEach(sub => {
               reply(`\n${format.bold("Usage:")} ${cmd.getFullCommandName()} ${sub.getUsage()}\n${getManual(sub)}`)
             })
           } else {
