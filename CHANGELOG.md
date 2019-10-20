@@ -1,6 +1,10 @@
-### 1.3.3 - ?
+### 1.4.0 - 20.10.2019
+* refactoring of the code base see `REFACTOR_NOTE.md`
+* checkPermissions now allows Promise responses
 * show alias inside man command
+* commands are now case insensitive
 * teamspeak now sends less seperat chat commands when using the help command
+* added a few tests
 
 ### 1.3.1 - 03.08.2019
 * added new possibility to create arguments
