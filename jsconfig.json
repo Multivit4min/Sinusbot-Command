@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "checkJs": true,
+        "strict": true,
         "target": "es2018"
     },
     "exclude": [

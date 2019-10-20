@@ -24,8 +24,8 @@ toc:
       Definition for Classes
   - Command
   - CommandGroup
-  - SubCommand
-  - CommandCollector
+  - BaseCommand
+  - Collector
   - Throttle
   - name: Argument Types
     description: |
@@ -36,8 +36,16 @@ toc:
   - ClientArgument
   - RestArgument
   - GroupArgument
-  - execFunction
-  - MessageEvent
+  - name: Callbacks
+    description: |
+      all callbacks existing
+  - permissionHandler
+  - createArgumentHandler
+  - execHandler
+  - name: Interfaces
+    description: |
+      type declarations
+  - ArgType
   - name: Exports
     description: |
       These Functions gets exported as object when imported through `require("command.js")`

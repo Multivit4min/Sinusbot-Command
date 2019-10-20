@@ -4,16 +4,13 @@ const fs = require("fs")
 describe("Command", () => {
 
   /** @type {Sinusbot} */
-  let sinusbot = null
-
+  let sinusbot
   /** @type {jest.Mock} */
-  let mockFn = null
-
-  /** return form createCommand */
-  let testCmd = null
-
-  /** command.js export */
-  let exported = null
+  let mockFn
+  /** @type {any} */
+  let testCmd
+  /** @type {any} */
+  let exported
 
   const script = fs.readFileSync("./command.js", "utf8")
 
@@ -31,6 +28,12 @@ describe("Command", () => {
 
     it("should test basic registration of a command", () => {
       sinusbot.event.chat({ text: "!test" })
+      expect(mockFn).toBeCalledTimes(1)
+    })
+
+    it("should test case insensitive commands", () => {
+      testCmd = exported.createCommand("FoO").exec(mockFn)
+      sinusbot.event.chat({ text: "!fOo" })
       expect(mockFn).toBeCalledTimes(1)
     })
 
@@ -60,6 +63,13 @@ describe("Command", () => {
       expect(client.chatMock).toBeCalledTimes(0)
     })
 
+    it("should test a forced prefix", () => {
+      testCmd.forcePrefix("$")
+      sinusbot.event.chat({ text: "$test" })
+      sinusbot.event.chat({ text: "!test" })
+      expect(mockFn).toBeCalledTimes(1)
+    })
+
     describe("invalid commands", () => {
       it("should check if a command throws an error on registration with a space in it", () => {
         expect(() => exported.createCommand("te st")).toThrowError()
@@ -78,6 +88,50 @@ describe("Command", () => {
       })
     })
   })
+
+  describe("CommandGroup", () => {
+
+  /** @type {Sinusbot} */
+  let sinusbot
+  /** @type {jest.Mock} */
+  let mockFn
+  /** @type {any} */
+  let cmdGroup = null
+  /** @type {any} */
+  let exported = null
+
+  const script = fs.readFileSync("./command.js", "utf8")
+
+  beforeEach(() => {
+    sinusbot = new Sinusbot()
+    sinusbot.setScript(script)
+    sinusbot.setConfig({ DEBUGLEVEL: 0, NOT_FOUND_MESSAGE: "0" })
+    mockFn = jest.fn()
+    exported = sinusbot.run()
+    cmdGroup = exported.createCommandGroup("test")
+  })
+
+  it("should test the basic registration of a CommandGroup", () => {
+    cmdGroup.addCommand("foo").exec(mockFn)
+    sinusbot.event.chat({ text: "!test foo" })
+    expect(mockFn).toBeCalledTimes(1)
+  })
+
+  it("should test the case insensitivity of a CommandGroup", () => {
+    cmdGroup = exported.createCommandGroup("FoO")
+    cmdGroup.addCommand("bAr").exec(mockFn)
+    sinusbot.event.chat({ text: "!fOo BaR" })
+    expect(mockFn).toBeCalledTimes(1)
+  })
+
+  it("should test alias of a Command in a CommandGroup", () => {
+    cmdGroup = exported.createCommandGroup("foo")
+    cmdGroup.addCommand("bar").alias("b").exec(mockFn)
+    sinusbot.event.chat({ text: "!foo b" })
+    expect(mockFn).toBeCalledTimes(1)
+  })
+
+})
 
 
   describe("Arguments", () => {
