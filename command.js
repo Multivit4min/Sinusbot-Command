@@ -1618,10 +1618,54 @@ registerPlugin({
   if (engine.getBackend() === "discord") {
     //discord message handler
     event.on("message", ev => {
+      let author = ev.author()
+      if (!author) {
+        const id = ev.authorID()
+        const guild = backend.getBotClientID().split("/")[0]
+        const clid = `${guild}/${id}`
+        if (id) {
+          author = backend.getClientByID(clid)
+        } else {
+          debug(DEBUG.VERBOSE)("authorID is undefined")
+        }
+        if (!author) {
+          debug(DEBUG.WARNING)(`could not get author with ID=${id}; replacing client with workaround`)
+          //simulate the basic functionality of a client object
+          author = {
+            // eslint-disable-next-line arrow-parens
+            chat: (/** @type {string} */ str) => ev.reply(str),
+            isSelf: () => false,
+            id: () => clid,
+            uid: () => clid,
+            uniqueId: () => clid,
+            databaseID: () => clid,
+            databaseId: () => clid,
+            type: () => 1,
+            getURL: () => `<@${id}>`,
+            name: () => `unknown (ID: ${id})`,
+            nick: () => `unknown (ID: ${id})`,
+            phoneticName: () => '',
+            description: () => '',
+            getServerGroups: () => [],
+            getChannelGroup: () => null,
+            getChannels: () => [],
+            getAudioChannel: () => null,
+            // eslint-disable-next-line arrow-parens
+            equals: (/** @type {Client} */ client) => {
+              const uid = client.uid().split("/")
+              if (uid.length === 2) {
+                return uid[2] === id
+              } else {
+                return client.uid() === clid
+              }
+            }
+          }
+        }
+      }
       messageHandler({
         text: ev.content(),
         channel: ev.channel(),
-        client: ev.author(),
+        client: author,
         mode: ev.guildID() ? 2 : 1,
         message: ev
       })
@@ -1637,6 +1681,8 @@ registerPlugin({
    * @param {MessageEvent} ev
    */
   function messageHandler(ev) {
+    //do not do anything when the client is undefined
+    if (!ev.client) return debug(DEBUG.WARNING)("client is undefined")
     //do not do anything when the bot sends a message
     if (ev.client.isSelf()) return debug(DEBUG.VERBOSE)("Will not handle messages from myself")
     //check if it is a possible command
