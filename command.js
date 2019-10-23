@@ -1138,7 +1138,9 @@ registerPlugin({
      * @private
      * @param {CommanderTextMessage} ev
      */
-    _dispatchCommand(ev) {
+    async _dispatchCommand(ev) {
+      if (!(await this.hasPermission(ev.client)))
+        throw new PermissionError("no permission to execute this command")
       this._handleThrottle(ev.client)
       this._execHandler.forEach(handle => handle(ev.client, ev.arguments, ev.reply, ev.raw))
     }
@@ -1209,7 +1211,7 @@ registerPlugin({
      * @param {MessageEvent} ev
      */
     dispatch(args, ev) {
-      this._dispatchCommand({
+      return this._dispatchCommand({
         ...ev,
         arguments: this.validate(args),
         reply: Collector.getReplyOutput(ev),
@@ -1328,14 +1330,18 @@ registerPlugin({
      * @param {string} args
      * @param {MessageEvent} ev
      */
-    dispatch(args, ev) {
+    async dispatch(args, ev) {
       const [cmd, ...rest] = args.split(" ")
-      if (cmd.length === 0) return this._dispatchCommand({
-        ...ev,
-        arguments: {},
-        reply: Collector.getReplyOutput(ev),
-        raw: ev
-      })
+      if (!await this.hasPermission(ev.client))
+        throw new PermissionError("not enough permission to execute this command")
+      if (cmd.length === 0) {
+        return this._dispatchCommand({
+          ...ev,
+          arguments: {},
+          reply: Collector.getReplyOutput(ev),
+          raw: ev
+        })
+      }
       return this.findCommandByName(cmd).dispatch(rest.join(" "), ev)
     }
   }
