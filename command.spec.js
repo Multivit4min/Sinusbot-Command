@@ -249,7 +249,7 @@ describe("Command", () => {
 
       it("should test the basic assignment of a string", () => {
         return new Promise(fulfill => {
-          testCmd.addArgument(args => args.string.setName("bar"))
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar"))
           sinusbot.event.chat({ text: "!test Foo" })
           process.nextTick(() => {
             expect(mockFn).toBeCalledTimes(1)
@@ -260,7 +260,7 @@ describe("Command", () => {
       })
       it("should test the forceUpperCase method", () => {
         return new Promise(fulfill => {
-          testCmd.addArgument(args => args.string.setName("bar").forceUpperCase())
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").forceUpperCase())
           sinusbot.event.chat({ text: "!test Foo" })
           process.nextTick(() => {
             expect(mockFn).toBeCalledTimes(1)
@@ -271,7 +271,7 @@ describe("Command", () => {
       })
       it("should test the forceLowerCase method", () => {
         return new Promise(fulfill => {
-          testCmd.addArgument(args => args.string.setName("bar").forceLowerCase())
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").forceLowerCase())
           sinusbot.event.chat({ text: "!test Foo" })
           process.nextTick(() => {
             expect(mockFn).toBeCalledTimes(1)
@@ -282,7 +282,8 @@ describe("Command", () => {
       })
       it("should test the forceLowerCase method", () => {
         return new Promise(fulfill => {
-          testCmd.addArgument(args => args.string.setName("bar").forceLowerCase())
+          
+          testCmd.addArgument((/** @type {object} */  args) => args.string.setName("bar").forceLowerCase())
           sinusbot.event.chat({ text: "!test Foo" })
           process.nextTick(() => {
             expect(mockFn).toBeCalledTimes(1)
@@ -293,7 +294,7 @@ describe("Command", () => {
       })
       it("should test the match regex", () => {
         return new Promise(fulfill => {
-          testCmd.addArgument(args => args.string.setName("bar").match(/^fOo$/))
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").match(/^fOo$/))
           sinusbot.event.chat({ text: "!test fOo" })
           process.nextTick(() => {
             expect(mockFn).toBeCalledTimes(1)
@@ -307,7 +308,7 @@ describe("Command", () => {
       })
       it("should test the max length", () => {
         return new Promise(fulfill => {
-          testCmd.addArgument(args => args.string.setName("bar").max(3))
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").max(3))
           sinusbot.event.chat({ text: "!test foo" })
           process.nextTick(() => {
             expect(mockFn).toBeCalledTimes(1)
@@ -321,7 +322,7 @@ describe("Command", () => {
       })
       it("should test the min length", () => {
         return new Promise(fulfill => {
-          testCmd.addArgument(args => args.string.setName("bar").min(3))
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").min(3))
           sinusbot.event.chat({ text: "!test foo" })
           process.nextTick(() => {
             expect(mockFn).toBeCalledTimes(1)
@@ -335,7 +336,7 @@ describe("Command", () => {
       })
       it("should test the whitelist method", () => {
         return new Promise(fulfill => {
-          testCmd.addArgument(args => args.string.setName("bar").whitelist(["foo", "bar"]))
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").whitelist(["foo", "bar"]))
           sinusbot.event.chat({ text: "!test foo" })
           process.nextTick(() => {
             expect(mockFn).toBeCalledTimes(1)
