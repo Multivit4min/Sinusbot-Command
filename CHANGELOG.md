@@ -1,3 +1,7 @@
+### 1.4.1 - 23.10.2019
+* fixed missing permission check
+* added tests to prevent missing permission checks
+
 ### 1.4.0 - 20.10.2019
 * refactoring of the code base see `REFACTOR_NOTE.md`
 * checkPermissions now allows Promise responses
