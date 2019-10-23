@@ -1,3 +1,6 @@
+///<reference path="node_modules/@types/jest/index.d.ts" />
+///<reference path="node_modules/@types/node/index.d.ts" />
+
 const { Sinusbot } = require("./node_modules/sinusbot-test-environment/lib/Sinusbot")
 const fs = require("fs")
 
@@ -27,47 +30,99 @@ describe("Command", () => {
   describe("General", () => {
 
     it("should test basic registration of a command", () => {
-      sinusbot.event.chat({ text: "!test" })
-      expect(mockFn).toBeCalledTimes(1)
+      return new Promise(fulfill => {
+        sinusbot.event.chat({ text: "!test" })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(1)
+          fulfill()
+        })
+      })
     })
 
     it("should test case insensitive commands", () => {
-      testCmd = exported.createCommand("FoO").exec(mockFn)
-      sinusbot.event.chat({ text: "!fOo" })
-      expect(mockFn).toBeCalledTimes(1)
+      return new Promise(fulfill => {
+        testCmd = exported.createCommand("FoO").exec(mockFn)
+        sinusbot.event.chat({ text: "!fOo" })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(1)
+          fulfill()
+        })
+      })
     })
 
     it("should test basic registration of a command with 2 alias", () => {
-      testCmd.alias("test1", "test2")
-      sinusbot.event.chat({ text: "!test" })
-      sinusbot.event.chat({ text: "!test1" })
-      sinusbot.event.chat({ text: "!test2" })
-      expect(mockFn).toBeCalledTimes(3)
+      return new Promise(fulfill => {
+        testCmd.alias("test1", "test2")
+        sinusbot.event.chat({ text: "!test" })
+        sinusbot.event.chat({ text: "!test1" })
+        sinusbot.event.chat({ text: "!test2" })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(3)
+          fulfill()
+        })
+      })
     })
 
     it("should test a disabled command", () => {
-      const client = Sinusbot.createClient()
-      client.chatMock = jest.fn()
-      testCmd.disable()
-      sinusbot.event.chat({ text: "!test", client: client.buildModule() })
-      expect(mockFn).toBeCalledTimes(0)
-      expect(client.chatMock).toBeCalledTimes(1)
+      return new Promise(fulfill => {
+        const client = Sinusbot.createClient()
+        client.chatMock = jest.fn()
+        testCmd.disable()
+        sinusbot.event.chat({ text: "!test", client: client.buildModule() })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(0)
+          expect(client.chatMock).toBeCalledTimes(1)
+          fulfill()
+        })
+      })
     })
 
     it("should test a reenabling of a command", () => {
-      const client = Sinusbot.createClient()
-      client.chatMock = jest.fn()
-      testCmd.disable().enable()
-      sinusbot.event.chat({ text: "!test", client: client.buildModule() })
-      expect(mockFn).toBeCalledTimes(1)
-      expect(client.chatMock).toBeCalledTimes(0)
+      return new Promise(fulfill => {
+        const client = Sinusbot.createClient()
+        client.chatMock = jest.fn()
+        testCmd.disable().enable()
+        sinusbot.event.chat({ text: "!test", client: client.buildModule() })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(1)
+          expect(client.chatMock).toBeCalledTimes(0)
+          fulfill()
+        })
+      })
     })
 
     it("should test a forced prefix", () => {
-      testCmd.forcePrefix("$")
-      sinusbot.event.chat({ text: "$test" })
-      sinusbot.event.chat({ text: "!test" })
-      expect(mockFn).toBeCalledTimes(1)
+      return new Promise(fulfill => {
+        testCmd.forcePrefix("$")
+        sinusbot.event.chat({ text: "$test" })
+        sinusbot.event.chat({ text: "!test" })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(1)
+          fulfill()
+        })
+      })
+    })
+
+    it("should test denied permissions", () => {
+      return new Promise(fulfill => {
+        testCmd.checkPermission(() => false)
+        sinusbot.event.chat({ text: "!test" })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(0)
+          fulfill()
+        })
+      })
+    })
+
+    it("should test allowed permissions", () => {
+      return new Promise(fulfill => {
+        testCmd.checkPermission(() => true)
+        sinusbot.event.chat({ text: "!test" })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(1)
+          fulfill()
+        })
+      })
     })
 
     describe("invalid commands", () => {
@@ -112,24 +167,78 @@ describe("Command", () => {
   })
 
   it("should test the basic registration of a CommandGroup", () => {
-    cmdGroup.addCommand("foo").exec(mockFn)
-    sinusbot.event.chat({ text: "!test foo" })
-    expect(mockFn).toBeCalledTimes(1)
+    return new Promise(fulfill => {
+      cmdGroup.addCommand("foo").exec(mockFn)
+      sinusbot.event.chat({ text: "!test foo" })
+      process.nextTick(() => {
+        expect(mockFn).toBeCalledTimes(1)
+        fulfill()
+      })
+    })
   })
 
   it("should test the case insensitivity of a CommandGroup", () => {
-    cmdGroup = exported.createCommandGroup("FoO")
-    cmdGroup.addCommand("bAr").exec(mockFn)
-    sinusbot.event.chat({ text: "!fOo BaR" })
-    expect(mockFn).toBeCalledTimes(1)
+    return new Promise(fulfill => {
+      cmdGroup = exported.createCommandGroup("FoO")
+      cmdGroup.addCommand("bAr").exec(mockFn)
+      sinusbot.event.chat({ text: "!fOo BaR" })
+      process.nextTick(() => {
+        expect(mockFn).toBeCalledTimes(1)
+        fulfill()
+      })
+    })
   })
 
   it("should test alias of a Command in a CommandGroup", () => {
-    cmdGroup = exported.createCommandGroup("foo")
-    cmdGroup.addCommand("bar").alias("b").exec(mockFn)
-    sinusbot.event.chat({ text: "!foo b" })
-    expect(mockFn).toBeCalledTimes(1)
+    return new Promise(fulfill => {
+      cmdGroup = exported.createCommandGroup("foo")
+      cmdGroup.addCommand("bar").alias("b").exec(mockFn)
+      sinusbot.event.chat({ text: "!foo b" })
+      process.nextTick(() => {
+        expect(mockFn).toBeCalledTimes(1)
+        fulfill()
+      })
+    })
   })
+
+  it("should test denied permissions of a CommandGroup", () => {
+    return new Promise(fulfill => {
+      cmdGroup = exported.createCommandGroup("foo").checkPermission(() => false)
+      cmdGroup.addCommand("bar").exec(mockFn)
+      sinusbot.event.chat({ text: "!foo bar" })
+      process.nextTick(() => {
+        expect(mockFn).toBeCalledTimes(0)
+        fulfill()
+      })
+    })
+  })
+
+  it("should test denied permissions of a Command in a CommandGroup", () => {
+    return new Promise(fulfill => {
+      cmdGroup = exported.createCommandGroup("foo")
+      cmdGroup.addCommand("bar").checkPermission(() => false).exec(mockFn)
+      cmdGroup.addCommand("baz").checkPermission(() => true).exec(mockFn)
+      sinusbot.event.chat({ text: "!foo bar" })
+      process.nextTick(() => {
+        expect(mockFn).toBeCalledTimes(0)
+        fulfill()
+      })
+    })
+  })
+
+  it("should test allowed permissions of a Command in a CommandGroup", () => {
+    return new Promise(fulfill => {
+      cmdGroup = exported.createCommandGroup("foo")
+      cmdGroup.addCommand("bar").checkPermission(() => true).exec(mockFn)
+      cmdGroup.addCommand("baz").checkPermission(() => false).exec(mockFn)
+      sinusbot.event.chat({ text: "!foo bar" })
+      process.nextTick(() => {
+        expect(mockFn).toBeCalledTimes(1)
+        fulfill()
+      })
+    })
+  })
+
 
 })
 
@@ -139,64 +248,105 @@ describe("Command", () => {
     describe("StringArgument", () => {
 
       it("should test the basic assignment of a string", () => {
-        testCmd.addArgument(args => args.string.setName("bar"))
-        sinusbot.event.chat({ text: "!test Foo" })
-        expect(mockFn).toBeCalledTimes(1)
-        expect(mockFn.mock.calls[0][1]).toEqual({ bar: "Foo" })
+        return new Promise(fulfill => {
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar"))
+          sinusbot.event.chat({ text: "!test Foo" })
+          process.nextTick(() => {
+            expect(mockFn).toBeCalledTimes(1)
+            expect(mockFn.mock.calls[0][1]).toEqual({ bar: "Foo" })
+            fulfill()
+          })
+        })
       })
       it("should test the forceUpperCase method", () => {
-        testCmd.addArgument(args => args.string.setName("bar").forceUpperCase())
-        sinusbot.event.chat({ text: "!test Foo" })
-        expect(mockFn).toBeCalledTimes(1)
-        expect(mockFn.mock.calls[0][1]).toEqual({ bar: "FOO" })
+        return new Promise(fulfill => {
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").forceUpperCase())
+          sinusbot.event.chat({ text: "!test Foo" })
+          process.nextTick(() => {
+            expect(mockFn).toBeCalledTimes(1)
+            expect(mockFn.mock.calls[0][1]).toEqual({ bar: "FOO" })
+            fulfill()
+          })
+        })
       })
       it("should test the forceLowerCase method", () => {
-        testCmd.addArgument(args => args.string.setName("bar").forceLowerCase())
-        sinusbot.event.chat({ text: "!test Foo" })
-        expect(mockFn).toBeCalledTimes(1)
-        expect(mockFn.mock.calls[0][1]).toEqual({ bar: "foo" })
+        return new Promise(fulfill => {
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").forceLowerCase())
+          sinusbot.event.chat({ text: "!test Foo" })
+          process.nextTick(() => {
+            expect(mockFn).toBeCalledTimes(1)
+            expect(mockFn.mock.calls[0][1]).toEqual({ bar: "foo" })
+            fulfill()
+          })
+        })
       })
       it("should test the forceLowerCase method", () => {
-        testCmd.addArgument(args => args.string.setName("bar").forceLowerCase())
-        sinusbot.event.chat({ text: "!test Foo" })
-        expect(mockFn).toBeCalledTimes(1)
-        expect(mockFn.mock.calls[0][1]).toEqual({ bar: "foo" })
+        return new Promise(fulfill => {
+          
+          testCmd.addArgument((/** @type {object} */  args) => args.string.setName("bar").forceLowerCase())
+          sinusbot.event.chat({ text: "!test Foo" })
+          process.nextTick(() => {
+            expect(mockFn).toBeCalledTimes(1)
+            expect(mockFn.mock.calls[0][1]).toEqual({ bar: "foo" })
+            fulfill()
+          })
+        })
       })
       it("should test the match regex", () => {
-        testCmd.addArgument(args => args.string.setName("bar").match(/^fOo$/))
-        sinusbot.event.chat({ text: "!test fOo" })
-        expect(mockFn).toBeCalledTimes(1)
-        expect(mockFn.mock.calls[0][1]).toEqual({ bar: "fOo" })
-        mockFn.mockClear()
-        sinusbot.event.chat({ text: "!test foo" })
-        expect(mockFn).toBeCalledTimes(0)
+        return new Promise(fulfill => {
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").match(/^fOo$/))
+          sinusbot.event.chat({ text: "!test fOo" })
+          process.nextTick(() => {
+            expect(mockFn).toBeCalledTimes(1)
+            expect(mockFn.mock.calls[0][1]).toEqual({ bar: "fOo" })
+            mockFn.mockClear()
+            sinusbot.event.chat({ text: "!test foo" })
+            expect(mockFn).toBeCalledTimes(0)
+            fulfill()
+          })
+        })
       })
       it("should test the max length", () => {
-        testCmd.addArgument(args => args.string.setName("bar").max(3))
-        sinusbot.event.chat({ text: "!test foo" })
-        expect(mockFn).toBeCalledTimes(1)
-        expect(mockFn.mock.calls[0][1]).toEqual({ bar: "foo" })
-        mockFn.mockClear()
-        sinusbot.event.chat({ text: "!test fooo" })
-        expect(mockFn).toBeCalledTimes(0)
+        return new Promise(fulfill => {
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").max(3))
+          sinusbot.event.chat({ text: "!test foo" })
+          process.nextTick(() => {
+            expect(mockFn).toBeCalledTimes(1)
+            expect(mockFn.mock.calls[0][1]).toEqual({ bar: "foo" })
+            mockFn.mockClear()
+            sinusbot.event.chat({ text: "!test fooo" })
+            expect(mockFn).toBeCalledTimes(0)
+            fulfill()
+          })
+        })
       })
       it("should test the min length", () => {
-        testCmd.addArgument(args => args.string.setName("bar").min(3))
-        sinusbot.event.chat({ text: "!test foo" })
-        expect(mockFn).toBeCalledTimes(1)
-        expect(mockFn.mock.calls[0][1]).toEqual({ bar: "foo" })
-        mockFn.mockClear()
-        sinusbot.event.chat({ text: "!test fo" })
-        expect(mockFn).toBeCalledTimes(0)
+        return new Promise(fulfill => {
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").min(3))
+          sinusbot.event.chat({ text: "!test foo" })
+          process.nextTick(() => {
+            expect(mockFn).toBeCalledTimes(1)
+            expect(mockFn.mock.calls[0][1]).toEqual({ bar: "foo" })
+            mockFn.mockClear()
+            sinusbot.event.chat({ text: "!test fo" })
+            expect(mockFn).toBeCalledTimes(0)
+            fulfill()
+          })
+        })
       })
       it("should test the whitelist method", () => {
-        testCmd.addArgument(args => args.string.setName("bar").whitelist(["foo", "bar"]))
-        sinusbot.event.chat({ text: "!test foo" })
-        expect(mockFn).toBeCalledTimes(1)
-        expect(mockFn.mock.calls[0][1]).toEqual({ bar: "foo" })
-        mockFn.mockClear()
-        sinusbot.event.chat({ text: "!test baz" })
-        expect(mockFn).toBeCalledTimes(0)
+        return new Promise(fulfill => {
+          testCmd.addArgument((/** @type {object} */ args) => args.string.setName("bar").whitelist(["foo", "bar"]))
+          sinusbot.event.chat({ text: "!test foo" })
+          process.nextTick(() => {
+            expect(mockFn).toBeCalledTimes(1)
+            expect(mockFn.mock.calls[0][1]).toEqual({ bar: "foo" })
+            mockFn.mockClear()
+            sinusbot.event.chat({ text: "!test baz" })
+            expect(mockFn).toBeCalledTimes(0)
+            fulfill()
+          })
+        })
       })
     })
 
