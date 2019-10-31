@@ -1710,6 +1710,7 @@ registerPlugin({
     commands.forEach(async cmd => {
       const start = Date.now()
       try {
+        debug(DEBUG.INFO)(`${ev.client.name()} (${ev.client.uid()}) used ${cmd.getFullCommandName()}`)
         //dispatches the cmd, this will
         // - check for permissions
         // - parse the arguments
@@ -1727,6 +1728,7 @@ registerPlugin({
           response += `For Command usage see ${format.bold(`${Collector.getCommandPrefix()}man ${cmd.getCommandName()}`)}\n`
           reply(response)
         } else if (e instanceof PermissionError) {
+          debug(DEBUG.INFO)(`${ev.client.name()} (${ev.client.uid()}) is missing permissions for ${cmd.getFullCommandName()}`)
           response += `You do not have permissions to use this command!\n`
           response += `To get a list of available commands see ${format.bold(`${Collector.getCommandPrefix()}help`)}`
           reply(response)
