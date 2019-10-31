@@ -1,3 +1,6 @@
+### Unreleased
+* added command usage logging
+
 ### 1.4.1 - 23.10.2019
 * fixed missing permission check
 * added tests to prevent missing permission checks
