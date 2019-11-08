@@ -1,7 +1,7 @@
 registerPlugin({
   name: "Command",
   description: "Library to handle and manage commands",
-  version: "1.4.1",
+  version: "1.4.2",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -1688,6 +1688,15 @@ registerPlugin({
    * @param {MessageEvent} ev
    */
   function messageHandler(ev) {
+    //check ignore private chat
+    if (ev.mode === 1 && engine.getIgnoreCommandsFromPrivateChat())
+      return debug(DEBUG.VERBOSE)("ignoring private chat due to sinusbot instance settings")
+    //check ignore channel chat
+    if (ev.mode === 2 && engine.getIgnoreCommandsFromChannelChat())
+      return debug(DEBUG.VERBOSE)("ignoring channel chat due to sinusbot instance settings")
+    //check ignore server chat
+    if (ev.mode === 3 && engine.getIgnoreCommandsFromServerChat())
+      return debug(DEBUG.VERBOSE)("ignoring server chat due to sinusbot instance settings")
     //do not do anything when the client is undefined
     if (!ev.client) return debug(DEBUG.WARNING)("client is undefined")
     //do not do anything when the bot sends a message
