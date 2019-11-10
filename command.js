@@ -783,7 +783,7 @@ registerPlugin({
      * @param {Client} client the client which points should be removed
      */
     throttle(client) {
-      this._reducePoints(client.uniqueId())
+      this._reducePoints(client.uid())
       return this.isThrottled(client)
     }
 
@@ -843,7 +843,7 @@ registerPlugin({
      * @param {Client} client the TeamSpeak Client which should get checked
      */
     isThrottled(client) {
-      const throttle = this._throttled[client.uniqueId()]
+      const throttle = this._throttled[client.uid()]
       if (throttle === undefined) return false
       return throttle.points <= 0
     }
@@ -854,8 +854,8 @@ registerPlugin({
      * @returns returns the time a client is throttled in ms
      */
     timeTillNextCommand(client) {
-      if (this._throttled[client.uniqueId()] === undefined) return 0
-      return this._throttled[client.uniqueId()].next - Date.now()
+      if (this._throttled[client.uid()] === undefined) return 0
+      return this._throttled[client.uid()].next - Date.now()
     }
   }
 
@@ -1645,6 +1645,7 @@ registerPlugin({
             id: () => clid,
             uid: () => clid,
             uniqueId: () => clid,
+            uniqueID: () => clid,
             databaseID: () => clid,
             databaseId: () => clid,
             type: () => 1,
