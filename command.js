@@ -1690,7 +1690,7 @@ registerPlugin({
    * @param {MessageEvent} ev
    */
   function messageHandler(ev) {
-    if (engine.version() >= "1.0.0-beta.9") {
+    if (typeof engine.getIgnoreCommandsFromPrivateChat === "function") {
       //check ignore private chat
       if (ev.mode === 1 && engine.getIgnoreCommandsFromPrivateChat())
         return debug(DEBUG.VERBOSE)("ignoring private chat due to sinusbot instance settings")
