@@ -65,7 +65,7 @@ describe("Command", () => {
 
     it("should test a disabled command", () => {
       return new Promise(fulfill => {
-        const client = Sinusbot.createClient()
+        const client = sinusbot.createClient()
         client.chatMock = jest.fn()
         testCmd.disable()
         sinusbot.event.chat({ text: "!test", client: client.buildModule() })
@@ -79,7 +79,7 @@ describe("Command", () => {
 
     it("should test a reenabling of a command", () => {
       return new Promise(fulfill => {
-        const client = Sinusbot.createClient()
+        const client = sinusbot.createClient()
         client.chatMock = jest.fn()
         testCmd.disable().enable()
         sinusbot.event.chat({ text: "!test", client: client.buildModule() })
