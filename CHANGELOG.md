@@ -1,3 +1,6 @@
+### 1.4.3 - Unreleased
+* added checks to prevent erros on old versions
+
 ### 1.4.2 - 08.11.2019
 * added command usage logging
 * respect ignore settings for server/channel/private chat
