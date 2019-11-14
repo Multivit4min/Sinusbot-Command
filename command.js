@@ -1,5 +1,5 @@
 registerPlugin({
-  name: "Command",
+  name: "Command Library",
   description: "Library to handle and manage commands",
   version: "1.4.3",
   author: "Multivitamin <david.kartnaller@gmail.com>",
