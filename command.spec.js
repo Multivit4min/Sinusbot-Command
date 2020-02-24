@@ -63,6 +63,26 @@ describe("Command", () => {
       })
     })
 
+    it("should test an alias with forced prefix", () => {
+      return new Promise(fulfill => {
+        testCmd.alias("test1")
+        testCmd.forcePrefix("$")
+        sinusbot.event.chat({ text: "$test" })
+        sinusbot.event.chat({ text: "$test1" })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(2)
+          fulfill()
+        })
+        // this should not cause addidional calls to mockFn
+        sinusbot.event.chat({ text: "!test" })
+        sinusbot.event.chat({ text: "!test1" })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(2)
+          fulfill()
+        })
+      })
+    })
+
     it("should test a disabled command", () => {
       return new Promise(fulfill => {
         const client = sinusbot.createClient()
@@ -95,6 +115,11 @@ describe("Command", () => {
       return new Promise(fulfill => {
         testCmd.forcePrefix("$")
         sinusbot.event.chat({ text: "$test" })
+        process.nextTick(() => {
+          expect(mockFn).toBeCalledTimes(1)
+          fulfill()
+        })
+        // this should not cause addidional calls to mockFn
         sinusbot.event.chat({ text: "!test" })
         process.nextTick(() => {
           expect(mockFn).toBeCalledTimes(1)
