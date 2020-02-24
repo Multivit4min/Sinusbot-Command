@@ -1457,7 +1457,7 @@ registerPlugin({
      */
     isPossibleCommand(text) {
       if (text.startsWith(Collector.getCommandPrefix())) return true
-      return this._commands.some(cmd => cmd.getFullCommandName() === text.split(" ")[0])
+      return this._commands.some(cmd => cmd.getFullCommandNames().includes(text.split(" ")[0]))
     }
 
     /**
