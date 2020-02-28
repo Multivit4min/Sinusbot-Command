@@ -2,7 +2,6 @@
   "name": "sinusbot-command",
   "version": "1.0.0",
   "description": "Command Library for the SinusBot",
-  "main": "command.js",
   "scripts": {
     "test": "jest --runInBand",
     "eslint": "eslint command.js",
@@ -25,15 +24,8 @@
     "url": "https://github.com/Multivit4min/Sinusbot-Command/issues"
   },
   "homepage": "https://github.com/Multivit4min/Sinusbot-Command#readme",
-  "dependencies": {
-    "@types/node": "^12.12.6",
-    "sinusbot-scripting-engine": "^1.0.16"
-  },
   "devDependencies": {
-    "@types/jest": "^24.0.22",
-    "documentation": "^12.1.3",
-    "eslint": "^6.6.0",
-    "jest": "^24.9.0",
-    "sinusbot-test-environment": "git+https://github.com/Multivit4min/Sinusbot-Test-Environment.git"
+    "sinusbot": "file:../scripting-docs",
+    "typescript": "^3.8.2"
   }
 }
