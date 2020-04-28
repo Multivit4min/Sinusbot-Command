@@ -1,0 +1,8835 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset='utf-8'>
+  <title>command.js 1.0.0 | Documentation</title>
+  <meta name='description' content='Command Library for the SinusBot'>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <link href='assets/bass.css' rel='stylesheet'>
+  <link href='assets/style.css' rel='stylesheet'>
+  <link href='assets/github.css' rel='stylesheet'>
+  <link href='assets/split.css' rel='stylesheet'>
+</head>
+<body class='documentation m0'>
+    <div class='flex'>
+      <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
+        <div class='py1 px2'>
+          <h3 class='mb0 no-anchor'>command.js</h3>
+          <div class='mb1'><code>1.0.0</code></div>
+          <input
+            placeholder='Filter'
+            id='filter-input'
+            class='col12 block input'
+            spellcheck='false'
+            autocapitalize='off'
+            autocorrect='off'
+            type='text' />
+          <div id='toc'>
+            <ul class='list-reset h5 py1-ul'>
+              
+                
+                <li><a
+                  href='#changelog'
+                  class="h5 bold black caps">
+                  Changelog
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#examples'
+                  class="h5 bold black caps toggle-sibling">
+                  Examples
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  <ul class='list-reset py1-ul pl1'>
+                    <li class='h5'><span>Static members</span></li>
+                    
+                      <li><a
+                        href='#how-to-load-the-library'
+                        class='regular pre-open'>
+                        .How to load the library
+                      </a></li>
+                    
+                      <li><a
+                        href='#command-come'
+                        class='regular pre-open'>
+                        .Command come
+                      </a></li>
+                    
+                      <li><a
+                        href='#command-ping-amount'
+                        class='regular pre-open'>
+                        .Command ping [amount]
+                      </a></li>
+                    
+                      <li><a
+                        href='#command-mass-chatpoke-message'
+                        class='regular pre-open'>
+                        .Command mass [chat|poke] [message]
+                      </a></li>
+                    
+                      <li><a
+                        href='#command-greet-client'
+                        class='regular pre-open'>
+                        .Command greet [client]
+                      </a></li>
+                    
+                      <li><a
+                        href='#async-example'
+                        class='regular pre-open'>
+                        .Async example
+                      </a></li>
+                    
+                      <li><a
+                        href='#parse-args-by-yourself'
+                        class='regular pre-open'>
+                        .parse args by yourself
+                      </a></li>
+                    
+                      <li><a
+                        href='#commandgroup-example'
+                        class='regular pre-open'>
+                        .CommandGroup example
+                      </a></li>
+                    
+                    </ul>
+                  
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#classes'
+                  class="h5 bold black caps">
+                  Classes
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#command'
+                  class=" toggle-sibling">
+                  Command
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#commandgetusage'
+                        class='regular pre-open'>
+                        #getUsage
+                      </a></li>
+                      
+                      <li><a
+                        href='#commandhaspermission'
+                        class='regular pre-open'>
+                        #hasPermission
+                      </a></li>
+                      
+                      <li><a
+                        href='#commandaddargument'
+                        class='regular pre-open'>
+                        #addArgument
+                      </a></li>
+                      
+                      <li><a
+                        href='#commandgetarguments'
+                        class='regular pre-open'>
+                        #getArguments
+                      </a></li>
+                      
+                      <li><a
+                        href='#commandvalidate'
+                        class='regular pre-open'>
+                        #validate
+                      </a></li>
+                      
+                      <li><a
+                        href='#commanddispatch'
+                        class='regular pre-open'>
+                        #dispatch
+                      </a></li>
+                      
+                      <li><a
+                        href='#commandvalidateargs'
+                        class='regular pre-open'>
+                        #validateArgs
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#commandgroup'
+                  class=" toggle-sibling">
+                  CommandGroup
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#commandgroupgetusage'
+                        class='regular pre-open'>
+                        #getUsage
+                      </a></li>
+                      
+                      <li><a
+                        href='#commandgrouphaspermission'
+                        class='regular pre-open'>
+                        #hasPermission
+                      </a></li>
+                      
+                      <li><a
+                        href='#commandgroupaddcommand'
+                        class='regular pre-open'>
+                        #addCommand
+                      </a></li>
+                      
+                      <li><a
+                        href='#commandgroupfindcommandbyname'
+                        class='regular pre-open'>
+                        #findCommandByName
+                      </a></li>
+                      
+                      <li><a
+                        href='#commandgroupgetavailablecommands'
+                        class='regular pre-open'>
+                        #getAvailableCommands
+                      </a></li>
+                      
+                      <li><a
+                        href='#commandgroupdispatch'
+                        class='regular pre-open'>
+                        #dispatch
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#basecommand'
+                  class=" toggle-sibling">
+                  BaseCommand
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#basecommand_collector'
+                        class='regular pre-open'>
+                        #_collector
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommand_exechandler'
+                        class='regular pre-open'>
+                        #_execHandler
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandgetusage'
+                        class='regular pre-open'>
+                        #getUsage
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandhaspermission'
+                        class='regular pre-open'>
+                        #hasPermission
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandvalidate'
+                        class='regular pre-open'>
+                        #validate
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommanddispatch'
+                        class='regular pre-open'>
+                        #dispatch
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandalias'
+                        class='regular pre-open'>
+                        #alias
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandisenabled'
+                        class='regular pre-open'>
+                        #isEnabled
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandenable'
+                        class='regular pre-open'>
+                        #enable
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommanddisable'
+                        class='regular pre-open'>
+                        #disable
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandgetcommandname'
+                        class='regular pre-open'>
+                        #getCommandName
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandgetalias'
+                        class='regular pre-open'>
+                        #getAlias
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandgetfullcommandname'
+                        class='regular pre-open'>
+                        #getFullCommandName
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandgetfullalias'
+                        class='regular pre-open'>
+                        #getFullAlias
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandgetcommandnames'
+                        class='regular pre-open'>
+                        #getCommandNames
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandgetfullcommandnames'
+                        class='regular pre-open'>
+                        #getFullCommandNames
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandgethelp'
+                        class='regular pre-open'>
+                        #getHelp
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandhelp'
+                        class='regular pre-open'>
+                        #help
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandhashelp'
+                        class='regular pre-open'>
+                        #hasHelp
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandgetmanual'
+                        class='regular pre-open'>
+                        #getManual
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandhasmanual'
+                        class='regular pre-open'>
+                        #hasManual
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandforceprefix'
+                        class='regular pre-open'>
+                        #forcePrefix
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandgetprefix'
+                        class='regular pre-open'>
+                        #getPrefix
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandmanual'
+                        class='regular pre-open'>
+                        #manual
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandclearmanual'
+                        class='regular pre-open'>
+                        #clearManual
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandexec'
+                        class='regular pre-open'>
+                        #exec
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandaddthrottle'
+                        class='regular pre-open'>
+                        #addThrottle
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandcheckpermission'
+                        class='regular pre-open'>
+                        #checkPermission
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommandisallowed'
+                        class='regular pre-open'>
+                        #isAllowed
+                      </a></li>
+                      
+                      <li><a
+                        href='#basecommand_dispatchcommand'
+                        class='regular pre-open'>
+                        #_dispatchCommand
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#collector'
+                  class=" toggle-sibling">
+                  Collector
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  <ul class='list-reset py1-ul pl1'>
+                    <li class='h5'><span>Static members</span></li>
+                    
+                      <li><a
+                        href='#collectorgetcommandprefix'
+                        class='regular pre-open'>
+                        .getCommandPrefix
+                      </a></li>
+                    
+                      <li><a
+                        href='#collectorcreatethrottle'
+                        class='regular pre-open'>
+                        .createThrottle
+                      </a></li>
+                    
+                      <li><a
+                        href='#collectorgetreplyoutput'
+                        class='regular pre-open'>
+                        .getReplyOutput
+                      </a></li>
+                    
+                      <li><a
+                        href='#collectorcheckpermissions'
+                        class='regular pre-open'>
+                        .checkPermissions
+                      </a></li>
+                    
+                      <li><a
+                        href='#collectorisvalidcommandname'
+                        class='regular pre-open'>
+                        .isValidCommandName
+                      </a></li>
+                    
+                    </ul>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#collectorgetavailablecommands'
+                        class='regular pre-open'>
+                        #getAvailableCommands
+                      </a></li>
+                      
+                      <li><a
+                        href='#collectorgetavailablecommandsbypermission'
+                        class='regular pre-open'>
+                        #getAvailableCommandsByPermission
+                      </a></li>
+                      
+                      <li><a
+                        href='#collectorgetavailablecommandswithprefix'
+                        class='regular pre-open'>
+                        #getAvailableCommandsWithPrefix
+                      </a></li>
+                      
+                      <li><a
+                        href='#collectorispossiblecommand'
+                        class='regular pre-open'>
+                        #isPossibleCommand
+                      </a></li>
+                      
+                      <li><a
+                        href='#collectorregistercommand'
+                        class='regular pre-open'>
+                        #registerCommand
+                      </a></li>
+                      
+                      <li><a
+                        href='#collectorregistercommandgroup'
+                        class='regular pre-open'>
+                        #registerCommandGroup
+                      </a></li>
+                      
+                      <li><a
+                        href='#collectorissavecommand'
+                        class='regular pre-open'>
+                        #isSaveCommand
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#throttle'
+                  class=" toggle-sibling">
+                  Throttle
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#throttletickrate'
+                        class='regular pre-open'>
+                        #tickRate
+                      </a></li>
+                      
+                      <li><a
+                        href='#throttlepenaltypercommand'
+                        class='regular pre-open'>
+                        #penaltyPerCommand
+                      </a></li>
+                      
+                      <li><a
+                        href='#throttlerestorepertick'
+                        class='regular pre-open'>
+                        #restorePerTick
+                      </a></li>
+                      
+                      <li><a
+                        href='#throttleinitialpoints'
+                        class='regular pre-open'>
+                        #initialPoints
+                      </a></li>
+                      
+                      <li><a
+                        href='#throttlethrottle'
+                        class='regular pre-open'>
+                        #throttle
+                      </a></li>
+                      
+                      <li><a
+                        href='#throttleisthrottled'
+                        class='regular pre-open'>
+                        #isThrottled
+                      </a></li>
+                      
+                      <li><a
+                        href='#throttletimetillnextcommand'
+                        class='regular pre-open'>
+                        #timeTillNextCommand
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#argument-types'
+                  class="h5 bold black caps">
+                  Argument Types
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#argument'
+                  class=" toggle-sibling">
+                  Argument
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  <ul class='list-reset py1-ul pl1'>
+                    <li class='h5'><span>Static members</span></li>
+                    
+                      <li><a
+                        href='#argumentcreateargumentlayer'
+                        class='regular pre-open'>
+                        .createArgumentLayer
+                      </a></li>
+                    
+                    </ul>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#argumentvalidate'
+                        class='regular pre-open'>
+                        #validate
+                      </a></li>
+                      
+                      <li><a
+                        href='#argumentoptional'
+                        class='regular pre-open'>
+                        #optional
+                      </a></li>
+                      
+                      <li><a
+                        href='#argumentgetdefault'
+                        class='regular pre-open'>
+                        #getDefault
+                      </a></li>
+                      
+                      <li><a
+                        href='#argumenthasdefault'
+                        class='regular pre-open'>
+                        #hasDefault
+                      </a></li>
+                      
+                      <li><a
+                        href='#argumentgetmanual'
+                        class='regular pre-open'>
+                        #getManual
+                      </a></li>
+                      
+                      <li><a
+                        href='#argumentisoptional'
+                        class='regular pre-open'>
+                        #isOptional
+                      </a></li>
+                      
+                      <li><a
+                        href='#argumentsetname'
+                        class='regular pre-open'>
+                        #setName
+                      </a></li>
+                      
+                      <li><a
+                        href='#argumentgetname'
+                        class='regular pre-open'>
+                        #getName
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#numberargument'
+                  class=" toggle-sibling">
+                  NumberArgument
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#numberargumentvalidate'
+                        class='regular pre-open'>
+                        #validate
+                      </a></li>
+                      
+                      <li><a
+                        href='#numberargumentmin'
+                        class='regular pre-open'>
+                        #min
+                      </a></li>
+                      
+                      <li><a
+                        href='#numberargumentmax'
+                        class='regular pre-open'>
+                        #max
+                      </a></li>
+                      
+                      <li><a
+                        href='#numberargumentinteger'
+                        class='regular pre-open'>
+                        #integer
+                      </a></li>
+                      
+                      <li><a
+                        href='#numberargumentpositive'
+                        class='regular pre-open'>
+                        #positive
+                      </a></li>
+                      
+                      <li><a
+                        href='#numberargumentnegative'
+                        class='regular pre-open'>
+                        #negative
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#stringargument'
+                  class=" toggle-sibling">
+                  StringArgument
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#stringargumentvalidate'
+                        class='regular pre-open'>
+                        #validate
+                      </a></li>
+                      
+                      <li><a
+                        href='#stringargument_validate'
+                        class='regular pre-open'>
+                        #_validate
+                      </a></li>
+                      
+                      <li><a
+                        href='#stringargumentmatch'
+                        class='regular pre-open'>
+                        #match
+                      </a></li>
+                      
+                      <li><a
+                        href='#stringargumentmax'
+                        class='regular pre-open'>
+                        #max
+                      </a></li>
+                      
+                      <li><a
+                        href='#stringargumentmin'
+                        class='regular pre-open'>
+                        #min
+                      </a></li>
+                      
+                      <li><a
+                        href='#stringargumentforceuppercase'
+                        class='regular pre-open'>
+                        #forceUpperCase
+                      </a></li>
+                      
+                      <li><a
+                        href='#stringargumentforcelowercase'
+                        class='regular pre-open'>
+                        #forceLowerCase
+                      </a></li>
+                      
+                      <li><a
+                        href='#stringargumentwhitelist'
+                        class='regular pre-open'>
+                        #whitelist
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#clientargument'
+                  class=" toggle-sibling">
+                  ClientArgument
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#clientargumentvalidate'
+                        class='regular pre-open'>
+                        #validate
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#restargument'
+                  class=" toggle-sibling">
+                  RestArgument
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#restargumentvalidate'
+                        class='regular pre-open'>
+                        #validate
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#groupargument'
+                  class=" toggle-sibling">
+                  GroupArgument
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#groupargumentvalidate'
+                        class='regular pre-open'>
+                        #validate
+                      </a></li>
+                      
+                      <li><a
+                        href='#groupargumentaddargument'
+                        class='regular pre-open'>
+                        #addArgument
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#callbacks'
+                  class="h5 bold black caps">
+                  Callbacks
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#permissionhandler'
+                  class="">
+                  permissionHandler
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#createargumenthandler'
+                  class="">
+                  createArgumentHandler
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#exechandler'
+                  class="">
+                  execHandler
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#interfaces'
+                  class="h5 bold black caps">
+                  Interfaces
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#argtype'
+                  class="">
+                  ArgType
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#exports'
+                  class="h5 bold black caps">
+                  Exports
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#createcommand'
+                  class="">
+                  createCommand
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#createcommandgroup'
+                  class="">
+                  createCommandGroup
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#createargument'
+                  class="">
+                  createArgument
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#creategroupedargument'
+                  class="">
+                  createGroupedArgument
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#getcommandprefix'
+                  class="">
+                  getCommandPrefix
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#collector'
+                  class="">
+                  collector
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#getversion'
+                  class="">
+                  getVersion
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#createthrottle'
+                  class="">
+                  createThrottle
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#'
+                  class="">
+                  
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#'
+                  class="">
+                  
+                  
+                </a>
+                
+                </li>
+              
+            </ul>
+          </div>
+          <div class='mt1 h6 quiet'>
+            <a href='https://documentation.js.org/reading-documentation.html'>Need help reading this?</a>
+          </div>
+        </div>
+      </div>
+      <div id='split-right' class='relative overflow-auto height-viewport-100'>
+        
+          
+            <div class='keyline-top-not py2'><section class='py2 clearfix'>
+
+  <h2 id='changelog' class='mt0'>
+    Changelog
+  </h2>
+
+  
+    <h3>1.4.3 - Unreleased</h3>
+<ul>
+<li>added checks to prevent erros on old versions</li>
+</ul>
+<h3>1.4.2 - 08.11.2019</h3>
+<ul>
+<li>added command usage logging</li>
+<li>respect ignore settings for server/channel/private chat</li>
+</ul>
+<h3>1.4.1 - 23.10.2019</h3>
+<ul>
+<li>fixed missing permission check</li>
+<li>added tests to prevent missing permission checks</li>
+</ul>
+<h3>1.4.0 - 20.10.2019</h3>
+<ul>
+<li>refactoring of the code base see <code>REFACTOR_NOTE.md</code></li>
+<li>checkPermissions now allows Promise responses</li>
+<li>show alias inside man command</li>
+<li>commands are now case insensitive</li>
+<li>teamspeak now sends less seperat chat commands when using the help command</li>
+<li>added a few tests</li>
+</ul>
+<h3>1.3.1 - 03.08.2019</h3>
+<ul>
+<li>added new possibility to create arguments</li>
+</ul>
+<pre class='hljs'>  createCommand(<span class="hljs-string">"foo"</span>)
+    .addArgument(<span class="hljs-function"><span class="hljs-params">args</span> =&gt;</span> args.number.setName(<span class="hljs-string">"bar"</span>).positive())</pre>
+<h3>1.3.0 - 11.06.2019</h3>
+<ul>
+<li>added better support for message events from discord</li>
+</ul>
+<h3>1.2.3 - 14.04.2019</h3>
+<ul>
+<li>fixed GroupArguments</li>
+</ul>
+<h3>1.2.2 - 10.02.2019</h3>
+<ul>
+<li>reworked responses especially for discord</li>
+<li>ClientArgument should now work with discord</li>
+</ul>
+<h3>1.2.1 - 09.02.2019</h3>
+<ul>
+<li>improved error handling messages</li>
+<li>improved man command (the command <code>!man !help</code> will now resolve to the help command aswell)</li>
+</ul>
+<h3>1.2.0 - 05.02.2019</h3>
+<ul>
+<li>implemented command throttling</li>
+<li>added method #getVersion() to retrieve the current semantic version string</li>
+</ul>
+<h3>1.1.3 - 04.02.2018</h3>
+<ul>
+<li>changed help output for discord</li>
+</ul>
+<h3>1.1.2 - 30.01.2018</h3>
+<ul>
+<li>changed error handling for PermissionError</li>
+</ul>
+<h3>1.1.1 - 17.01.2019</h3>
+<ul>
+<li>changed error handling for failing permission checks</li>
+<li>fixed client object not passed to the checkPermission Parent of a CommandGroup</li>
+</ul>
+<h3>1.1.0 - 17.01.2019</h3>
+<ul>
+<li>added createCommandGroup to create a CommandGroup with multiple SubCommands for simpler handling of complex commands</li>
+<li>refactored command handling</li>
+<li>set default config value for <code>NOT_FOUND_MESSAGE</code> to <code>"1"</code></li>
+<li>moved <code>getCommandByName</code> to CommandCollector</li>
+<li>moved <code>getAvailableCommands</code> to CommandCollector</li>
+<li>moved multiple log messages to VERBOSE logging</li>
+<li>fixed documentation</li>
+<li>removed alias from commands for the sake of simplicity</li>
+<li>removed method ignoreOptionalArgs to enforce a more strict parsing</li>
+</ul>
+<h3>1.0.1 - 14.01.2019</h3>
+<ul>
+<li>fixed a bug when the prefix has been removed from the instance settings</li>
+</ul>
+<h3>1.0.0 - 10.12.2018</h3>
+<ul>
+<li>initial release</li>
+</ul>
+
+  
+</section></div>
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='examples'>
+      Examples
+    </h3>
+    
+    
+  </div>
+  
+
+  
+
+    <div class='pre p1 fill-light mt0'>Examples</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Static Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='how-to-load-the-library'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>How to load the library</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>In order to load this library you need to wait for the <a href="https://sinusbot.github.io/scripting-docs/#eventeventload">load event</a>.
+After this you can import the library with <code>require("command")</code></p>
+<pre class='hljs'>  <span class="hljs-keyword">const</span> engine = <span class="hljs-built_in">require</span>(<span class="hljs-string">"engine"</span>)
+  <span class="hljs-keyword">const</span> event = <span class="hljs-built_in">require</span>(<span class="hljs-string">"event"</span>)
+
+  <span class="hljs-comment">//this makes sure that all scripts have finished loading</span>
+  event.on(<span class="hljs-string">"load"</span>, () =&gt; {
+    <span class="hljs-comment">//try to load the library</span>
+    <span class="hljs-keyword">const</span> command = <span class="hljs-built_in">require</span>(<span class="hljs-string">"command"</span>)
+    <span class="hljs-comment">//check if the library has been loaded successfully</span>
+    <span class="hljs-keyword">if</span> (!command) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"command.js library not found! Please download command.js and enable it to be able use this script!"</span>)
+
+    <span class="hljs-comment">//start declaring your Commands from here</span>
+    engine.log(<span class="hljs-string">`Command prefix is <span class="hljs-subst">${command.getCommandPrefix()}</span>`</span>)
+  })</pre>
+
+    <div class='pre p1 fill-light mt0'>How to load the library</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='command-come'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>Command come</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>This command lets some defined clients use the command <strong>!come</strong> which will move the Sinusbot to the channel of the requesting User</p>
+<pre class='hljs'><span class="hljs-keyword">const</span> backend = <span class="hljs-built_in">require</span>(<span class="hljs-string">"backend"</span>)
+<span class="hljs-comment">//uids which are allowed to use this command</span>
+<span class="hljs-keyword">const</span> allowed = [
+  <span class="hljs-string">"NF61yPIiDvYuOJ/Bbeod84bw6dE="</span>,
+  <span class="hljs-string">"Dtrx9Cf5tRP81P4gKnc3ttLo6Kk="</span>
+]
+
+<span class="hljs-keyword">const</span> backend = <span class="hljs-built_in">require</span>(<span class="hljs-string">"backend"</span>)
+<span class="hljs-keyword">const</span> event = <span class="hljs-built_in">require</span>(<span class="hljs-string">"event"</span>)
+
+<span class="hljs-comment">//this makes sure that all scripts have finished loading</span>
+event.on(<span class="hljs-string">"load"</span>, () =&gt; {
+  <span class="hljs-comment">//try to load the library</span>
+  <span class="hljs-keyword">const</span> command = <span class="hljs-built_in">require</span>(<span class="hljs-string">"command"</span>)
+  <span class="hljs-comment">//check if the library has been loaded successfully</span>
+  <span class="hljs-keyword">if</span> (!command) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"command.js library not found! Please download command.js and enable it to be able use this script!"</span>)
+
+  <span class="hljs-comment">//creates the command "come"</span>
+  command.createCommand(<span class="hljs-string">"come"</span>)
+    <span class="hljs-comment">//sets a helptext, this gets displayed when using the command help</span>
+    .help(<span class="hljs-string">"moves the sinusbot to your channel"</span>)
+    <span class="hljs-comment">//sets a manual command</span>
+    .manual(<span class="hljs-string">"This will let Sinusbot join into your channel"</span>)
+    <span class="hljs-comment">//checks if the client is allowed to use this command</span>
+    <span class="hljs-comment">//the function receives the requesting client as single parameter</span>
+    <span class="hljs-comment">//the function should return true if the client is allowed to use this command</span>
+    <span class="hljs-comment">//BEWARE this function gets called on every help command and everytime the client tries to execute the command</span>
+    <span class="hljs-comment">//so this function should not have any CPU/IO intense tasks</span>
+    .checkPermission(<span class="hljs-function"><span class="hljs-params">client</span> =&gt;</span> {
+      <span class="hljs-comment">//returns true when the client is in the list of allowed clients</span>
+      <span class="hljs-keyword">return</span> allowed.includes(client.uid())
+    })
+    <span class="hljs-comment">//this function gets executed when a command has been parsed successfully</span>
+    <span class="hljs-comment">//the arguments which this function receives are following:</span>
+    <span class="hljs-comment">//1) the client which has executed the command</span>
+    <span class="hljs-comment">//2) the arguments which had been parsed</span>
+    <span class="hljs-comment">//3) reply, depending on where the client has sent the message it will automatically reply to the client, channel or server chat</span>
+    <span class="hljs-comment">//4) the raw text of the message</span>
+    .exec(<span class="hljs-function">(<span class="hljs-params">client, args, reply, raw</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> channel = client.getChannels()[<span class="hljs-number">0</span>]
+      <span class="hljs-keyword">if</span> (channel === <span class="hljs-literal">undefined</span>) <span class="hljs-keyword">return</span> reply(<span class="hljs-string">"Channel you are in has not been found!"</span>)
+      backend.getBotClient().moveTo(channel)
+    })
+})</pre>
+
+    <div class='pre p1 fill-light mt0'>Command come</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='command-ping-amount'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>Command ping [amount]</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>This command will send one or more pongs to the clients</p>
+<pre class='hljs'>Command.createCommand(<span class="hljs-string">"ping"</span>)
+  <span class="hljs-comment">//sets a helptext, this gets displayed when using the command help</span>
+  .help(<span class="hljs-string">"replies n times with Pong!"</span>)
+  <span class="hljs-comment">//sets a manual command this</span>
+  .manual(<span class="hljs-string">"replies at least one time with ping"</span>)
+  <span class="hljs-comment">//the second manual command will add it as new line</span>
+  <span class="hljs-comment">//looks better than having an ultra long string</span>
+  .manual(<span class="hljs-string">"depending on the number given it will replies with this amount of pongs"</span>)
+  <span class="hljs-comment">//creates a number argument with the name "amount" a number of 1 to 10 is allowed</span>
+  .addArgument(<span class="hljs-function"><span class="hljs-params">args</span> =&gt;</span> args.number.setName(<span class="hljs-string">"amount"</span>).min(<span class="hljs-number">1</span>).max(<span class="hljs-number">10</span>).optional(<span class="hljs-number">1</span>))
+  <span class="hljs-comment">//this function gets executed when a command has been parsed successfully</span>
+  <span class="hljs-comment">//the arguments which this function receives are following:</span>
+  <span class="hljs-comment">//1) the client which has executed the command</span>
+  <span class="hljs-comment">//2) the arguments which had been parsed</span>
+  <span class="hljs-comment">//3) reply, depending on where the client has sent the message it will automatically reply to the client, channel or server chat</span>
+  <span class="hljs-comment">//4) the raw text of the message</span>
+  .exec(<span class="hljs-function">(<span class="hljs-params">client, { amount }, reply, raw</span>) =&gt;</span> {
+    <span class="hljs-built_in">Array</span>(amount).fill().forEach(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> reply(<span class="hljs-string">"Pong!"</span>))
+  })</pre>
+
+    <div class='pre p1 fill-light mt0'>Command ping [amount]</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='command-mass-chatpoke-message'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>Command mass [chat|poke] [message]</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>This command will send the defined <strong>message</strong> via <strong>chat</strong> or <strong>poke</strong> to all clients</p>
+<pre class='hljs'><span class="hljs-keyword">const</span> backend = <span class="hljs-built_in">require</span>(<span class="hljs-string">"backend"</span>)
+<span class="hljs-keyword">const</span> event = <span class="hljs-built_in">require</span>(<span class="hljs-string">"event"</span>)
+
+<span class="hljs-comment">//this makes sure that all scripts have finished loading</span>
+event.on(<span class="hljs-string">"load"</span>, () =&gt; {
+  <span class="hljs-comment">//try to load the library</span>
+  <span class="hljs-keyword">const</span> command = <span class="hljs-built_in">require</span>(<span class="hljs-string">"command"</span>)
+  <span class="hljs-comment">//check if the library has been loaded successfully</span>
+  <span class="hljs-keyword">if</span> (!command) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"command.js library not found! Please download command.js and enable it to be able use this script!"</span>)
+
+  <span class="hljs-comment">//creates the command mass</span>
+  command.createCommand(<span class="hljs-string">"mass"</span>)
+    <span class="hljs-comment">//sets a helptext, this gets displayed when using the command help</span>
+    .help(<span class="hljs-string">"sends a mass chat or poke to all clients"</span>)
+    <span class="hljs-comment">//sets a manual command this</span>
+    .manual(<span class="hljs-string">"Usage: ${Command.getCommandPrefix()}mass &lt;chat|poke&gt; &lt;message&gt;"</span>)
+    <span class="hljs-comment">//allows the word "chat" or "poke" as second argument</span>
+    .addArgument(<span class="hljs-function"><span class="hljs-params">args</span> =&gt;</span> args.string.setName(<span class="hljs-string">"action"</span>).whitelist([<span class="hljs-string">"chat"</span>, <span class="hljs-string">"poke"</span>]).toLowerCase())
+    <span class="hljs-comment">//parsed the rest of the string, it should have a minimum length of 3</span>
+    .addArgument(<span class="hljs-function"><span class="hljs-params">args</span> =&gt;</span> args.rest.setName(<span class="hljs-string">"message"</span>).min(<span class="hljs-number">3</span>))
+    <span class="hljs-comment">//this function gets executed when a command has been parsed successfully</span>
+    <span class="hljs-comment">//the arguments which this function receives are following:</span>
+    <span class="hljs-comment">//1) the client which has executed the command</span>
+    <span class="hljs-comment">//2) the arguments which had been parsed</span>
+    <span class="hljs-comment">//3) reply, depending on where the client has sent the message it will automatically reply to the client, channel or server chat</span>
+    <span class="hljs-comment">//4) the ev text of the message</span>
+    .exec(<span class="hljs-function">(<span class="hljs-params">client, args, reply, ev</span>) =&gt;</span> {
+      <span class="hljs-keyword">let</span> sent = <span class="hljs-number">0</span>
+      <span class="hljs-keyword">const</span> ignoreUids = [client.uid(), backend.getBotClient().uid()]
+      backend.getClients().forEach(<span class="hljs-function"><span class="hljs-params">client</span> =&gt;</span> {
+        <span class="hljs-keyword">if</span> (ignoreUids === client.uid()) <span class="hljs-keyword">return</span>
+        sent++
+        <span class="hljs-keyword">if</span> (args.action === <span class="hljs-string">"poke"</span>) {
+          client.chat(args.message)
+        } <span class="hljs-keyword">else</span> {
+          client.poke(args.message)
+        }
+      })
+      reply(<span class="hljs-string">`Message has been sent to <span class="hljs-subst">${sent}</span> Clients!`</span>)
+    })
+})</pre>
+
+    <div class='pre p1 fill-light mt0'>Command mass [chat|poke] [message]</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='command-greet-client'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>Command greet [client]</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <pre class='hljs'><span class="hljs-keyword">const</span> backend = <span class="hljs-built_in">require</span>(<span class="hljs-string">"backend"</span>)
+<span class="hljs-keyword">const</span> event = <span class="hljs-built_in">require</span>(<span class="hljs-string">"event"</span>)
+
+<span class="hljs-comment">//this makes sure that all scripts have finished loading</span>
+event.on(<span class="hljs-string">"load"</span>, () =&gt; {
+  <span class="hljs-comment">//try to load the library</span>
+  <span class="hljs-keyword">const</span> command = <span class="hljs-built_in">require</span>(<span class="hljs-string">"command"</span>)
+  <span class="hljs-comment">//check if the library has been loaded successfully</span>
+  <span class="hljs-keyword">if</span> (!command) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"command.js library not found! Please download command.js and enable it to be able use this script!"</span>)
+
+  command.createCommand(<span class="hljs-string">"greet"</span>)
+    .help(<span class="hljs-string">"sends greetings to the given client"</span>)
+    .manual(<span class="hljs-string">"This will send a message to the given client on the server"</span>)
+    .addArgument(<span class="hljs-function"><span class="hljs-params">args</span> =&gt;</span> args.client.setName(<span class="hljs-string">"uid"</span>))
+    .exec(<span class="hljs-function">(<span class="hljs-params">client, args, reply, raw</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> receiver = backend.getClientByUID(args.uid) 
+      <span class="hljs-keyword">if</span> (!receiver) <span class="hljs-keyword">return</span> reply(<span class="hljs-string">`No online client with uid <span class="hljs-subst">${args.uid}</span> found!`</span>)
+      receiver.chat(<span class="hljs-string">`<span class="hljs-subst">${client.nick()}</span> sends you his greetings!`</span>)
+      reply(<span class="hljs-string">`Greetings sent to <span class="hljs-subst">${receiver.nick()}</span>`</span>)
+    })
+})</pre>
+
+    <div class='pre p1 fill-light mt0'>Command greet [client]</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='async-example'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>Async example</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <pre class='hljs'><span class="hljs-comment">//create a function which uses asynchronous functions</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">wait</span>(<span class="hljs-params">time</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">fulfill</span> =&gt;</span> {
+    setTimeout(fulfill, time)
+  })
+}
+
+<span class="hljs-keyword">const</span> backend = <span class="hljs-built_in">require</span>(<span class="hljs-string">"backend"</span>)
+<span class="hljs-keyword">const</span> event = <span class="hljs-built_in">require</span>(<span class="hljs-string">"event"</span>)
+
+<span class="hljs-comment">//this makes sure that all scripts have finished loading</span>
+event.on(<span class="hljs-string">"load"</span>, () =&gt; {
+  <span class="hljs-comment">//try to load the library</span>
+  <span class="hljs-keyword">const</span> command = <span class="hljs-built_in">require</span>(<span class="hljs-string">"command"</span>)
+  <span class="hljs-comment">//check if the library has been loaded successfully</span>
+  <span class="hljs-keyword">if</span> (!command) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"command.js library not found! Please download command.js and enable it to be able use this script!"</span>)
+
+
+  <span class="hljs-comment">//creates the command "async"</span>
+  command.createCommand(<span class="hljs-string">"async"</span>)
+    <span class="hljs-comment">//sets a helptext, this gets displayed when using the command help</span>
+    .help(<span class="hljs-string">"tests the aync execution"</span>)
+    <span class="hljs-comment">//this function gets executed when a command has been parsed successfully</span>
+    <span class="hljs-comment">//the arguments which this function receives are following:</span>
+    <span class="hljs-comment">//1) the client which has executed the command</span>
+    <span class="hljs-comment">//2) the arguments which had been parsed</span>
+    <span class="hljs-comment">//3) reply, depending on where the client has sent the message it will automatically reply to the client, channel or server chat</span>
+    <span class="hljs-comment">//4) the raw text of the message</span>
+    <span class="hljs-comment">//in order to use async functions and have correct error handling within the command.js usage do it like this</span>
+    .exec(<span class="hljs-function">(<span class="hljs-params">client, args, reply, raw</span>) =&gt;</span> {
+      <span class="hljs-comment">//return an instance of promise</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Promie(<span class="hljs-keyword">async</span> (fulfill, reject) =&gt; {
+        <span class="hljs-keyword">try</span> {
+          <span class="hljs-keyword">await</span> wait(<span class="hljs-number">1000</span>)
+          <span class="hljs-comment">//resolve the function successfully</span>
+          fulfill()
+        } <span class="hljs-keyword">catch</span> (e) {
+          <span class="hljs-comment">//reject the function when an error occured</span>
+          reject(e)
+        }
+      })
+    })
+})</pre>
+
+    <div class='pre p1 fill-light mt0'>Async example</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='parse-args-by-yourself'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>parse args by yourself</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Want to parse the arguments by yourself?</p>
+<pre class='hljs'><span class="hljs-comment">//creates the command arg</span>
+command.createCommand(<span class="hljs-string">"arg"</span>)
+  <span class="hljs-comment">//sets a helptext, this gets displayed when using the command help</span>
+  .help(<span class="hljs-string">"example which outputs the given additional arguments"</span>)
+  <span class="hljs-comment">//this will catch all arguments</span>
+  .addArgument(<span class="hljs-function"><span class="hljs-params">args</span> =&gt;</span> args.rest.setName(<span class="hljs-string">"args"</span>).optional(<span class="hljs-string">""</span>))
+  <span class="hljs-comment">//this function gets executed when a command has been parsed successfully</span>
+  <span class="hljs-comment">//the arguments which this function receives are following:</span>
+  <span class="hljs-comment">//1) the client which has executed the command</span>
+  <span class="hljs-comment">//2) the arguments which had been parsed</span>
+  <span class="hljs-comment">//3) reply, depending on where the client has sent the message it will automatically reply to the client, channel or server chat</span>
+  <span class="hljs-comment">//4) the raw text of the message</span>
+  .exec(<span class="hljs-function">(<span class="hljs-params">client, { args }, reply</span>) =&gt;</span> {
+    <span class="hljs-comment">//the variable args will now hold all the parameters which have additionally been added after the command</span>
+    reply(<span class="hljs-string">`Your arguments are <span class="hljs-subst">${args}</span>`</span>)
+  })</pre>
+
+    <div class='pre p1 fill-light mt0'>parse args by yourself</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandgroup-example'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>CommandGroup example</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>This will create a command with multiple sub commands.
+For example to implement a command which handles money
+!money add 10
+!money remove 5</p>
+<pre class='hljs'><span class="hljs-keyword">const</span> backend = <span class="hljs-built_in">require</span>(<span class="hljs-string">"backend"</span>)
+<span class="hljs-keyword">const</span> event = <span class="hljs-built_in">require</span>(<span class="hljs-string">"event"</span>)
+
+<span class="hljs-comment">//this makes sure that all scripts have finished loading</span>
+event.on(<span class="hljs-string">"load"</span>, () =&gt; {
+  <span class="hljs-comment">//try to load the library</span>
+  <span class="hljs-keyword">const</span> command = <span class="hljs-built_in">require</span>(<span class="hljs-string">"command"</span>)
+  <span class="hljs-comment">//check if the library has been loaded successfully</span>
+  <span class="hljs-keyword">if</span> (!command) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"command.js library not found! Please download command.js and enable it to be able use this script!"</span>)
+
+  <span class="hljs-comment">//this will return an instance of the GroupCommand class</span>
+  <span class="hljs-comment">//most methods from the Command class are available here also</span>
+  <span class="hljs-keyword">const</span> moneyCommand = Command.createCommandGroup(<span class="hljs-string">"money"</span>)
+    <span class="hljs-comment">//sets a helptext, this gets displayed when using the command help</span>
+    .help(<span class="hljs-string">"manages the money of users"</span>)
+    <span class="hljs-comment">//you can use exec here aswell but you are not able to add any Arguments!</span>
+
+  <span class="hljs-comment">//the addCommand method will create a new instance of the SubCommand class</span>
+  <span class="hljs-comment">//this class is basically the same as the basic Command class</span>
+  <span class="hljs-comment">//if a user sends `!money add x` then this command gets executed</span>
+  moneyCommand.addCommand(<span class="hljs-string">"add"</span>)
+    .help(<span class="hljs-string">"Adds a certain amount of money to you"</span>)
+    .addArgument(<span class="hljs-function"><span class="hljs-params">args</span> =&gt;</span> args.number.setName(<span class="hljs-string">"amount"</span>).min(<span class="hljs-number">1</span>))
+    .exec(<span class="hljs-function">(<span class="hljs-params">client, args, reply</span>) =&gt;</span> {
+      <span class="hljs-comment">//add money to the user</span>
+    })
+
+  <span class="hljs-comment">//you can create multiple sub commands when calling again addCommand on the commandGroup class</span>
+  <span class="hljs-comment">//if a user sends `!money remove x` then this command gets executed</span>
+  moneyCommand.addCommand(<span class="hljs-string">"remove"</span>)
+    .help(<span class="hljs-string">"Removes a certain amounf of money from you"</span>)
+    .addArgument(<span class="hljs-function"><span class="hljs-params">args</span> =&gt;</span> args.number.setName(<span class="hljs-string">"amount"</span>).min(<span class="hljs-number">1</span>))
+    .exec(<span class="hljs-function">(<span class="hljs-params">client, args, reply</span>) =&gt;</span> {
+      <span class="hljs-comment">//remove money from a user</span>
+    })
+})</pre>
+
+    <div class='pre p1 fill-light mt0'>CommandGroup example</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <div class='keyline-top-not py2'><section class='py2 clearfix'>
+
+  <h2 id='classes' class='mt0'>
+    Classes
+  </h2>
+
+  
+    <p>Definition for Classes</p>
+
+  
+</section></div>
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='command'>
+      Command
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>Command</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='commandgetusage'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getUsage()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Retrieves the usage of the command with its parameterized names</p>
+
+    <div class='pre p1 fill-light mt0'>getUsage(): any</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>any</code>:
+        retrieves the complete usage of the command with its argument names
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandhaspermission'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>hasPermission(client)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>checks if a client should have permission to use this command</p>
+
+    <div class='pre p1 fill-light mt0'>hasPermission(client: Client)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>client</span> <code class='quiet'>(Client)</code>
+	    the client which should be checked
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandaddargument'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>addArgument(arg)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>adds an argument to the command</p>
+
+    <div class='pre p1 fill-light mt0'>addArgument(arg: (<a href="#createargumenthandler">createArgumentHandler</a> | <a href="#argument">Argument</a>))</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>arg</span> <code class='quiet'>((<a href="#createargumenthandler">createArgumentHandler</a> | <a href="#argument">Argument</a>))</code>
+	    an argument to add
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandgetarguments'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getArguments()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves all available arguments</p>
+
+    <div class='pre p1 fill-light mt0'>getArguments()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandvalidate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>validate(args)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Validates the command</p>
+
+    <div class='pre p1 fill-light mt0'>validate(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the arguments from the command which should be validated
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commanddispatch'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>dispatch(args, ev)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  
+    <div class='pre p1 fill-light mt0'>dispatch(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, ev: <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MessageEvent</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>ev</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MessageEvent</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandvalidateargs'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>validateArgs(args)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Validates the given input string to all added arguments</p>
+
+    <div class='pre p1 fill-light mt0'>validateArgs(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the string which should get validated
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='commandgroup'>
+      CommandGroup
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>CommandGroup</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='commandgroupgetusage'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getUsage()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Retrieves the usage of the command with its parameterized names</p>
+
+    <div class='pre p1 fill-light mt0'>getUsage(): any</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>any</code>:
+        retrieves the complete usage of the command with its argument names
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandgrouphaspermission'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>hasPermission(client)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>checks if a client should have permission to use this command</p>
+
+    <div class='pre p1 fill-light mt0'>hasPermission(client: Client)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>client</span> <code class='quiet'>(Client)</code>
+	    the client which should be checked
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandgroupaddcommand'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>addCommand(name)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Adds a new sub Commmand to the group</p>
+
+    <div class='pre p1 fill-light mt0'>addCommand(name: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the sub command name which should be added
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandgroupfindcommandbyname'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>findCommandByName(name)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Retrieves a subcommand by its command name</p>
+
+    <div class='pre p1 fill-light mt0'>findCommandByName(name: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the name which should be searched for
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandgroupgetavailablecommands'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getAvailableCommands(client?, cmd?)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrievel all available subcommands</p>
+
+    <div class='pre p1 fill-light mt0'>getAvailableCommands(client: Client?, cmd: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>client</span> <code class='quiet'>(Client?)</code>
+	    the sinusbot client for which the commands should be retrieved if none has been omitted it will retrieve all available commands
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>cmd</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?)</code>
+	    the command which should be searched for
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='commandgroupdispatch'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>dispatch(args, ev)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  
+    <div class='pre p1 fill-light mt0'>dispatch(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, ev: <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MessageEvent</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>ev</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MessageEvent</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='basecommand'>
+      BaseCommand
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>BaseCommand</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='basecommand_collector'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>_collector</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  
+    <div class='pre p1 fill-light mt0'>_collector</div>
+  
+    <p>
+      Type:
+      <a href="#collector">Collector</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommand_exechandler'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>_execHandler</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  
+    <div class='pre p1 fill-light mt0'>_execHandler</div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#exechandler">execHandler</a>>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandgetusage'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getUsage()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  
+    <div class='pre p1 fill-light mt0'>getUsage(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>:
+        
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandhaspermission'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>hasPermission(client)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  
+    <div class='pre p1 fill-light mt0'>hasPermission(client: Client): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>client</span> <code class='quiet'>(Client)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>></code>:
+        
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandvalidate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>validate(args)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  
+    <div class='pre p1 fill-light mt0'>validate(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): Record&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, any></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>Record&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, any></code>:
+        
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommanddispatch'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>dispatch(args, ev)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  
+    <div class='pre p1 fill-light mt0'>dispatch(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, ev: <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MessageEvent</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>ev</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MessageEvent</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandalias'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>alias(alias)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>one or more alias for this command</p>
+
+    <div class='pre p1 fill-light mt0'>alias(alias: ...<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>alias</span> <code class='quiet'>(...<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandisenabled'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>isEnabled()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>checks if the command is enabled</p>
+
+    <div class='pre p1 fill-light mt0'>isEnabled()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandenable'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>enable()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>enables the current command</p>
+
+    <div class='pre p1 fill-light mt0'>enable()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommanddisable'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>disable()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>disables the current command</p>
+
+    <div class='pre p1 fill-light mt0'>disable()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandgetcommandname'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getCommandName()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>gets the command name without its prefix</p>
+
+    <div class='pre p1 fill-light mt0'>getCommandName()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandgetalias'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getAlias()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves all registered alias names without prefix</p>
+
+    <div class='pre p1 fill-light mt0'>getAlias()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandgetfullcommandname'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getFullCommandName()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>gets the command name with its prefix</p>
+
+    <div class='pre p1 fill-light mt0'>getFullCommandName()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandgetfullalias'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getFullAlias()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves all registered alias names with prefix</p>
+
+    <div class='pre p1 fill-light mt0'>getFullAlias()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandgetcommandnames'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getCommandNames()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves all registered command names</p>
+
+    <div class='pre p1 fill-light mt0'>getCommandNames()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandgetfullcommandnames'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getFullCommandNames()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves all registered command names with prefix</p>
+
+    <div class='pre p1 fill-light mt0'>getFullCommandNames()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandgethelp'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getHelp()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves the help text</p>
+
+    <div class='pre p1 fill-light mt0'>getHelp()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandhelp'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>help(text)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>sets a help text (should be a very brief description)</p>
+
+    <div class='pre p1 fill-light mt0'>help(text: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>text</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    help text
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandhashelp'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>hasHelp()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>returns a boolean wether a help text has been set or not</p>
+
+    <div class='pre p1 fill-light mt0'>hasHelp()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandgetmanual'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getManual()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves the current manual text</p>
+
+    <div class='pre p1 fill-light mt0'>getManual()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandhasmanual'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>hasManual()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>returns a boolean wether a help text has been set or not</p>
+
+    <div class='pre p1 fill-light mt0'>hasManual()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandforceprefix'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>forcePrefix(prefix)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  
+    <div class='pre p1 fill-light mt0'>forcePrefix(prefix: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>prefix</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the new prefix to set
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandgetprefix'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getPrefix()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>gets the current prefix for this command</p>
+
+    <div class='pre p1 fill-light mt0'>getPrefix()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandmanual'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>manual(text)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>sets a manual text, this function can be called multiple times
+in order to create a multilined manual text</p>
+
+    <div class='pre p1 fill-light mt0'>manual(text: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>text</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the manual text
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandclearmanual'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>clearManual()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>clears the current manual text</p>
+
+    <div class='pre p1 fill-light mt0'>clearManual()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandexec'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>exec(callback)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>register an execution handler for this command</p>
+
+    <div class='pre p1 fill-light mt0'>exec(callback: <a href="#exechandler">execHandler</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>callback</span> <code class='quiet'>(<a href="#exechandler">execHandler</a>)</code>
+	    gets called whenever the command should do something
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandaddthrottle'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>addThrottle(throttle)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>adds an instance of a throttle class</p>
+
+    <div class='pre p1 fill-light mt0'>addThrottle(throttle: <a href="#throttle">Throttle</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>throttle</span> <code class='quiet'>(<a href="#throttle">Throttle</a>)</code>
+	    adds the throttle instance
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandcheckpermission'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>checkPermission(callback)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>register a permission handler for this command</p>
+
+    <div class='pre p1 fill-light mt0'>checkPermission(callback: <a href="#permissionhandler">permissionHandler</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>callback</span> <code class='quiet'>(<a href="#permissionhandler">permissionHandler</a>)</code>
+	    gets called whenever the permission for a client gets checked
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommandisallowed'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>isAllowed(client)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>checks if a client is allowed to use this command
+this is the low level method to check permissions for a single command</p>
+
+    <div class='pre p1 fill-light mt0'>isAllowed(client: Client)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>client</span> <code class='quiet'>(Client)</code>
+	    sinusbot client to check permissions from
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='basecommand_dispatchcommand'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>_dispatchCommand(ev)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>dispatches a command</p>
+
+    <div class='pre p1 fill-light mt0'>_dispatchCommand(ev: CommanderTextMessage)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>ev</span> <code class='quiet'>(CommanderTextMessage)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='collector'>
+      Collector
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>Collector</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Static Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='collectorgetcommandprefix'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getCommandPrefix()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves the current Command Prefix</p>
+
+    <div class='pre p1 fill-light mt0'>getCommandPrefix(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>:
+        returns the command prefix
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='collectorcreatethrottle'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>createThrottle()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>creates a new Throttle instance</p>
+
+    <div class='pre p1 fill-light mt0'>createThrottle()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='collectorgetreplyoutput'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getReplyOutput(event)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves the correct reply chat from where the client has sent the message</p>
+
+    <div class='pre p1 fill-light mt0'>getReplyOutput(event: Message)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>event</span> <code class='quiet'>(Message)</code>
+	    
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>event.mode</span> <code class='quiet'>any</code>
+  </td>
+  <td class='break-word'><span></span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>event.client</span> <code class='quiet'>any</code>
+  </td>
+  <td class='break-word'><span></span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>event.channel</span> <code class='quiet'>any</code>
+  </td>
+  <td class='break-word'><span></span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='collectorcheckpermissions'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>checkPermissions(commands, client)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>checks the permissions from a set of commands</p>
+
+    <div class='pre p1 fill-light mt0'>checkPermissions(commands: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#basecommand">BaseCommand</a>>, client: Client): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#basecommand">BaseCommand</a>>></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>commands</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#basecommand">BaseCommand</a>>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>client</span> <code class='quiet'>(Client)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#basecommand">BaseCommand</a>>></code>:
+        
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='collectorisvalidcommandname'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>isValidCommandName(name)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>checks if the command name is valid</p>
+
+    <div class='pre p1 fill-light mt0'>isValidCommandName(name: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='collectorgetavailablecommands'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getAvailableCommands(name)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>get all available commands from its command string</p>
+
+    <div class='pre p1 fill-light mt0'>getAvailableCommands(name: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='collectorgetavailablecommandsbypermission'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getAvailableCommandsByPermission(client)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves all available permissions for a certain client</p>
+
+    <div class='pre p1 fill-light mt0'>getAvailableCommandsByPermission(client: Client)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>client</span> <code class='quiet'>(Client)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='collectorgetavailablecommandswithprefix'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getAvailableCommandsWithPrefix(name)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Searches for one or multiple enabled commands with its prefix</p>
+
+    <div class='pre p1 fill-light mt0'>getAvailableCommandsWithPrefix(name: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#basecommand">BaseCommand</a>></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the command with its prefix
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#basecommand">BaseCommand</a>></code>:
+        returns an array of found commands
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='collectorispossiblecommand'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>isPossibleCommand(text)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>checks if a command is a possible command string</p>
+
+    <div class='pre p1 fill-light mt0'>isPossibleCommand(text: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>text</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='collectorregistercommand'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>registerCommand(name)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>creates a new command</p>
+
+    <div class='pre p1 fill-light mt0'>registerCommand(name: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the name of the command
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='collectorregistercommandgroup'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>registerCommandGroup(name)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>creates a new command</p>
+
+    <div class='pre p1 fill-light mt0'>registerCommandGroup(name: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the name of the command
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='collectorissavecommand'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>isSaveCommand(cmd)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>checks if the command string is save to register as a new command
+this function basically checks if there is no other command named with
+throws an error when Collector#validateCommandName errors
+returns false when this command has been already registered
+returns true when this is a completely unused command</p>
+
+    <div class='pre p1 fill-light mt0'>isSaveCommand(cmd: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>cmd</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='throttle'>
+      Throttle
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>Throttle</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='throttletickrate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>tickRate(duration)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Defines how fast points will get restored</p>
+
+    <div class='pre p1 fill-light mt0'>tickRate(duration: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>duration</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    time in ms how fast points should get restored
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='throttlepenaltypercommand'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>penaltyPerCommand(amount)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>The amount of points a command request costs</p>
+
+    <div class='pre p1 fill-light mt0'>penaltyPerCommand(amount: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>amount</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    the amount of points that should be reduduced
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='throttlerestorepertick'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>restorePerTick(amount)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>The Amount of Points that should get restored per tick</p>
+
+    <div class='pre p1 fill-light mt0'>restorePerTick(amount: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>amount</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    the amount that should get restored
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='throttleinitialpoints'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>initialPoints(initial)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Sets the initial Points a user has at beginning</p>
+
+    <div class='pre p1 fill-light mt0'>initialPoints(initial: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>initial</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    the Initial amount of Points a user has
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='throttlethrottle'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>throttle(client)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Reduces the given points for a Command for the given Client</p>
+
+    <div class='pre p1 fill-light mt0'>throttle(client: Client)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>client</span> <code class='quiet'>(Client)</code>
+	    the client which points should be removed
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='throttleisthrottled'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>isThrottled(client)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Checks if the given Client is affected by throttle limitations</p>
+
+    <div class='pre p1 fill-light mt0'>isThrottled(client: Client)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>client</span> <code class='quiet'>(Client)</code>
+	    the TeamSpeak Client which should get checked
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='throttletimetillnextcommand'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>timeTillNextCommand(client)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves the time in milliseconds until a client can send his next command</p>
+
+    <div class='pre p1 fill-light mt0'>timeTillNextCommand(client: Client): any</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>client</span> <code class='quiet'>(Client)</code>
+	    the client which should be checked
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>any</code>:
+        returns the time a client is throttled in ms
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <div class='keyline-top-not py2'><section class='py2 clearfix'>
+
+  <h2 id='argument-types' class='mt0'>
+    Argument Types
+  </h2>
+
+  
+    <p>Available Argument Types which can be added to a Command</p>
+
+  
+</section></div>
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='argument'>
+      Argument
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>Argument</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Static Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='argumentcreateargumentlayer'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>createArgumentLayer()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>creates new object with argument options</p>
+
+    <div class='pre p1 fill-light mt0'>createArgumentLayer(): <a href="#argtype">ArgType</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#argtype">ArgType</a></code>:
+        
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='argumentvalidate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>validate(args)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  
+    <div class='pre p1 fill-light mt0'>validate(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;any></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;any></code>:
+        
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='argumentoptional'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>optional(fallback?, displayDefault = true)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Sets an Argument as optional
+if the argument has not been parsed successful it will use the first argument which has been given inside this method</p>
+
+    <div class='pre p1 fill-light mt0'>optional(fallback: any?, displayDefault: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>fallback</span> <code class='quiet'>(any?)</code>
+	    the default value which should be set if this parameter has not been found
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>displayDefault</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?
+            = <code>true</code>)</code>
+	    wether it should display the default value when called with the #getUsage method
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='argumentgetdefault'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getDefault()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>retrieves the default value if it had been set</p>
+
+    <div class='pre p1 fill-light mt0'>getDefault()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='argumenthasdefault'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>hasDefault()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>checks if the Argument has a default value</p>
+
+    <div class='pre p1 fill-light mt0'>hasDefault()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='argumentgetmanual'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getManual()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>gets the manual of a command</p>
+
+    <div class='pre p1 fill-light mt0'>getManual()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='argumentisoptional'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>isOptional()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>checks if the Argument is optional</p>
+
+    <div class='pre p1 fill-light mt0'>isOptional()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='argumentsetname'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>setName(name, display?)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Sets a name for the argument to identify it later when the command gets dispatched
+This name will be used when passing the parsed argument to the exec function</p>
+
+    <div class='pre p1 fill-light mt0'>setName(name: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, display: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    sets the name of the argument
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>display</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?)</code>
+	    sets a beautified display name which will be used when the getManual command gets executed, if none given it will use the first parameter as display value
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='argumentgetname'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getName()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Retrieves the name of the Argument</p>
+
+    <div class='pre p1 fill-light mt0'>getName(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>:
+        retrieves the arguments name
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='numberargument'>
+      NumberArgument
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>NumberArgument</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='numberargumentvalidate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>validate(args)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Validates the given Number to the Object</p>
+
+    <div class='pre p1 fill-light mt0'>validate(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the remaining args
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='numberargumentmin'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>min(min)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>specifies the minimum value</p>
+
+    <div class='pre p1 fill-light mt0'>min(min: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>min</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    the minimum length of the argument
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='numberargumentmax'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>max(max)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>specifies the maximum value</p>
+
+    <div class='pre p1 fill-light mt0'>max(max: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>max</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    the maximum length of the argument
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='numberargumentinteger'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>integer()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>specifies that the Number must be an integer (no floating point)</p>
+
+    <div class='pre p1 fill-light mt0'>integer()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='numberargumentpositive'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>positive()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>specifies that the Number must be a positive Number</p>
+
+    <div class='pre p1 fill-light mt0'>positive()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='numberargumentnegative'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>negative()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>specifies that the Number must be a negative Number</p>
+
+    <div class='pre p1 fill-light mt0'>negative()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='stringargument'>
+      StringArgument
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>StringArgument</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='stringargumentvalidate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>validate(args)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Validates the given String to the StringArgument</p>
+
+    <div class='pre p1 fill-light mt0'>validate(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the remaining args
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='stringargument_validate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>_validate(arg, rest)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Validates the given string to the StringArgument params</p>
+
+    <div class='pre p1 fill-light mt0'>_validate(arg: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, rest: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>arg</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    string argument that should be parsed
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>rest</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>)</code>
+	    the remaining args
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='stringargumentmatch'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>match(regex)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Matches a regular expression pattern</p>
+
+    <div class='pre p1 fill-light mt0'>match(regex: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/RegExp">RegExp</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>regex</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/RegExp">RegExp</a>)</code>
+	    the regex which should be validated
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='stringargumentmax'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>max(len)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Sets the maximum Length of the String</p>
+
+    <div class='pre p1 fill-light mt0'>max(len: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>len</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    the maximum length of the argument
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='stringargumentmin'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>min(len)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Sets the minimum Length of the String</p>
+
+    <div class='pre p1 fill-light mt0'>min(len: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>len</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    the minimum length of the argument
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='stringargumentforceuppercase'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>forceUpperCase()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>converts the input to an upper case string</p>
+
+    <div class='pre p1 fill-light mt0'>forceUpperCase()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='stringargumentforcelowercase'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>forceLowerCase()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>converts the input to a lower case string</p>
+
+    <div class='pre p1 fill-light mt0'>forceLowerCase()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='stringargumentwhitelist'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>whitelist(words)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>creates a list of available whitelisted words</p>
+
+    <div class='pre p1 fill-light mt0'>whitelist(words: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>words</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>)</code>
+	    array of whitelisted words
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='clientargument'>
+      ClientArgument
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Class representing a ClientArgument
+this Argument is capable to parse a Client UID or a simple UID
+inside the exec function it will resolve the found uid</p>
+
+    <div class='pre p1 fill-light mt0'>ClientArgument</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='clientargumentvalidate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>validate(args)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Validates and tries to parse the Client from the given input string</p>
+
+    <div class='pre p1 fill-light mt0'>validate(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the input from where the client gets extracted
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='restargument'>
+      RestArgument
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>RestArgument</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='restargumentvalidate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>validate(args)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Validates the given String to the RestArgument</p>
+
+    <div class='pre p1 fill-light mt0'>validate(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the remaining args
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='groupargument'>
+      GroupArgument
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>GroupArgument</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='groupargumentvalidate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>validate(args)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Validates the given String to the GroupArgument</p>
+
+    <div class='pre p1 fill-light mt0'>validate(args: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the remaining args
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='groupargumentaddargument'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>addArgument(arg)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>adds an argument to the command</p>
+
+    <div class='pre p1 fill-light mt0'>addArgument(arg: (<a href="#createargumenthandler">createArgumentHandler</a> | <a href="#argument">Argument</a>))</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>arg</span> <code class='quiet'>((<a href="#createargumenthandler">createArgumentHandler</a> | <a href="#argument">Argument</a>))</code>
+	    an argument to add
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <div class='keyline-top-not py2'><section class='py2 clearfix'>
+
+  <h2 id='callbacks' class='mt0'>
+    Callbacks
+  </h2>
+
+  
+    <p>all callbacks existing</p>
+
+  
+</section></div>
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='permissionhandler'>
+      permissionHandler
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>callback for the command event</p>
+
+    <div class='pre p1 fill-light mt0'>permissionHandler(invoker: Client)</div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>invoker</span> <code class='quiet'>(Client)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='createargumenthandler'>
+      createArgumentHandler
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>callback for the command event</p>
+
+    <div class='pre p1 fill-light mt0'>createArgumentHandler(arg: <a href="#argtype">ArgType</a>): <a href="#argument">Argument</a></div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>arg</span> <code class='quiet'>(<a href="#argtype">ArgType</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#argument">Argument</a></code>:
+        
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='exechandler'>
+      execHandler
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>callback for the command event</p>
+
+    <div class='pre p1 fill-light mt0'>execHandler(invoker: Client, args: Record&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, any>, event: <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MessageEvent</a>)</div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>invoker</span> <code class='quiet'>(Client)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>args</span> <code class='quiet'>(Record&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, any>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>event</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MessageEvent</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <div class='keyline-top-not py2'><section class='py2 clearfix'>
+
+  <h2 id='interfaces' class='mt0'>
+    Interfaces
+  </h2>
+
+  
+    <p>type declarations</p>
+
+  
+</section></div>
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='argtype'>
+      ArgType
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>ArgType</div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>string</span> <code class='quiet'>(<a href="#stringargument">StringArgument</a>)</code>
+          
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>number</span> <code class='quiet'>(<a href="#numberargument">NumberArgument</a>)</code>
+          
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>client</span> <code class='quiet'>(<a href="#clientargument">ClientArgument</a>)</code>
+          
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>rest</span> <code class='quiet'>(<a href="#restargument">RestArgument</a>)</code>
+          
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>or</span> <code class='quiet'>(<a href="#groupargument">GroupArgument</a>)</code>
+          
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>and</span> <code class='quiet'>(<a href="#groupargument">GroupArgument</a>)</code>
+          
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <div class='keyline-top-not py2'><section class='py2 clearfix'>
+
+  <h2 id='exports' class='mt0'>
+    Exports
+  </h2>
+
+  
+    <p>These Functions gets exported as object when imported through <code>require("command.js")</code></p>
+
+  
+</section></div>
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='createcommand'>
+      createCommand
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>createCommand(cmd: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="#command">Command</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>cmd</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the command which should be added
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#command">Command</a></code>:
+        returns the created Command
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='createcommandgroup'>
+      createCommandGroup
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>createCommandGroup(cmd: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="#commandgroup">CommandGroup</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>cmd</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    the command which should be added
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#commandgroup">CommandGroup</a></code>:
+        returns the created CommandGroup instance
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='createargument'>
+      createArgument
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>createArgument(type: any): <a href="#argument">Argument</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>type</span> <code class='quiet'>(any)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#argument">Argument</a></code>:
+        returns the created Argument
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='creategroupedargument'>
+      createGroupedArgument
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>createGroupedArgument(type: (<code>"or"</code> | <code>"and"</code>)): <a href="#groupargument">GroupArgument</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>type</span> <code class='quiet'>((<code>"or"</code> | <code>"and"</code>))</code>
+	    the argument type which should be created either "or" or "and" allowed
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#groupargument">GroupArgument</a></code>:
+        returns the created Group Argument
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='getcommandprefix'>
+      getCommandPrefix
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>getCommandPrefix(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>:
+        returns the command prefix
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='collector'>
+      collector
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>collector</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='getversion'>
+      getVersion
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>getVersion(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>:
+        returns the semantic version of this script
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='createthrottle'>
+      createThrottle
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>createThrottle(): <a href="#throttle">Throttle</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#throttle">Throttle</a></code>:
+        returns the created Throttle
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id=''>
+      
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'></div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id=''>
+      
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'></div>
+  
+    <p>
+      Type:
+      Client
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+      </div>
+    </div>
+  <script src='assets/anchor.js'></script>
+  <script src='assets/split.js'></script>
+  <script src='assets/site.js'></script>
+</body>
+</html>
