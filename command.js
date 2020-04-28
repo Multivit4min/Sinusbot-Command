@@ -1,7 +1,7 @@
 registerPlugin({
   name: "Command Library",
   description: "Library to handle and manage commands",
-  version: "1.4.3",
+  version: "1.4.4",
   author: "Multivitamin <david.kartnaller@gmail.com>",
   autorun: true,
   backends: ["ts3", "discord"],
@@ -683,7 +683,7 @@ registerPlugin({
           return true
         }
       })
-      if (error !== null) return error
+      if (error !== null) throw error
       return [resolved, args]
     }
 
@@ -875,7 +875,7 @@ registerPlugin({
     constructor(cmd, collector) {
       /**
        * @type {Collector}
-       * @private
+       * @protected
        */
       this._collector = collector
       /**
@@ -885,7 +885,7 @@ registerPlugin({
       this._permissionHandler = []
       /**
        * @type {execHandler[]}
-       * @private
+       * @protected
        */
       this._execHandler = []
       /**
@@ -1136,7 +1136,7 @@ registerPlugin({
 
     /**
      * dispatches a command
-     * @private
+     * @protected
      * @param {CommanderTextMessage} ev
      */
     async _dispatchCommand(ev) {
